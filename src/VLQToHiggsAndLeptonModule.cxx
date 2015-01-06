@@ -11,6 +11,11 @@
 using namespace std;
 using namespace uhh2;
 
+typedef std::vector<std::unique_ptr<Selection> >    SelVector;
+typedef std::vector<std::unique_ptr<Hists> >        HistVector;
+
+
+
 /** \brief Basic analysis example of an AnalysisModule (formerly 'cycle') in UHH2
  * 
  * This is the central class which calls other AnalysisModules, Hists or Selection classes.
@@ -82,8 +87,8 @@ bool VLQToHiggsAndLeptonModule::process(Event & event) {
     cout << "VLQToHiggsAndLeptonModule: Starting to process event (runid, eventid) = (" << event.run << ", " << event.event << "); weight = " << event.weight << endl;
     
     // 1. run all modules; here: only jet cleaning.
-    jetcleaner->process(event);
-    
+    // jetcleaner->process(event);
+
     // 2. test selections and fill histograms
     
     h_nocuts->fill(event);

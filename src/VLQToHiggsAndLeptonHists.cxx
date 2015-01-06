@@ -11,10 +11,10 @@ VLQToHiggsAndLeptonHists::VLQToHiggsAndLeptonHists(Context & ctx, const string &
   // book all histograms here
   // jets
   book<TH1F>("N_jets", "N_{jets}", 20, 0, 20);  
-  book<TH1F>("eta_jet1", "#eta^{jet 1}", 40, -2.5, 2.5);
-  book<TH1F>("eta_jet2", "#eta^{jet 2}", 40, -2.5, 2.5);
-  book<TH1F>("eta_jet3", "#eta^{jet 3}", 40, -2.5, 2.5);
-  book<TH1F>("eta_jet4", "#eta^{jet 4}", 40, -2.5, 2.5);
+  book<TH1F>("eta_jet1", "#eta^{jet 1}", 40, -5, 5);
+  book<TH1F>("eta_jet2", "#eta^{jet 2}", 40, -5, 5);
+  book<TH1F>("eta_jet3", "#eta^{jet 3}", 40, -5, 5);
+  book<TH1F>("eta_jet4", "#eta^{jet 4}", 40, -5, 5);
 
   // leptons
   book<TH1F>("N_mu", "N^{#mu}", 10, 0, 10);

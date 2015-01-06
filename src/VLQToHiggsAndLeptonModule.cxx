@@ -87,7 +87,7 @@ bool VLQToHiggsAndLeptonModule::process(Event & event) {
     cout << "VLQToHiggsAndLeptonModule: Starting to process event (runid, eventid) = (" << event.run << ", " << event.event << "); weight = " << event.weight << endl;
     
     // 1. run all modules; here: only jet cleaning.
-    // jetcleaner->process(event);
+    //  jetcleaner->process(event);
 
     // 2. test selections and fill histograms
     

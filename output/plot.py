@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 
+import ROOT
+ROOT.gROOT.SetBatch()
+
 import os
 import time
 import varial.tools as t

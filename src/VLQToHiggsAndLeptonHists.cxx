@@ -1,7 +1,6 @@
 #include "UHH2/VLQToHiggsAndLepton/include/VLQToHiggsAndLeptonHists.h"
 #include "UHH2/core/include/Event.h"
 
-#include "TH1F.h"
 #include <iostream>
 
 using namespace std;
@@ -10,7 +9,12 @@ using namespace uhh2;
 VLQToHiggsAndLeptonHists::VLQToHiggsAndLeptonHists(Context & ctx, const string & dirname): Hists(ctx, dirname){
   // book all histograms here
   // jets
-  book<TH1F>("N_jets", "N_{jets}", 20, 0, 20);  
+  book<TH1F>("N_fwd_jets", "N_{fwd jets}", 20, 0, 20);
+  book<TH1F>("fwd_jet_eta", "#eta^{fwd jets}", 40, -5, 5);
+  book<TH1F>("fwd_jet_pt", "p_{T}^{fwd jets} [GeV/c]", 40, 0, 200);
+  book<TH1F>("fwd_jet_energy", "E^{fwd jets} [GeV/c]", 80, 0, 400);
+
+  // book<TH1F>("N_jets", "N_{jets}", 20, 0, 20);
   book<TH1F>("eta_jet1", "#eta^{jet 1}", 40, -5, 5);
   book<TH1F>("eta_jet2", "#eta^{jet 2}", 40, -5, 5);
   book<TH1F>("eta_jet3", "#eta^{jet 3}", 40, -5, 5);
@@ -24,6 +28,8 @@ VLQToHiggsAndLeptonHists::VLQToHiggsAndLeptonHists(Context & ctx, const string &
 
   // primary vertices
   book<TH1F>("N_pv", "N^{PV}", 50, 0, 50);
+
+  fwd_jets_h = ctx.get_handle<std::vector<Jet> >("fwd_jets");
 }
 
 
@@ -35,10 +41,18 @@ void VLQToHiggsAndLeptonHists::fill(const Event & event){
   
   // Don't forget to always use the weight when filling.
   double weight = event.weight;
-  
+
+  const std::vector<Jet> & fwd_jets = event.get(fwd_jets_h);
+  hist("N_fwd_jets")->Fill(fwd_jets.size(), weight);
+  for (auto jet: fwd_jets) {
+    hist("fwd_jet_eta")->Fill(jet.eta(), weight);
+    hist("fwd_jet_pt")->Fill(jet.pt(), weight);
+    hist("fwd_jet_energy")->Fill(jet.energy(), weight);
+  }
+
   std::vector<Jet>* jets = event.jets;
   int Njets = jets->size();
-  hist("N_jets")->Fill(Njets, weight);
+  // hist("N_jets")->Fill(Njets, weight);
   
   if(Njets>=1){
     hist("eta_jet1")->Fill(jets->at(0).eta(), weight);

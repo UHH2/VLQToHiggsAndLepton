@@ -43,32 +43,47 @@ using namespace uhh2;
 class NBTags: public Selection {
 public:
     /// In case nmax=-1, no cut on the maximum is applied.
-    explicit NBTags(Context &ctx,
-                    int nmin_,
-                    int nmax_ = -1):
+    explicit NBTags(Context &ctx, int nmin_, int nmax_ = -1):
         hndl(ctx.get_handle<int>("n_btags")), nmin(nmin_), nmax(nmax_) {}
 
     virtual bool passes(const Event & event) override {
-        int nbtag = event.get(hndl);
-        return nbtag >= nmin && (nmax < 0 || nbtag <= nmax);
+        int n = event.get(hndl);
+        return n >= nmin && (nmax < 0 || n <= nmax);
     }
 
 private:
     Event::Handle<int> hndl;
     int nmin, nmax;
-};
+};  // class NJets
 
-class OneFwdJet: public Selection {
+class NFwdJets: public Selection {
 public:
-    explicit OneFwdJet(Context & ctx):
-        hndl(ctx.get_handle<std::vector<Jet> >("fwd_jets")) {}
+    explicit NFwdJets(Context & ctx, int nmin_, int nmax_ = -1):
+        hndl(ctx.get_handle<std::vector<Jet> >("fwd_jets")),
+        nmin(nmin_), nmax(nmax_) {}
 
     bool passes(const Event & e) override {
-        return e.get(hndl).size() > 0;
+        int n = e.get(hndl).size();
+        return n >= nmin && (nmax < 0 || n <= nmax);
     }
 
 private:
     Event::Handle<std::vector<Jet> > hndl;
-};
+    int nmin, nmax;
+};  // class NFwdJets
+
+class NLeptons: public Selection {
+public:
+    explicit NLeptons(int nmin_, int nmax_ = -1):
+        nmin(nmin_), nmax(nmax_) {}
+
+    bool passes(const uhh2::Event & e) override {
+        int n = e.electrons->size() + e.muons->size();
+        return n >= nmin && (nmax < 0 || n <= nmax);
+    }
+
+private:
+    int nmin, nmax;
+};  // class NLeptons
 
 }

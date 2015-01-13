@@ -9,7 +9,7 @@ import varial.tools as t
 
 dirname = 'FirstPlots_VLQToHiggsAndLepton'
 
-p = t.mk_plotter_chain(name=dirname)
+p = t.mk_rootfile_plotter(name=dirname)
 time.sleep(1)
 p.run()
 t.WebCreator().run()

@@ -4,6 +4,8 @@
 #include "UHH2/core/include/AnalysisModule.h"
 #include "UHH2/core/include/Event.h"
 #include "UHH2/common/include/CleaningModules.h"
+#include "UHH2/common/include/ElectronIds.h"
+#include "UHH2/common/include/MuonIds.h"
 #include "UHH2/common/include/ElectronHists.h"
 // #include "UHH2/common/include/MuonHists.h"
 #include "UHH2/common/include/NSelections.h"
@@ -72,6 +74,8 @@ public:
     virtual bool process(Event & event) override;
 
 private:
+    std::unique_ptr<ElectronCleaner> elecleaner;
+    std::unique_ptr<MuonCleaner> mucleaner;
     std::unique_ptr<JetCleaner> jetcleaner;
     std::unique_ptr<FwdJetProducer> fwdjetprod;
     std::unique_ptr<NBTagProducer> nbtagprod;
@@ -103,24 +107,42 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     nbtagprod.reset(new NBTagProducer(ctx));
     fwdjetprod.reset(new FwdJetProducer(ctx));
     jetcleaner.reset(new JetCleaner(30.0, 2.4));
+    elecleaner.reset(new ElectronCleaner(
+        AndId<Electron>(
+            ElectronID_CSA14_50ns_medium,
+            PtEtaCut(20.0, 2.4)
+        )
+    ));
+    mucleaner.reset(new MuonCleaner(
+        AndId<Muon>(
+            MuonIDTight(),
+            PtEtaCut(20.0, 2.1)
+        )
+    ));
 
     // 2. set up selections:
-    int n_cuts = 2;
+    int n_cuts = 4;
     v_sel.resize(n_cuts);
     v_sel[0].reset(new NJetSelection(2));
-    v_sel[1].reset(new vlq2hl_sel::NBTags(ctx, 1));
+    v_sel[1].reset(new vlq2hl_sel::NBTags(ctx, 2));
+    v_sel[2].reset(new vlq2hl_sel::NFwdJets(ctx, 1));
+    v_sel[3].reset(new vlq2hl_sel::NLeptons(1, 1));
 
     // 3. Set up Hists classes:
     vh_nocuts.resize(n_cuts);
-    vh_nocuts[0].reset(new vlq2hl_hist::NJets(ctx, "CutsPlain"));
-    vh_nocuts[1].reset(new vlq2hl_hist::NBTags(ctx, "CutsPlain"));
+    vh_nocuts[0].reset(new vlq2hl_hist::NJets(ctx, "SelNone"));
+    vh_nocuts[1].reset(new vlq2hl_hist::NBTags(ctx, "SelNone"));
+    vh_nocuts[2].reset(new vlq2hl_hist::NFwdJets(ctx, "SelNone"));
+    vh_nocuts[3].reset(new vlq2hl_hist::NLeptons(ctx, "SelNone"));
 
     vh_nm1.resize(n_cuts);
-    vh_nm1[0].reset(new vlq2hl_hist::NJets(ctx, "CutsNm1"));
-    vh_nm1[1].reset(new vlq2hl_hist::NBTags(ctx, "CutsNm1"));
+    vh_nm1[0].reset(new vlq2hl_hist::NJets(ctx, "SelNm1"));
+    vh_nm1[1].reset(new vlq2hl_hist::NBTags(ctx, "SelNm1"));
+    vh_nm1[2].reset(new vlq2hl_hist::NFwdJets(ctx, "SelNm1"));
+    vh_nm1[3].reset(new vlq2hl_hist::NLeptons(ctx, "SelNm1"));
 
-    h_nocuts.reset(new VLQToHiggsAndLeptonHists(ctx, "NoCuts"));
-    h_allcuts.reset(new VLQToHiggsAndLeptonHists(ctx, "AllCuts"));
+    h_nocuts.reset(new VLQToHiggsAndLeptonHists(ctx, "NoSel"));
+    h_allcuts.reset(new VLQToHiggsAndLeptonHists(ctx, "AllSel"));
     h_ele.reset(new ElectronHists(ctx, "ele_nocuts"));
     // h_mu.reset(new MuonHists(ctx, "mu_nocuts"));
 }
@@ -133,7 +155,8 @@ bool VLQToHiggsAndLeptonModule::process(Event & event) {
     // 1. run all modules; here: only jet cleaning.
     fwdjetprod->process(event);
     nbtagprod->process(event);
-    jetcleaner->process(event);
+    elecleaner->process(event);
+    mucleaner->process(event);
 
     // 2.a test selections
     bool all_accepted = true;

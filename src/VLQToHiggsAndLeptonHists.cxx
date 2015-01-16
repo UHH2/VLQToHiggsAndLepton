@@ -10,10 +10,16 @@ VLQToHiggsAndLeptonHists::VLQToHiggsAndLeptonHists(Context & ctx, const string &
   // book all histograms here
   // jets
   book<TH1F>("N_fwd_jets", "N_{fwd jets}", 20, 0, 20);
-  book<TH1F>("fwd_jet_eta", "#eta^{fwd jets}", 40, -5, 5);
-  book<TH1F>("fwd_jet_pt", "p_{T}^{fwd jets} [GeV/c]", 40, 0, 200);
+  book<TH1F>("eta_fwd_jet", "#eta^{fwd jets}", 40, -5, 5);
+  book<TH1F>("pt_fwd_jet", "p_{T}^{fwd jet} [GeV/c]", 80, 0, 400);
 
-  // book<TH1F>("N_jets", "N_{jets}", 20, 0, 20);
+  book<TH1F>("N_jets", "N_{jets}", 20, 0, 20);
+  book<TH1F>("pt_jet", "p_{T}^{jet} [GeV/c]", 160, 0, 800);
+  book<TH1F>("pt_jet1", "p_{T}^{jet 1} [GeV/c]", 160, 0, 800);
+  book<TH1F>("pt_jet2", "p_{T}^{jet 2} [GeV/c]", 160, 0, 800);
+  book<TH1F>("pt_jet3", "p_{T}^{jet 3} [GeV/c]", 160, 0, 800);
+  book<TH1F>("pt_jet4", "p_{T}^{jet 4} [GeV/c]", 160, 0, 800);
+  book<TH1F>("eta_jet", "#eta^{jet}", 40, -5, 5);
   book<TH1F>("eta_jet1", "#eta^{jet 1}", 40, -5, 5);
   book<TH1F>("eta_jet2", "#eta^{jet 2}", 40, -5, 5);
   book<TH1F>("eta_jet3", "#eta^{jet 3}", 40, -5, 5);
@@ -43,26 +49,33 @@ void VLQToHiggsAndLeptonHists::fill(const Event & event){
 
   const std::vector<Jet> & fwd_jets = event.get(fwd_jets_h);
   hist("N_fwd_jets")->Fill(fwd_jets.size(), weight);
-  for (auto jet: fwd_jets) {
-    hist("fwd_jet_eta")->Fill(jet.eta(), weight);
-    hist("fwd_jet_pt")->Fill(jet.pt(), weight);
+  for (auto &jet: fwd_jets) {
+    hist("eta_fwd_jet")->Fill(jet.eta(), weight);
+    hist("pt_fwd_jet")->Fill(jet.pt(), weight);
   }
 
   std::vector<Jet>* jets = event.jets;
   int Njets = jets->size();
-  // hist("N_jets")->Fill(Njets, weight);
-  
+  hist("N_jets")->Fill(Njets, weight);
+  for (auto &jet: *jets) {
+    hist("eta_jet")->Fill(jet.eta(), weight);
+    hist("pt_jet")->Fill(jet.pt(), weight);
+  }
   if(Njets>=1){
     hist("eta_jet1")->Fill(jets->at(0).eta(), weight);
+    hist("pt_jet1")->Fill(jets->at(0).pt(), weight);
   }
   if(Njets>=2){
     hist("eta_jet2")->Fill(jets->at(1).eta(), weight);
+    hist("pt_jet2")->Fill(jets->at(1).pt(), weight);
   }
   if(Njets>=3){
     hist("eta_jet3")->Fill(jets->at(2).eta(), weight);
+    hist("pt_jet3")->Fill(jets->at(2).pt(), weight);
   }
   if(Njets>=4){
     hist("eta_jet4")->Fill(jets->at(3).eta(), weight);
+    hist("pt_jet4")->Fill(jets->at(3).pt(), weight);
   }
 
   int Nmuons = event.muons->size();

@@ -7,6 +7,8 @@
 #include "UHH2/common/include/CleaningModules.h"
 #include "UHH2/common/include/ElectronIds.h"
 #include "UHH2/common/include/MuonIds.h"
+#include "UHH2/common/include/EventHists.h"
+#include "UHH2/common/include/EventVariables.h"
 #include "UHH2/common/include/ElectronHists.h"
 // #include "UHH2/common/include/MuonHists.h"
 #include "UHH2/common/include/NSelections.h"
@@ -84,12 +86,17 @@ private:
     std::unique_ptr<JetCleaner> jetcleaner;
     std::unique_ptr<FwdJetSwitch> fwdjetswitch;
     std::unique_ptr<NBTagProducer> nbtagprod;
+    std::unique_ptr<HTCalculator> htcalc;
 
     // declare the Selections to use.
     std::vector<std::unique_ptr<Selection> > v_sel;
     
     // store the Hists collection as member variables.
-    std::unique_ptr<Hists> h_nocuts, h_allcuts, h_ele;  // h_mu;
+    std::unique_ptr<Hists>  h_SC_EtaPtN,
+                            h_SC_Ele,
+                            h_SC_Evt,
+                            h_allcuts;
+                            // h_mu;
     std::vector<std::unique_ptr<Hists> > vh_nocuts;
     std::vector<std::unique_ptr<Hists> > vh_nm1;
 };
@@ -124,6 +131,7 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
             PtEtaCut(20.0, 2.1)
         )
     ));
+    htcalc.reset(new HTCalculator(ctx));
 
     // 2. set up selections:
     int n_cuts = 4;
@@ -146,9 +154,10 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     vh_nm1[2].reset(new vlq2hl_hist::NFwdJets(ctx, "SelNm1"));
     vh_nm1[3].reset(new vlq2hl_hist::NLeptons(ctx, "SelNm1"));
 
-    h_nocuts.reset(new VLQToHiggsAndLeptonHists(ctx, "NoSel"));
+    h_SC_EtaPtN.reset(new VLQToHiggsAndLeptonHists(ctx, "SanityCheckEtaPtN"));
+    h_SC_Ele.reset(new ElectronHists(ctx, "SanityCheckEle", true));
+    h_SC_Evt.reset(new EventHists(ctx, "SanityCheckEvent"));
     h_allcuts.reset(new VLQToHiggsAndLeptonHists(ctx, "AllSel"));
-    h_ele.reset(new ElectronHists(ctx, "ele_nocuts"));
     // h_mu.reset(new MuonHists(ctx, "mu_nocuts"));
 }
 
@@ -163,6 +172,7 @@ bool VLQToHiggsAndLeptonModule::process(Event & event) {
     nbtagprod->process(event);
     elecleaner->process(event);
     mucleaner->process(event);
+    htcalc->process(event);
 
     // 2.a test selections
     bool all_accepted = true;
@@ -176,8 +186,9 @@ bool VLQToHiggsAndLeptonModule::process(Event & event) {
     }
 
     // 2.b fill histograms
-    h_nocuts->fill(event);
-    h_ele->fill(event);
+    h_SC_EtaPtN->fill(event);
+    h_SC_Ele->fill(event);
+    h_SC_Evt->fill(event);
     // h_mu->fill(event);
 
     if (all_accepted) {

@@ -12,7 +12,6 @@ VLQToHiggsAndLeptonHists::VLQToHiggsAndLeptonHists(Context & ctx, const string &
   book<TH1F>("N_fwd_jets", "N_{fwd jets}", 20, 0, 20);
   book<TH1F>("fwd_jet_eta", "#eta^{fwd jets}", 40, -5, 5);
   book<TH1F>("fwd_jet_pt", "p_{T}^{fwd jets} [GeV/c]", 40, 0, 200);
-  book<TH1F>("fwd_jet_energy", "E^{fwd jets} [GeV/c]", 80, 0, 400);
 
   // book<TH1F>("N_jets", "N_{jets}", 20, 0, 20);
   book<TH1F>("eta_jet1", "#eta^{jet 1}", 40, -5, 5);
@@ -47,7 +46,6 @@ void VLQToHiggsAndLeptonHists::fill(const Event & event){
   for (auto jet: fwd_jets) {
     hist("fwd_jet_eta")->Fill(jet.eta(), weight);
     hist("fwd_jet_pt")->Fill(jet.pt(), weight);
-    hist("fwd_jet_energy")->Fill(jet.energy(), weight);
   }
 
   std::vector<Jet>* jets = event.jets;

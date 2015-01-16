@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <iostream>
 #include <memory>
 
@@ -19,19 +20,23 @@ typedef std::vector<std::unique_ptr<Selection> >    SelVector;
 typedef std::vector<std::unique_ptr<Hists> >        HistVector;
 
 
-class FwdJetProducer: public AnalysisModule {
+class FwdJetSwitch: public AnalysisModule {
 public:
-    explicit FwdJetProducer(Context & ctx):
+    explicit FwdJetSwitch(Context & ctx):
         hndl(ctx.get_handle<std::vector<Jet> >("fwd_jets")) {}
 
     bool process(Event & event){
-        std::vector<Jet> tmp;
+        std::vector<Jet> fwd;
+        std::vector<Jet> cnt;
         for(const auto & jet: *event.jets) {
             if (fabs(jet.eta()) > 2.4) {
-                tmp.push_back(jet);
+                fwd.push_back(jet);
+            } else {
+                cnt.push_back(jet);
             }
         }
-        event.set(hndl, tmp);
+        event.set(hndl, fwd);
+        swap(*event.jets, cnt);
         return true;
     }
 
@@ -77,7 +82,7 @@ private:
     std::unique_ptr<ElectronCleaner> elecleaner;
     std::unique_ptr<MuonCleaner> mucleaner;
     std::unique_ptr<JetCleaner> jetcleaner;
-    std::unique_ptr<FwdJetProducer> fwdjetprod;
+    std::unique_ptr<FwdJetSwitch> fwdjetswitch;
     std::unique_ptr<NBTagProducer> nbtagprod;
 
     // declare the Selections to use.
@@ -105,8 +110,8 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     
     // 1. setup other modules. Here, only the jet cleaner
     nbtagprod.reset(new NBTagProducer(ctx));
-    fwdjetprod.reset(new FwdJetProducer(ctx));
-    jetcleaner.reset(new JetCleaner(30.0, 2.4));
+    fwdjetswitch.reset(new FwdJetSwitch(ctx));
+    jetcleaner.reset(new JetCleaner(30.0, 7.0));
     elecleaner.reset(new ElectronCleaner(
         AndId<Electron>(
             ElectronID_CSA14_50ns_medium,
@@ -152,8 +157,9 @@ bool VLQToHiggsAndLeptonModule::process(Event & event) {
 
     cout << "VLQToHiggsAndLeptonModule: Starting to process event (runid, eventid) = (" << event.run << ", " << event.event << "); weight = " << event.weight << endl;
     
-    // 1. run all modules; here: only jet cleaning.
-    fwdjetprod->process(event);
+    // 1. run all modules
+    jetcleaner->process(event);
+    fwdjetswitch->process(event);
     nbtagprod->process(event);
     elecleaner->process(event);
     mucleaner->process(event);

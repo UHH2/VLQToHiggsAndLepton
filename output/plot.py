@@ -24,7 +24,6 @@ def make_eff_graphs(wrps):
                 subs[t] = wrp
         elif wrp.name.endswith('_tot'):
             t = token(wrp)
-            print t
             if t in subs:
                 yield varial.operations.eff((subs.pop(t), wrp))
             else:

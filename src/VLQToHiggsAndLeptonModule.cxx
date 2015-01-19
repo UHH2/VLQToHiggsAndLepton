@@ -7,6 +7,7 @@
 #include "UHH2/common/include/CleaningModules.h"
 #include "UHH2/common/include/ElectronIds.h"
 #include "UHH2/common/include/MuonIds.h"
+#include "UHH2/common/include/JetHists.h"
 #include "UHH2/common/include/EventHists.h"
 #include "UHH2/common/include/EventVariables.h"
 #include "UHH2/common/include/ElectronHists.h"
@@ -95,10 +96,12 @@ private:
     std::unique_ptr<Hists>  h_SC_EtaPtN,
                             h_SC_Ele,
                             h_SC_Evt,
+                            h_SC_Jet,
+                            h_SC_FwdJet,
                             h_allcuts;
                             // h_mu;
-    std::vector<std::unique_ptr<Hists> > vh_nocuts;
-    std::vector<std::unique_ptr<Hists> > vh_nm1;
+    std::vector<std::unique_ptr<Hists> > vh_nocuts,
+                                         vh_nm1;
 };
 
 
@@ -157,6 +160,8 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     h_SC_EtaPtN.reset(new VLQToHiggsAndLeptonHists(ctx, "SanityCheckEtaPtN"));
     h_SC_Ele.reset(new ElectronHists(ctx, "SanityCheckEle", true));
     h_SC_Evt.reset(new EventHists(ctx, "SanityCheckEvent"));
+    h_SC_Jet.reset(new JetHists(ctx, "SanityCheckJets"));
+    h_SC_FwdJet.reset(new JetHists(ctx, "SanityCheckFwdJets", "fwd_jets"));
     h_allcuts.reset(new VLQToHiggsAndLeptonHists(ctx, "AllSel"));
     // h_mu.reset(new MuonHists(ctx, "mu_nocuts"));
 }
@@ -189,6 +194,8 @@ bool VLQToHiggsAndLeptonModule::process(Event & event) {
     h_SC_EtaPtN->fill(event);
     h_SC_Ele->fill(event);
     h_SC_Evt->fill(event);
+    h_SC_Jet->fill(event);
+    h_SC_FwdJet->fill(event);
     // h_mu->fill(event);
 
     if (all_accepted) {

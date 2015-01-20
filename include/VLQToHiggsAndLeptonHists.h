@@ -26,6 +26,22 @@ private:
 namespace vlq2hl_hist {
 using namespace uhh2;
 
+class Trigger: public Hists {
+public:
+    Trigger(Context & ctx, const std::string & dir):
+        Hists(ctx, dir),
+        h(book<TH1F>("trigger", ";ele+Jets OR mu+Jets;events", 2, -.5, 1.5)) {}
+
+    virtual void fill(const uhh2::Event & e) override {
+        auto ele_trig = e.get_trigger_index("HLT_Ele45_CaloIdVT_GsfTrkIdT_PFJet200_PFJet50_v*");
+        auto mu_trig = e.get_trigger_index("HLT_Mu40_eta2p1_PFJet200_PFJet50_v*");
+        h->Fill(e.passes_trigger(ele_trig) || e.passes_trigger(mu_trig), e.weight);
+    }
+
+private:
+    TH1F * h;
+};  // class Trigger
+
 class NJets: public Hists {
 public:
     NJets(Context & ctx, const std::string & dir):

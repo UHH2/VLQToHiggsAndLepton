@@ -93,13 +93,11 @@ private:
     std::vector<std::unique_ptr<Selection> > v_sel;
     
     // store the Hists collection as member variables.
-    std::unique_ptr<Hists>  h_SC_EtaPtN,
-                            h_SC_Ele,
+    std::unique_ptr<Hists>  h_SC_Ele,
                             h_SC_Mu,
                             h_SC_Evt,
                             h_SC_Jet,
-                            h_SC_FwdJet,
-                            h_allcuts;
+                            h_SC_FwdJet;
     std::vector<std::unique_ptr<Hists> > vh_nocuts,
                                          vh_nm1;
 };
@@ -137,33 +135,30 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     htcalc.reset(new HTCalculator(ctx));
 
     // 2. set up selections:
-    int n_cuts = 4;
-    v_sel.resize(n_cuts);
-    v_sel[0].reset(new NJetSelection(2));
-    v_sel[1].reset(new vlq2hl_sel::NBTags(ctx, 2));
-    v_sel[2].reset(new vlq2hl_sel::NFwdJets(ctx, 1));
-    v_sel[3].reset(new vlq2hl_sel::NLeptons(1, 1));
+    // v_sel.push_back(std::unique_ptr<Selection>(new vlq2hl_sel::Trigger()));
+    v_sel.push_back(std::unique_ptr<Selection>(new NJetSelection(2)));
+    v_sel.push_back(std::unique_ptr<Selection>(new vlq2hl_sel::NBTags(ctx, 2)));
+    v_sel.push_back(std::unique_ptr<Selection>(new vlq2hl_sel::NFwdJets(ctx, 1)));
+    v_sel.push_back(std::unique_ptr<Selection>(new vlq2hl_sel::NLeptons(1, 1)));
 
     // 3. Set up Hists classes:
-    vh_nocuts.resize(n_cuts);
-    vh_nocuts[0].reset(new vlq2hl_hist::NJets(ctx, "SelNone"));
-    vh_nocuts[1].reset(new vlq2hl_hist::NBTags(ctx, "SelNone"));
-    vh_nocuts[2].reset(new vlq2hl_hist::NFwdJets(ctx, "SelNone"));
-    vh_nocuts[3].reset(new vlq2hl_hist::NLeptons(ctx, "SelNone"));
+    // vh_nocuts.push_back(std::unique_ptr<Hists>(new vlq2hl_hist::Trigger (ctx, "SelNone")));
+    vh_nocuts.push_back(std::unique_ptr<Hists>(new vlq2hl_hist::NJets   (ctx, "SelNone")));
+    vh_nocuts.push_back(std::unique_ptr<Hists>(new vlq2hl_hist::NBTags  (ctx, "SelNone")));
+    vh_nocuts.push_back(std::unique_ptr<Hists>(new vlq2hl_hist::NFwdJets(ctx, "SelNone")));
+    vh_nocuts.push_back(std::unique_ptr<Hists>(new vlq2hl_hist::NLeptons(ctx, "SelNone")));
 
-    vh_nm1.resize(n_cuts);
-    vh_nm1[0].reset(new vlq2hl_hist::NJets(ctx, "SelNm1"));
-    vh_nm1[1].reset(new vlq2hl_hist::NBTags(ctx, "SelNm1"));
-    vh_nm1[2].reset(new vlq2hl_hist::NFwdJets(ctx, "SelNm1"));
-    vh_nm1[3].reset(new vlq2hl_hist::NLeptons(ctx, "SelNm1"));
+    // vh_nm1.push_back(std::unique_ptr<Hists>(new vlq2hl_hist::Trigger (ctx, "SelNm1")));
+    vh_nm1.push_back(std::unique_ptr<Hists>(new vlq2hl_hist::NJets   (ctx, "SelNm1")));
+    vh_nm1.push_back(std::unique_ptr<Hists>(new vlq2hl_hist::NBTags  (ctx, "SelNm1")));
+    vh_nm1.push_back(std::unique_ptr<Hists>(new vlq2hl_hist::NFwdJets(ctx, "SelNm1")));
+    vh_nm1.push_back(std::unique_ptr<Hists>(new vlq2hl_hist::NLeptons(ctx, "SelNm1")));
 
-    h_SC_EtaPtN.reset(new VLQToHiggsAndLeptonHists(ctx, "SanityCheckEtaPtN"));
     h_SC_Ele.reset(new ElectronHists(ctx, "SanityCheckEle", true));
     h_SC_Mu.reset(new MuonHists(ctx, "SanityCheckMu"));
     h_SC_Evt.reset(new EventHists(ctx, "SanityCheckEvent"));
     h_SC_Jet.reset(new JetHists(ctx, "SanityCheckJets"));
     h_SC_FwdJet.reset(new JetHists(ctx, "SanityCheckFwdJets", "fwd_jets"));
-    h_allcuts.reset(new VLQToHiggsAndLeptonHists(ctx, "AllSel"));
 
 }
 
@@ -192,16 +187,15 @@ bool VLQToHiggsAndLeptonModule::process(Event & event) {
     }
 
     // 2.b fill histograms
-    h_SC_EtaPtN->fill(event);
     h_SC_Ele->fill(event);
     h_SC_Mu->fill(event);
     h_SC_Evt->fill(event);
     h_SC_Jet->fill(event);
     h_SC_FwdJet->fill(event);
 
-    if (all_accepted) {
-        h_allcuts->fill(event);
-    }
+    //if (all_accepted) {
+    //    h_allcuts->fill(event);
+    //}
 
     for (unsigned i=0; i<vh_nocuts.size(); ++i) {
         vh_nocuts[i]->fill(event);

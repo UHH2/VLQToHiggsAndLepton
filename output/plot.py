@@ -14,18 +14,19 @@ dirname = 'FirstPlots_VLQToHiggsAndLepton'
 def make_eff_graphs(wrps):
     token = lambda w: w.legend + ":" + "/".join(w.in_file_path)[:-4]
     subs, tots = {}, {}
+    res = []
     for wrp in wrps:
         yield wrp
         if wrp.name.endswith('_sub'):
             t = token(wrp)
             if t in tots:
-                yield varial.operations.eff((wrp, tots.pop(t)))
+                res.append(varial.operations.eff((wrp, tots.pop(t))))
             else:
                 subs[t] = wrp
         elif wrp.name.endswith('_tot'):
             t = token(wrp)
             if t in subs:
-                yield varial.operations.eff((subs.pop(t), wrp))
+                res.append(varial.operations.eff((subs.pop(t), wrp)))
             else:
                 tots[t] = wrp
 

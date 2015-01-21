@@ -7,36 +7,6 @@
 
 #include <stdexcept>
 
-namespace uhh2 {
-
-/** \brief Various definitions of b-tagging, in particular working points
- *
- * This is useful for various selection modules, and thus defined outside of a particular Selection class.
- */
-namespace btagging {
-using namespace std;
-
-enum class csv_wp {
-    loose, medium, tight
-};
-
-/// convert a CSV working point to a numerical threshold of the discriminator.
-float csv_threshold(const csv_wp & wp){
-    using namespace btagging;
-    switch(wp){
-        case csv_wp::loose: return 0.244f;
-        case csv_wp::medium: return 0.679f;
-        case csv_wp::tight: return 0.898f;
-    }
-    // This should never happen; even if, the coompiler should warn in the switch.
-    // But to avoid a compiler warning that no value is returned, include this line:
-    throw invalid_argument("unknown working point given to btagging::csv_threshold");
-}
-
-}
-
-}
-
 namespace vlq2hl_sel {
 using namespace uhh2;
 

@@ -4,17 +4,23 @@
 
 #include "UHH2/core/include/AnalysisModule.h"
 #include "UHH2/core/include/Event.h"
+
+#include "UHH2/common/include/EventVariables.h"
 #include "UHH2/common/include/CleaningModules.h"
 #include "UHH2/common/include/ElectronIds.h"
 #include "UHH2/common/include/MuonIds.h"
+#include "UHH2/common/include/JetIds.h"
+#include "UHH2/common/include/JetCorrections.h"
+
 #include "UHH2/common/include/EventHists.h"
-#include "UHH2/common/include/EventVariables.h"
 #include "UHH2/common/include/ElectronHists.h"
 #include "UHH2/common/include/MuonHists.h"
 #include "UHH2/common/include/JetHists.h"
+#include "UHH2/VLQToHiggsAndLepton/include/VLQToHiggsAndLeptonHists.h"
+
 #include "UHH2/common/include/NSelections.h"
 #include "UHH2/VLQToHiggsAndLepton/include/VLQToHiggsAndLeptonSelections.h"
-#include "UHH2/VLQToHiggsAndLepton/include/VLQToHiggsAndLeptonHists.h"
+
 
 using namespace std;
 using namespace uhh2;
@@ -47,14 +53,16 @@ private:
 class NBTagProducer: public AnalysisModule {
 public:
     explicit NBTagProducer(Context & ctx,
-                           btagging::csv_wp wp = btagging::csv_wp::medium):
+                           CSVBTag::wp wp = CSVBTag::WP_MEDIUM):
         hndl(ctx.get_handle<int>("n_btags")),
-        min_csv(btagging::csv_threshold(wp)) {}
+        tagger(CSVBTag(wp)) {}
 
     bool process(Event & event){
         int nbtag = 0;
         for(const Jet & j : *event.jets){
-            if(j.btag_combinedSecondaryVertex() >= min_csv) ++nbtag;
+            if (tagger(j, event)) {
+                ++nbtag;
+            }
         }
         event.set(hndl, nbtag);
         return true;
@@ -62,7 +70,7 @@ public:
 
 private:
     Event::Handle<int> hndl;
-    float min_csv;
+    CSVBTag tagger;
 };
 
 
@@ -79,24 +87,16 @@ public:
     virtual bool process(Event & event) override;
 
 private:
-    std::unique_ptr<ElectronCleaner> elecleaner;
-    std::unique_ptr<MuonCleaner> mucleaner;
-    std::unique_ptr<JetCleaner> jetcleaner;
-    std::unique_ptr<FwdJetSwitch> fwdjetswitch;
-    std::unique_ptr<NBTagProducer> nbtagprod;
-    std::unique_ptr<HTCalculator> htcalc;
+    // modules for setting up collections and cleaning
+    std::vector<std::unique_ptr<AnalysisModule>> v_pre_modules;
 
-    // declare the Selections to use.
-    std::vector<std::unique_ptr<Selection> > v_sel;
+    // declare the Selections to use
+    std::vector<std::unique_ptr<Selection>> v_sel;
     
-    // store the Hists collection as member variables.
-    std::unique_ptr<Hists>  h_SC_Ele,
-                            h_SC_Mu,
-                            h_SC_Evt,
-                            h_SC_Jet,
-                            h_SC_FwdJet;
-    std::vector<std::unique_ptr<Hists> > vh_nocuts,
-                                         vh_nm1;
+    // store the Hists collection
+    std::vector<std::unique_ptr<Hists>> v_sanity_hists,
+                                        vh_nocuts,
+                                        vh_nm1;
 };
 
 
@@ -114,22 +114,23 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     }
     
     // 1. setup other modules. Here, only the jet cleaner
-    nbtagprod.reset(new NBTagProducer(ctx));
-    fwdjetswitch.reset(new FwdJetSwitch(ctx));
-    jetcleaner.reset(new JetCleaner(30.0, 7.0));
-    elecleaner.reset(new ElectronCleaner(
+    v_pre_modules.push_back(std::unique_ptr<AnalysisModule>(new JetCorrector(JERFiles::PHYS14_L123_MC)));
+    v_pre_modules.push_back(std::unique_ptr<AnalysisModule>(new JetCleaner(30.0, 7.0)));
+    v_pre_modules.push_back(std::unique_ptr<AnalysisModule>(new FwdJetSwitch(ctx)));
+    v_pre_modules.push_back(std::unique_ptr<AnalysisModule>(new NBTagProducer(ctx)));
+    v_pre_modules.push_back(std::unique_ptr<AnalysisModule>(new ElectronCleaner(
         AndId<Electron>(
             ElectronID_CSA14_50ns_medium,
             PtEtaCut(20.0, 2.4)
         )
-    ));
-    mucleaner.reset(new MuonCleaner(
+    )));
+    v_pre_modules.push_back(std::unique_ptr<AnalysisModule>(new MuonCleaner(
         AndId<Muon>(
             MuonIDTight(),
             PtEtaCut(20.0, 2.1)
         )
-    ));
-    htcalc.reset(new HTCalculator(ctx));
+    )));
+    v_pre_modules.push_back(std::unique_ptr<AnalysisModule>(new HTCalculator(ctx)));
 
     // 2. set up selections:
     // v_sel.push_back(std::unique_ptr<Selection>(new vlq2hl_sel::Trigger()));
@@ -151,26 +152,23 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     vh_nm1.push_back(std::unique_ptr<Hists>(new vlq2hl_hist::NFwdJets(ctx, "SelNm1")));
     vh_nm1.push_back(std::unique_ptr<Hists>(new vlq2hl_hist::NLeptons(ctx, "SelNm1")));
 
-    h_SC_Ele.reset(new ElectronHists(ctx, "SanityCheckEle", true));
-    h_SC_Mu.reset(new MuonHists(ctx, "SanityCheckMu"));
-    h_SC_Evt.reset(new EventHists(ctx, "SanityCheckEvent"));
-    h_SC_Jet.reset(new JetHists(ctx, "SanityCheckJets"));
-    h_SC_FwdJet.reset(new JetHists(ctx, "SanityCheckFwdJets", "fwd_jets"));
+    v_sanity_hists.push_back(std::unique_ptr<Hists>(new ElectronHists(ctx, "SanityCheckEle", true)));
+    v_sanity_hists.push_back(std::unique_ptr<Hists>(new MuonHists(ctx, "SanityCheckMu")));
+    v_sanity_hists.push_back(std::unique_ptr<Hists>(new EventHists(ctx, "SanityCheckEvent")));
+    v_sanity_hists.push_back(std::unique_ptr<Hists>(new JetHists(ctx, "SanityCheckJets")));
+    v_sanity_hists.push_back(std::unique_ptr<Hists>(new JetHists(ctx, "SanityCheckFwdJets", "fwd_jets")));
 
 }
 
 
 bool VLQToHiggsAndLeptonModule::process(Event & event) {
 
-    cout << "VLQToHiggsAndLeptonModule: Starting to process event (runid, eventid) = (" << event.run << ", " << event.event << "); weight = " << event.weight << endl;
-    
+    cout << "VLQToHiggsAndLeptonModule: Starting to process event (runid, eventid) = (" << event.run << ", " << event.event << ");\r";
+
     // 1. run all modules
-    jetcleaner->process(event);
-    fwdjetswitch->process(event);
-    nbtagprod->process(event);
-    elecleaner->process(event);
-    mucleaner->process(event);
-    htcalc->process(event);
+    for (auto & mod : v_pre_modules) {
+         mod->process(event);
+    }
 
     // 2.a test selections
     bool all_accepted = true;
@@ -184,20 +182,17 @@ bool VLQToHiggsAndLeptonModule::process(Event & event) {
     }
 
     // 2.b fill histograms
-    h_SC_Ele->fill(event);
-    h_SC_Mu->fill(event);
-    h_SC_Evt->fill(event);
-    h_SC_Jet->fill(event);
-    h_SC_FwdJet->fill(event);
+    // sanity
+    for (auto & hist : v_sanity_hists) {
+        hist->fill(event);
+    }
 
-    //if (all_accepted) {
-    //    h_allcuts->fill(event);
-    //}
-
+    // selection: no cuts
     for (unsigned i=0; i<vh_nocuts.size(); ++i) {
         vh_nocuts[i]->fill(event);
     }
 
+    // selection: n-1
     for (unsigned i=0; i<vh_nm1.size(); ++i) {
         bool accept_nm1 = true;
         for (unsigned j=0; j<v_accept.size(); ++j) {

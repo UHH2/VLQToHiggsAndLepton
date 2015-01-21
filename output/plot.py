@@ -8,7 +8,7 @@ import os
 import time
 import varial.tools
 
-dirname = 'FirstPlots_VLQToHiggsAndLepton'
+dirname = 'VLQ'
 
 
 def make_eff_graphs(wrps):
@@ -42,16 +42,20 @@ def norm_histos_to_integral(wrps):
             yield wrp
 
 
-def loader_hook(wrps):
-    wrps = make_eff_graphs(wrps)
-    #wrps = sorted(wrps, key=lambda w: w.type + ':' + w.name)
-    wrps = norm_histos_to_integral(wrps)
+def label_axes(wrps):
     for w in wrps:
         if 'TH1' in w.type and w.histo.GetXaxis().GetTitle() == '':
             w.histo.GetXaxis().SetTitle(w.histo.GetTitle())
             w.histo.GetYaxis().SetTitle('events')
             w.histo.SetTitle('')
         yield w
+
+
+def loader_hook(wrps):
+    wrps = label_axes(wrps)
+    wrps = make_eff_graphs(wrps)
+    wrps = norm_histos_to_integral(wrps)
+    return wrps
 
 
 def plotter_factory(**kws):

@@ -29,6 +29,9 @@ def make_eff_graphs(wrps):
                 res.append(varial.operations.eff((subs.pop(t), wrp)))
             else:
                 tots[t] = wrp
+        if res and not (subs or tots):
+            for _ in xrange(len(res)):
+                yield res.pop(0)
 
 
 def norm_histos_to_integral(wrps):
@@ -41,7 +44,7 @@ def norm_histos_to_integral(wrps):
 
 def loader_hook(wrps):
     wrps = make_eff_graphs(wrps)
-    wrps = sorted(wrps, key=lambda w: w.type + ':' + w.name)
+    #wrps = sorted(wrps, key=lambda w: w.type + ':' + w.name)
     wrps = norm_histos_to_integral(wrps)
     for w in wrps:
         if 'TH1' in w.type and w.histo.GetXaxis().GetTitle() == '':

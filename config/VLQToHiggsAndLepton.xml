@@ -17,7 +17,7 @@
                 If no OutputTree is given, no events will be written. Please do use "AnalysisTree" as Name. -->
             <!-- <OutputTree Name="AnalysisTree" /> -->
         </InputData>
-        <InputData Lumi="1" NEventsMax="1000" Type="MC" Version="TTJets" Cacheable="False">
+        <InputData Lumi="1" NEventsMax="1000" Type="MC" Version="tTJets" Cacheable="False">
             <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_0_Ntuple.root" Lumi="0.0"/>
             <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_100_Ntuple.root" Lumi="0.0"/>
             <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_101_Ntuple.root" Lumi="0.0"/>

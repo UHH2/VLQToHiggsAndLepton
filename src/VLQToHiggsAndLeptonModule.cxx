@@ -163,8 +163,6 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
 
 bool VLQToHiggsAndLeptonModule::process(Event & event) {
 
-    cout << "VLQToHiggsAndLeptonModule: Starting to process event (runid, eventid) = (" << event.run << ", " << event.event << ");\r";
-
     // 1. run all modules
     for (auto & mod : v_pre_modules) {
          mod->process(event);
@@ -183,8 +181,10 @@ bool VLQToHiggsAndLeptonModule::process(Event & event) {
 
     // 2.b fill histograms
     // sanity
-    for (auto & hist : v_sanity_hists) {
-        hist->fill(event);
+    if (all_accepted) {
+        for (auto & hist : v_sanity_hists) {
+            hist->fill(event);
+        }
     }
 
     // selection: no cuts

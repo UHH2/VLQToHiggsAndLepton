@@ -36,7 +36,7 @@ def make_eff_graphs(wrps):
 
 def norm_histos_to_integral(wrps):
     for wrp in wrps:
-        if isinstance(wrp, varial.wrappers.HistoWrapper):
+        if 'TH1' in wrp.type in wrp.type:
             yield varial.operations.norm_to_integral(wrp)
         else:
             yield wrp

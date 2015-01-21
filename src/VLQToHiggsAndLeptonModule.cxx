@@ -134,7 +134,7 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
 
     // 2. set up selections:
     // v_sel.push_back(std::unique_ptr<Selection>(new vlq2hl_sel::Trigger()));
-    v_sel.push_back(std::unique_ptr<Selection>(new NJetSelection(2)));
+    v_sel.push_back(std::unique_ptr<Selection>(new NJetSelection(3)));
     v_sel.push_back(std::unique_ptr<Selection>(new vlq2hl_sel::NBTags(ctx, 2)));
     v_sel.push_back(std::unique_ptr<Selection>(new vlq2hl_sel::NFwdJets(ctx, 1)));
     v_sel.push_back(std::unique_ptr<Selection>(new vlq2hl_sel::NLeptons(1, 1)));

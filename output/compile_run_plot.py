@@ -1,7 +1,8 @@
 #! /usr/bin/env python
 
 import os
-os.system('pwd')
+cwd = os.getcwd()
+print cwd
 
 # compile
 os.chdir('..')
@@ -15,7 +16,7 @@ if os.system('make'):
     exit(-1)
 
 # run sframe
-os.chdir('../VLQToHiggsAndLepton/output')
+os.chdir(cwd)
 if os.system('sframe_main ../config/VLQToHiggsAndLepton.xml'):
     print 'ERROR exiting!'
     exit(-1)

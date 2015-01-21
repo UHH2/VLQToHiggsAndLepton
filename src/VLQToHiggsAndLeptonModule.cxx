@@ -19,9 +19,6 @@
 using namespace std;
 using namespace uhh2;
 
-typedef std::vector<std::unique_ptr<Selection> >    SelVector;
-typedef std::vector<std::unique_ptr<Hists> >        HistVector;
-
 
 class FwdJetSwitch: public AnalysisModule {
 public:

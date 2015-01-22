@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE JobConfiguration PUBLIC "" "JobConfig.dtd">
+<!DOCTYPE JobConfiguration PUBLIC "" "JobConfig.dtd"
+[
+<!ENTITY TTbar SYSTEM "/afs/desy.de/user/t/tholenhe/xxl-af-cms/CMSSW_7_2_1_patch1/src/UHH2/common/datasets/MC_TTJets_20x25.xml">
+<!ENTITY TpJ_TH_M800 SYSTEM "/afs/desy.de/user/t/tholenhe/xxl-af-cms/CMSSW_7_2_1_patch1/src/UHH2/common/datasets/MC_TpJ_TH_M800_20x25.xml">
+]
+>
 
 <!-- OutputLevel controls which messages are printed; set to VERBOSE or DEBUG for more verbosity, to WARNING or ERROR for less -->
 <JobConfiguration JobName="ExampleCycleJob" OutputLevel="INFO">
@@ -8,146 +13,18 @@
 
    <Cycle Name="uhh2::AnalysisModuleRunner" OutputDirectory="./" PostFix="" TargetLumi="1" >
    <!-- <Cycle Name="uhh2::AnalysisModuleRunner"  RunMode="PROOF" ProofServer="lite://"  ProofWorkDir="/nfs/dust/cms/user/ottjoc/proof-wd/" ProofNodes="2" OutputDirectory="./" PostFix="" TargetLumi="1" >  -->
-        <InputData Lumi="1" NEventsMax="100000" Type="MC" Version="TpJ_TH_M800" Cacheable="False">
-            <In FileName="/nfs/dust/cms/user/ottjoc/gc-output/PHYS14v1/signals/MC_TpJ_TH_M800_20x25_11_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/ottjoc/gc-output/PHYS14v1/signals/MC_TpJ_TH_M800_20x25_12_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/ottjoc/gc-output/PHYS14v1/signals/MC_TpJ_TH_M800_20x25_13_Ntuple.root" Lumi="0.0"/>
+        <InputData Lumi="1" NEventsMax="10000" Type="MC" Version="TpJ_TH_M800_Tlep" Cacheable="False">
+            &TpJ_TH_M800;
             <InputTree Name="AnalysisTree" />
-            <!-- uncomment to write tree of selected events, i.e. of those events for which the AnalysisModule::process method  returns true
-                If no OutputTree is given, no events will be written. Please do use "AnalysisTree" as Name. -->
-            <!-- <OutputTree Name="AnalysisTree" /> -->
         </InputData>
-        <InputData Lumi="1" NEventsMax="100000" Type="MC" Version="tTJets" Cacheable="False">
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_0_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_100_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_101_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_121_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_122_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_123_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_124_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_125_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_126_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_127_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_128_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_129_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_12_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_130_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_131_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_132_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_133_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_134_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_135_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_136_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_137_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_138_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_139_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_13_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_140_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_141_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_142_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_143_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_144_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_145_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_146_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_147_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_148_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_149_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_14_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_150_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_151_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_152_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_153_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_154_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_155_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_156_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_157_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_158_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_159_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_15_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_160_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_161_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_162_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_163_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_164_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_165_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_166_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_167_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_168_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_169_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_16_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_170_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_171_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_172_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_173_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_174_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_175_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_176_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_177_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_178_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_179_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_17_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_180_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_181_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_182_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_183_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_184_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_185_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_186_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_187_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_188_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_189_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_18_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_190_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_191_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_192_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_193_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_194_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_195_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_196_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_197_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_198_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_199_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_19_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_1_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_200_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_201_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_202_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_203_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_204_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_205_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_206_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_207_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_208_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_209_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_20_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_210_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_211_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_212_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_213_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_214_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_215_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_216_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_217_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_218_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_219_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_21_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_220_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_221_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_222_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_223_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_224_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_225_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_226_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_227_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_228_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_229_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_22_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_230_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_231_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_232_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_233_Ntuple.root" Lumi="0.0"/>
-            <In FileName="/nfs/dust/cms/user/usaiem/gc-output/PHYS14v0/ttbar//MC_TTJets_20x25_234_Ntuple.root" Lumi="0.0"/>
+        <InputData Lumi="1" NEventsMax="10000" Type="MC" Version="TpJ_TH_M800_NonTlep" Cacheable="False">
+            &TpJ_TH_M800;
             <InputTree Name="AnalysisTree" />
+        </InputData>
+        <InputData Lumi="1" NEventsMax="10000" Type="MC" Version="tTJets" Cacheable="False">
+            &TTbar;
+            <InputTree Name="AnalysisTree" />
+            <!-- <OutputTree Name="AnalysisTree" /> -->
         </InputData>
         <UserConfig>
             <!-- define which collections to read from the input. Only specify what you need to save I/O time -->

@@ -48,7 +48,7 @@ public:
 
 private:
     Event::Handle<std::vector<Jet> > hndl;
-};
+};  // class FwdJetSwitch
 
 class NBTagProducer: public AnalysisModule {
 public:
@@ -71,7 +71,17 @@ public:
 private:
     Event::Handle<int> hndl;
     CSVBTag tagger;
-};
+};  // class NBTagProducer
+
+
+// bool isTlepEvent(const std::vector<GenParticle> & gps) {
+//     for (const auto & gp : gps) {
+//         if (abs(gp.pdgId()) == 6) {
+//             if gp.daughter
+//         }
+//         return false;
+//     }
+// }
 
 
 /** \brief Basic analysis example of an AnalysisModule (formerly 'cycle') in UHH2

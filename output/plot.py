@@ -7,6 +7,7 @@ ROOT.gROOT.ProcessLine('gErrorIgnoreLevel = kError;')
 import os
 import time
 import varial.tools
+import varial.generators as gen
 
 dirname = 'VLQ'
 
@@ -22,8 +23,17 @@ def label_axes(wrps):
 
 def loader_hook(wrps):
     wrps = label_axes(wrps)
-    wrps = varial.generators.make_eff_graphs(wrps)
-    wrps = varial.generators.gen_noex_norm_to_integral(wrps)
+    wrps = gen.switch(
+        wrps,
+        lambda w: w.in_file_path[0] == 'GenHists',
+        gen.gen_make_th2_projections
+    )
+    wrps = gen.gen_make_eff_graphs(wrps)
+    wrps = gen.switch(
+        wrps,
+        lambda w: 'TH1' in w.type,
+        gen.gen_noex_norm_to_integral
+    )
     return wrps
 
 

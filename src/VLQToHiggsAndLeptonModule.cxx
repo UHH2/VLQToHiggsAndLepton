@@ -104,6 +104,7 @@ private:
     std::vector<std::unique_ptr<Selection>> v_sel;
     
     // store the Hists collection
+    std::unique_ptr<Hists> gen_hists;
     std::vector<std::unique_ptr<Hists>> v_sanity_hists,
                                         vh_nocuts,
                                         vh_nm1;
@@ -168,10 +169,17 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     v_sanity_hists.push_back(std::unique_ptr<Hists>(new JetHists(ctx, "SanityCheckJets")));
     v_sanity_hists.push_back(std::unique_ptr<Hists>(new JetHists(ctx, "SanityCheckFwdJets", "fwd_jets")));
 
+    if (ctx.get("dataset_version") == "TpJ_TH_M800_Tlep") {
+        gen_hists.reset(new GenHists(ctx, "GenHists"));
+    }
 }
 
 
 bool VLQToHiggsAndLeptonModule::process(Event & event) {
+
+    if (gen_hists) {
+        gen_hists->fill(event);
+    }
 
     // 1. run all modules
     for (auto & mod : v_pre_modules) {

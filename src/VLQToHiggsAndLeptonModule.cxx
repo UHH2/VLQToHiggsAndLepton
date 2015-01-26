@@ -74,14 +74,22 @@ private:
 };  // class NBTagProducer
 
 
-// bool isTlepEvent(const std::vector<GenParticle> & gps) {
-//     for (const auto & gp : gps) {
-//         if (abs(gp.pdgId()) == 6) {
-//             if gp.daughter
-//         }
-//         return false;
-//     }
-// }
+bool isTlepEvent(const std::vector<GenParticle> * gps) {
+    for (const auto & gp : *gps) {
+        if (abs(gp.pdgId()) == 6) {
+            auto d1 = gp.daughter(gps, 1);
+            auto d2 = gp.daughter(gps, 2);
+            if (d1 && d2) {
+                auto w = (abs(d1->pdgId() == 24)) ? d1 : d2;
+                auto w_dau = w->daughter(gps, 1);
+                if (w_dau && abs(w_dau->pdgId()) < 17 && abs(w_dau->pdgId()) > 10) {
+                    return true;
+                } 
+            }
+        }
+    }
+    return false;
+}
 
 
 /** \brief Basic analysis example of an AnalysisModule (formerly 'cycle') in UHH2
@@ -97,6 +105,7 @@ public:
     virtual bool process(Event & event) override;
 
 private:
+    std::string version;
     // modules for setting up collections and cleaning
     std::vector<std::unique_ptr<AnalysisModule>> v_pre_modules;
 
@@ -114,8 +123,9 @@ private:
 VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
 
     // If needed, access the configuration of the module here, e.g.:
-    string testvalue = ctx.get("TestKey", "<not set>");
-    cout << "TestKey in the configuration was: " << testvalue << endl;
+    // string testvalue = ctx.get("TestKey", "<not set>");
+    // cout << "TestKey in the configuration was: " << testvalue << endl;
+    version = ctx.get("dataset_version", "");
     
     // If running in SFrame, the keys "dataset_version", "dataset_type" and "dataset_lumi"
     // are set to the according values in the xml file. For CMSSW, these are
@@ -179,6 +189,14 @@ bool VLQToHiggsAndLeptonModule::process(Event & event) {
 
     if (gen_hists) {
         gen_hists->fill(event);
+    }
+ 
+    bool tlepEvt = isTlepEvent(event.genparticles);
+    if (version == "TpJ_TH_M800_Tlep" && !tlepEvt) {
+        return false;
+    }
+    if (version == "TpJ_TH_M800_NonTlep" && tlepEvt) {
+        return false;
     }
 
     // 1. run all modules

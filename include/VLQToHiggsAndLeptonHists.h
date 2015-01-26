@@ -34,19 +34,19 @@ public:
             "tPrimeKinematic",
             ";T' p_{T};T' #eta",
             100, 0, 1000,
-            100, 0., 10.
+            100, -6., 6.
         )),
         fwJetKinematic(book<TH2F>(
             "fwJetKinematic",
             ";forward parton p_{T};forward parton #eta",
             100, 0, 1000,
-            100, 0., 10.
+            100, -6., 6.
         )),
         higgKinematic(book<TH2F>(
             "higgKinematic",
             ";H p_{T};H #eta",
             100, 0, 1000,
-            100, 0., 10.
+            100, -6., 6.
         )),
         // HProdDeltaR(book<TH1F>(
         //     "HProdDeltaR",
@@ -57,13 +57,13 @@ public:
             "topKinematic",
             ";top quark p_{T};top quark #eta",
             100, 0, 1000,
-            100, 0., 10.
+            100, -6., 6.
         ))  // ,
         // leptonKinematic(book<TH2F>(
         //     "leptonKinematic",
         //     ";lepton p_{T};lepton #eta",
         //     100, 0, 1000,
-        //     100, 0., 10.
+        //     100, -6., 6.
         // )),
         {}
 
@@ -71,7 +71,7 @@ public:
         const auto & gps = e.genparticles;
         float w = e.weight;
 
-        // find tprime mom
+        // find particles
         GenParticle tprime,
                     fwd_parton,
                     higg,
@@ -103,14 +103,12 @@ public:
             top = *d2;
             higg = *d1;
         }
-        if (tprime.pdgId())
-            tPrimeKinematic->Fill(tprime.pt(), fabs(tprime.eta()), w);
-        if (fwd_parton.pdgId())
-            fwJetKinematic->Fill(fwd_parton.pt(), fabs(fwd_parton.eta()), w);
-        if (top.pdgId())
-            topKinematic->Fill(top.pt(), fabs(top.eta()), w);
-        if (higg.pdgId())
-            higgKinematic->Fill(higg.pt(), fabs(higg.eta()), w);
+
+        // fill hists
+        tPrimeKinematic->Fill(tprime.pt(), tprime.eta(), w);
+        fwJetKinematic->Fill(fwd_parton.pt(), fwd_parton.eta(), w);
+        topKinematic->Fill(top.pt(), top.eta(), w);
+        higgKinematic->Fill(higg.pt(), higg.eta(), w);
 
     }
 

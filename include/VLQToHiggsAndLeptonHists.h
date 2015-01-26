@@ -82,12 +82,12 @@ public:
         for (const auto &gp : *gps) {
             auto d1 = gp.daughter(gps,1);
             auto d2 = gp.daughter(gps,2);
-            if (d1 && abs(d1->pdgId()) == 6000006) {
+            if (d1 && abs(d1->pdgId()) < 6000009 && abs(d1->pdgId()) > 6000003) {
                 tprime = *d1;
                 fwd_parton = *d2;
                 break;
             }
-            else if (d2 && abs(d2->pdgId()) == 6000006) {
+            else if (d2 && abs(d2->pdgId()) < 6000009 && abs(d2->pdgId()) > 6000003) {
                 tprime = *d2;
                 fwd_parton = *d1;
                 break;

@@ -37,8 +37,8 @@ public:
             100, -6., 6.
         )),
         fwJetKinematic(book<TH2F>(
-            "fwJetKinematic",
-            ";forward parton p_{T};forward parton #eta",
+            "assJetKinematic",
+            ";ass. parton p_{T};ass. parton #eta",
             100, 0, 1000,
             100, -6., 6.
         )),
@@ -48,24 +48,44 @@ public:
             100, 0, 1000,
             100, -6., 6.
         )),
-        // HProdDeltaR(book<TH1F>(
-        //     "HProdDeltaR",
-        //     ";#DeltaR(X,X) from H->XX;events",
-        //     100, 0., 5.
-        // ))
+        higgProdKinematic(book<TH2F>(
+            "higgProdKinematic",
+            ";H decay prods. p_{T};H decay prods. #eta",
+            100, 0, 1000,
+            100, -6., 6.
+        )),
+        higgProdPdgId(book<TH1F>(
+            "higgProdPdgId",
+            ";H decay prod pdgid;events",
+            1, 0, -1
+        )),
         topKinematic(book<TH2F>(
             "topKinematic",
             ";top quark p_{T};top quark #eta",
             100, 0, 1000,
             100, -6., 6.
-        ))  // ,
-        // leptonKinematic(book<TH2F>(
-        //     "leptonKinematic",
-        //     ";lepton p_{T};lepton #eta",
-        //     100, 0, 1000,
-        //     100, -6., 6.
-        // )),
-        {}
+        )),
+        topWKinematic(book<TH2F>(
+            "topWKinematic",
+            ";W p_{T};W #eta",
+            100, 0, 1000,
+            100, -6., 6.
+        )),
+        topBKinematic(book<TH2F>(
+            "topBKinematic",
+            ";b quark (from top) p_{T};b quark (from top) #eta",
+            100, 0, 1000,
+            100, -6., 6.
+        )),        
+        topWProdKinematic(book<TH2F>(
+            "topWProdKinematic",
+            ";W decay prods. p_{T};W decay prods. #eta",
+            100, 0, 1000,
+            100, -6., 6.
+        ))
+    {
+        higgProdPdgId->SetBit(TH1::kCanRebin);
+    }
 
     virtual void fill(const uhh2::Event & e) override {
         const auto & gps = e.genparticles;
@@ -75,10 +95,9 @@ public:
         GenParticle tprime,
                     fwd_parton,
                     higg,
-                    top;
-                    // top_w,
-                    // top_b,
-                    // lepton;
+                    top,
+                    top_w,
+                    top_b;
         for (const auto &gp : *gps) {
             auto d1 = gp.daughter(gps,1);
             auto d2 = gp.daughter(gps,2);
@@ -93,32 +112,60 @@ public:
                 break;
             }
         }
+        if (!tprime.pdgId()) {
+            std::cout << "Missing T' particle. Skipping Event." << std::endl;
+            return;
+        }
         auto d1 = tprime.daughter(gps,1);
         auto d2 = tprime.daughter(gps,2);
         if (d1 && abs(d1->pdgId()) == 6) {
             top = *d1;
             higg = *d2;
-        }
-        else if (d2 && abs(d2->pdgId()) == 6) {
+        } else {
             top = *d2;
             higg = *d1;
         }
-
+        auto d3 = top.daughter(gps,1);
+        auto d4 = top.daughter(gps,2);
+        if (d3 && d4) {
+            if (abs(d3->pdgId()) == 5) {
+                top_b = *d3;
+                top_w = *d4;
+            } else {
+                top_b = *d4;
+                top_w = *d3;
+            }
+        }
         // fill hists
         tPrimeKinematic->Fill(tprime.pt(), tprime.eta(), w);
         fwJetKinematic->Fill(fwd_parton.pt(), fwd_parton.eta(), w);
         topKinematic->Fill(top.pt(), top.eta(), w);
+        if (top_w.pdgId()) {
+            topWKinematic->Fill(top_w.pt(), top_w.eta(), w);
+            topBKinematic->Fill(top_b.pt(), top_b.eta(), w);
+            if (top_w.daughter(gps, 1)) {
+                topWProdKinematic->Fill(top_w.daughter(gps, 1)->pt(), top_w.daughter(gps, 1)->eta(), w);
+                topWProdKinematic->Fill(top_w.daughter(gps, 2)->pt(), top_w.daughter(gps, 2)->eta(), w);
+            }
+        }
         higgKinematic->Fill(higg.pt(), higg.eta(), w);
-
+        if (higg.daughter(gps, 1)) {
+            higgProdKinematic->Fill(higg.daughter(gps, 1)->pt(), higg.daughter(gps, 1)->eta(), w);
+            higgProdKinematic->Fill(higg.daughter(gps, 2)->pt(), higg.daughter(gps, 2)->eta(), w);
+            higgProdPdgId->Fill(std::to_string(abs(higg.daughter(gps, 1)->pdgId())).c_str(), w);
+        }
     }
 
 private:
     TH2F * tPrimeKinematic;
     TH2F * fwJetKinematic;
     TH2F * higgKinematic;
-    // TH1F * HProdDeltaR;
+    TH2F * higgProdKinematic;
+    TH1F * higgProdPdgId;
     TH2F * topKinematic;
-    // TH2F * leptonKinematic;
+    TH2F * topWKinematic;
+    TH2F * topBKinematic;
+    TH2F * topWProdKinematic;
 };  // class GenHists
 
 

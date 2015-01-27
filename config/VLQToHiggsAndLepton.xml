@@ -13,15 +13,15 @@
 
    <Cycle Name="uhh2::AnalysisModuleRunner" OutputDirectory="./" PostFix="" TargetLumi="1" >
    <!-- <Cycle Name="uhh2::AnalysisModuleRunner"  RunMode="PROOF" ProofServer="lite://"  ProofWorkDir="/nfs/dust/cms/user/ottjoc/proof-wd/" ProofNodes="2" OutputDirectory="./" PostFix="" TargetLumi="1" >  -->
-        <InputData Lumi="1" NEventsMax="10000" Type="MC" Version="TpJ_TH_M800_Tlep" Cacheable="False">
+        <InputData Lumi="1" NEventsMax="-1" Type="MC" Version="TpJ_TH_M800_Tlep" Cacheable="False">
             &TpJ_TH_M800;
             <InputTree Name="AnalysisTree" />
         </InputData>
-        <InputData Lumi="1" NEventsMax="10000" Type="MC" Version="TpJ_TH_M800_NonTlep" Cacheable="False">
+        <InputData Lumi="1" NEventsMax="-1" Type="MC" Version="TpJ_TH_M800_NonTlep" Cacheable="False">
             &TpJ_TH_M800;
             <InputTree Name="AnalysisTree" />
         </InputData>
-        <InputData Lumi="1" NEventsMax="10000" Type="MC" Version="tTJets" Cacheable="False">
+        <InputData Lumi="1" NEventsMax="-1" Type="MC" Version="tTJets" Cacheable="False">
             &TTbar;
             <InputTree Name="AnalysisTree" />
             <!-- <OutputTree Name="AnalysisTree" /> -->

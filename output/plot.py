@@ -8,9 +8,11 @@ import os
 import time
 import varial.tools
 import varial.generators as gen
+import varial.settings as settings
 
 dirname = 'VLQ'
-
+settings.defaults_Legend['x_pos'] = 0.83
+settings.defaults_Legend['label_width'] = 0.33
 
 def label_axes(wrps):
     for w in wrps:

@@ -21,24 +21,41 @@ public:
     }
 };  // class Trigger
 
+class JetPt: public Selection {
+public:
+    explicit JetPt(unsigned jet_index_, float min_pt_):
+        jet_index(jet_index_),
+        min_pt(min_pt_) {}
+
+    virtual bool passes(const Event & e) override {
+        return (e.jets->size() > jet_index
+                && e.jets->at(jet_index).pt() > min_pt);
+    }
+
+private:
+    unsigned jet_index;
+    float min_pt;
+};  // class JetPt
+
 class NBTags: public Selection {
 public:
     /// In case nmax=-1, no cut on the maximum is applied.
     explicit NBTags(Context &ctx, int nmin_, int nmax_ = -1):
         hndl(ctx.get_handle<int>("n_btags")), nmin(nmin_), nmax(nmax_) {}
 
-    virtual bool passes(const Event & event) override {
-        int n = event.get(hndl);
+    virtual bool passes(const Event & e) override {
+        int n = e.get(hndl);
         return n >= nmin && (nmax < 0 || n <= nmax);
     }
 
 private:
     Event::Handle<int> hndl;
     int nmin, nmax;
-};  // class NJets
+};  // class NBTags
 
 class NFwdJets: public Selection {
 public:
+    /// In case nmax=-1, no cut on the maximum is applied.
     explicit NFwdJets(Context & ctx, int nmin_, int nmax_ = -1):
         hndl(ctx.get_handle<std::vector<Jet> >("fwd_jets")),
         nmin(nmin_), nmax(nmax_) {}
@@ -66,5 +83,19 @@ public:
 private:
     int nmin, nmax;
 };  // class NLeptons
+
+class LeptonPt: public Selection {
+public:
+    explicit LeptonPt(float ele_cut_, float mu_cut_):
+        ele_cut(ele_cut_), mu_cut(mu_cut_) {}
+
+    bool passes(const uhh2::Event & e) override {
+        return (e.electrons->size() && e.electrons->at(0).pt() > ele_cut)
+               || (e.muons->size() && e.muons->at(0).pt() > mu_cut);
+    }
+
+private:
+    float ele_cut, mu_cut;
+};  // class LeptonPt
 
 }

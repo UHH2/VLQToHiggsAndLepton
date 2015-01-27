@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE JobConfiguration PUBLIC "" "JobConfig.dtd"
 [
+<!ENTITY WJets SYSTEM "/afs/desy.de/user/t/tholenhe/xxl-af-cms/CMSSW_7_2_1_patch1/src/UHH2/common/datasets/MC_WJets_LNu_20x25.xml">
+<!ENTITY ZJets SYSTEM "/afs/desy.de/user/t/tholenhe/xxl-af-cms/CMSSW_7_2_1_patch1/src/UHH2/common/datasets/MC_ZJets_LNu_20x25.xml">
 <!ENTITY TTbar SYSTEM "/afs/desy.de/user/t/tholenhe/xxl-af-cms/CMSSW_7_2_1_patch1/src/UHH2/common/datasets/MC_TTJets_20x25.xml">
 <!ENTITY TpJ_TH_M800 SYSTEM "/afs/desy.de/user/t/tholenhe/xxl-af-cms/CMSSW_7_2_1_patch1/src/UHH2/common/datasets/MC_TpJ_TH_M800_20x25.xml">
 ]
@@ -21,8 +23,18 @@
             &TpJ_TH_M800;
             <InputTree Name="AnalysisTree" />
         </InputData>
-        <InputData Lumi="1" NEventsMax="-1" Type="MC" Version="tTJets" Cacheable="False">
+        <InputData Lumi="1" NEventsMax="200000" Type="MC" Version="TTJets" Cacheable="False">
             &TTbar;
+            <InputTree Name="AnalysisTree" />
+            <!-- <OutputTree Name="AnalysisTree" /> -->
+        </InputData>
+        <InputData Lumi="1" NEventsMax="200000" Type="MC" Version="WJets" Cacheable="False">
+            &WJets;
+            <InputTree Name="AnalysisTree" />
+            <!-- <OutputTree Name="AnalysisTree" /> -->
+        </InputData>
+        <InputData Lumi="1" NEventsMax="200000" Type="MC" Version="ZJets" Cacheable="False">
+            &ZJets;
             <InputTree Name="AnalysisTree" />
             <!-- <OutputTree Name="AnalysisTree" /> -->
         </InputData>

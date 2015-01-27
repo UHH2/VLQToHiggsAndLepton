@@ -99,26 +99,31 @@ public:
                     top_w,
                     top_b;
         for (const auto &gp : *gps) {
-            auto d1 = gp.daughter(gps,1);
-            auto d2 = gp.daughter(gps,2);
-            if (d1 && abs(d1->pdgId()) < 6000009 && abs(d1->pdgId()) > 6000003) {
-                tprime = *d1;
-                fwd_parton = *d2;
-                break;
-            }
-            else if (d2 && abs(d2->pdgId()) < 6000009 && abs(d2->pdgId()) > 6000003) {
-                tprime = *d2;
-                fwd_parton = *d1;
+            if (abs(gp.pdgId()) == 6000006) {
+                tprime = gp;
                 break;
             }
         }
-        if (!tprime.pdgId()) {
-            std::cout << "Missing T' particle. Skipping Event." << std::endl;
-            return;
+        if (tprime.mother(gps, 1)) {
+            auto mom = tprime.mother(gps, 1);
+            auto d1 = mom->daughter(gps,1);
+            auto d2 = mom->daughter(gps,2);
+            if (abs(d1->pdgId()) == 6000006) {
+                fwd_parton = *d2;
+            } else {
+                fwd_parton = *d1;
+            }
+        } else {
+            for (const auto &gp : *gps) {
+                if (!gp.mother(gps, 1) && abs(gp.pdgId()) != 6000006) {
+                    fwd_parton = gp;
+                    break;
+                }
+            }
         }
         auto d1 = tprime.daughter(gps,1);
         auto d2 = tprime.daughter(gps,2);
-        if (d1 && abs(d1->pdgId()) == 6) {
+        if (abs(d1->pdgId()) == 6) {
             top = *d1;
             higg = *d2;
         } else {
@@ -128,12 +133,12 @@ public:
         auto d3 = top.daughter(gps,1);
         auto d4 = top.daughter(gps,2);
         if (d3 && d4) {
-            if (abs(d3->pdgId()) == 5) {
-                top_b = *d3;
-                top_w = *d4;
-            } else {
+            if (abs(d3->pdgId()) == 24) {
                 top_b = *d4;
                 top_w = *d3;
+            } else {
+                top_b = *d3;
+                top_w = *d4;
             }
         }
         // fill hists

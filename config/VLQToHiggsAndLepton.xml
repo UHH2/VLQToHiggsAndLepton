@@ -33,17 +33,14 @@
         <InputData Lumi="31571" NEventsMax="-1" Type="MC" Version="TTJets" Cacheable="False">
             &TTbar;
             <InputTree Name="AnalysisTree" />
-            <!-- <OutputTree Name="AnalysisTree" /> -->
         </InputData>
-        <InputData Lumi="488.44" NEventsMax="-1" Type="MC" Version="WJets" Cacheable="False">
+        <InputData Lumi="162.81" NEventsMax="-1" Type="MC" Version="WJets" Cacheable="False">
             &WJets;
             <InputTree Name="AnalysisTree" />
-            <!-- <OutputTree Name="AnalysisTree" /> -->
         </InputData>
         <InputData Lumi="1408.66" NEventsMax="-1" Type="MC" Version="ZJets" Cacheable="False">
             &ZJets;
             <InputTree Name="AnalysisTree" />
-            <!-- <OutputTree Name="AnalysisTree" /> -->
         </InputData>
         <UserConfig>
             <!-- define which collections to read from the input. Only specify what you need to save I/O time -->

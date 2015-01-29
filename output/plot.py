@@ -41,6 +41,7 @@ def loader_hook(wrps):
 
 def plotter_factory(**kws):
     kws['hook_loaded_histos'] = loader_hook
+    kws['save_lin_log_scale'] = True
     return varial.tools.Plotter(**kws)
 
 p = varial.tools.mk_rootfile_plotter(
@@ -53,3 +54,5 @@ p.run()
 varial.tools.WebCreator().run()
 os.system('rm -r ~/www/%s' % dirname)
 os.system('mv -f %s ~/www' % dirname)
+
+

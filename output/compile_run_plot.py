@@ -23,3 +23,5 @@ if os.system('sframe_main ../config/VLQToHiggsAndLepton.xml'):
 
 # plot
 os.system('./plot.py')
+os.system('./plot_stks.py')
+

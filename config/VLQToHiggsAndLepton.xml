@@ -13,27 +13,34 @@
     <Library Name="libSUHH2VLQToHiggsAndLepton"/>
     <Package Name="SUHH2VLQToHiggsAndLepton.par" />
 
-   <Cycle Name="uhh2::AnalysisModuleRunner" OutputDirectory="./" PostFix="" TargetLumi="1" >
+   <Cycle Name="uhh2::AnalysisModuleRunner" OutputDirectory="./" PostFix="" TargetLumi="20000" >
    <!-- <Cycle Name="uhh2::AnalysisModuleRunner"  RunMode="PROOF" ProofServer="lite://"  ProofWorkDir="/nfs/dust/cms/user/ottjoc/proof-wd/" ProofNodes="2" OutputDirectory="./" PostFix="" TargetLumi="1" >  -->
-        <InputData Lumi="1" NEventsMax="-1" Type="MC" Version="TpJ_TH_M800_Tlep" Cacheable="False">
+<!--
+ ( INFO  )  SInputData         : Input type "MC" version "TpJ_TH_M800_Tlep" : 99900 events
+ ( INFO  )  SInputData         : Input type "MC" version "TpJ_TH_M800_NonTlep" : 99900 events
+ ( INFO  )  SInputData         : Input type "MC" version "TTJets" : 25446993 events
+ ( INFO  )  SInputData         : Input type "MC" version "WJets" : 10017462 events
+ ( INFO  )  SInputData         : Input type "MC" version "ZJets" : 2829164 events
+-->
+        <InputData Lumi="99900" NEventsMax="-1" Type="MC" Version="TpJ_TH_M800_Tlep" Cacheable="False">
             &TpJ_TH_M800;
             <InputTree Name="AnalysisTree" />
         </InputData>
-        <InputData Lumi="1" NEventsMax="-1" Type="MC" Version="TpJ_TH_M800_NonTlep" Cacheable="False">
+        <InputData Lumi="99900" NEventsMax="-1" Type="MC" Version="TpJ_TH_M800_NonTlep" Cacheable="False">
             &TpJ_TH_M800;
             <InputTree Name="AnalysisTree" />
         </InputData>
-        <InputData Lumi="1" NEventsMax="200000" Type="MC" Version="TTJets" Cacheable="False">
+        <InputData Lumi="31571" NEventsMax="-1" Type="MC" Version="TTJets" Cacheable="False">
             &TTbar;
             <InputTree Name="AnalysisTree" />
             <!-- <OutputTree Name="AnalysisTree" /> -->
         </InputData>
-        <InputData Lumi="1" NEventsMax="200000" Type="MC" Version="WJets" Cacheable="False">
+        <InputData Lumi="488.44" NEventsMax="-1" Type="MC" Version="WJets" Cacheable="False">
             &WJets;
             <InputTree Name="AnalysisTree" />
             <!-- <OutputTree Name="AnalysisTree" /> -->
         </InputData>
-        <InputData Lumi="1" NEventsMax="200000" Type="MC" Version="ZJets" Cacheable="False">
+        <InputData Lumi="1408.66" NEventsMax="-1" Type="MC" Version="ZJets" Cacheable="False">
             &ZJets;
             <InputTree Name="AnalysisTree" />
             <!-- <OutputTree Name="AnalysisTree" /> -->

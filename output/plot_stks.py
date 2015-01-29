@@ -28,7 +28,6 @@ def label_axes(wrps):
 
 
 def loader_hook(wrps):
-    wrps = gen.itertools.ifilter(lambda w: 'TH1' in w.type, wrps)
     wrps = gen.gen_add_wrp_info(
         wrps,
         sample=lambda w: w.file_path.split('.')[-2],
@@ -41,6 +40,7 @@ def loader_hook(wrps):
 
 
 def plotter_factory(**kws):
+    kws['filter_keyfunc'] = lambda w: 'TH1' in w.type
     kws['hook_loaded_histos'] = loader_hook
     kws['plot_setup'] = gen.mc_stack_n_data_sum
     return varial.tools.Plotter(**kws)

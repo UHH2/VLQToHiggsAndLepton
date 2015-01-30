@@ -184,8 +184,10 @@ public:
         h(book<TH1F>("Trigger", ";ele+Jets OR mu+Jets;events", 2, -.5, 1.5)) {}
 
     virtual void fill(const uhh2::Event & e) override {
-        auto ele_trig = e.get_trigger_index("HLT_Ele45_CaloIdVT_GsfTrkIdT_PFJet200_PFJet50_v*");
-        auto mu_trig = e.get_trigger_index("HLT_Mu40_eta2p1_PFJet200_PFJet50_v*");
+        // auto ele_trig = e.get_trigger_index("HLT_Ele45_CaloIdVT_GsfTrkIdT_PFJet200_PFJet50_v*");
+        // auto mu_trig = e.get_trigger_index("HLT_Mu40_eta2p1_PFJet200_PFJet50_v*");
+        auto ele_trig = e.get_trigger_index("HLT_Ele95_CaloIdVT_GsfTrkIdT_v*");
+        auto mu_trig = e.get_trigger_index("HLT_Mu40_v*");
         h->Fill(e.passes_trigger(ele_trig) || e.passes_trigger(mu_trig), e.weight);
     }
 

@@ -162,10 +162,10 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     // 2. set up selections:
     v_sel.push_back(std::unique_ptr<Selection>(new vlq2hl_sel::Trigger()));
     v_sel.push_back(std::unique_ptr<Selection>(new vlq2hl_sel::NLeptons(1, 1)));
-    v_sel.push_back(std::unique_ptr<Selection>(new vlq2hl_sel::LeptonPt(50, 45)));
+    v_sel.push_back(std::unique_ptr<Selection>(new vlq2hl_sel::LeptonPt(105, 45)));
     v_sel.push_back(std::unique_ptr<Selection>(new NJetSelection(3)));
-    v_sel.push_back(std::unique_ptr<Selection>(new vlq2hl_sel::JetPt(0, 250)));
-    v_sel.push_back(std::unique_ptr<Selection>(new vlq2hl_sel::JetPt(0, 75)));
+    // v_sel.push_back(std::unique_ptr<Selection>(new vlq2hl_sel::JetPt(0, 250)));
+    // v_sel.push_back(std::unique_ptr<Selection>(new vlq2hl_sel::JetPt(0, 75)));
     v_sel.push_back(std::unique_ptr<Selection>(new vlq2hl_sel::NBTags(ctx, 2)));
     v_sel.push_back(std::unique_ptr<Selection>(new vlq2hl_sel::NFwdJets(ctx, 1)));
 
@@ -174,8 +174,8 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     vh_nocuts.push_back(std::unique_ptr<Hists>(new vlq2hl_hist::NLeptons        (ctx, "SelNone")));
     vh_nocuts.push_back(std::unique_ptr<Hists>(new vlq2hl_hist::LeptonPt        (ctx, "SelNone")));
     vh_nocuts.push_back(std::unique_ptr<Hists>(new vlq2hl_hist::NJets           (ctx, "SelNone")));
-    vh_nocuts.push_back(std::unique_ptr<Hists>(new vlq2hl_hist::LeadingJetPt    (ctx, "SelNone")));
-    vh_nocuts.push_back(std::unique_ptr<Hists>(new vlq2hl_hist::SubLeadingJetPt (ctx, "SelNone")));
+    // vh_nocuts.push_back(std::unique_ptr<Hists>(new vlq2hl_hist::LeadingJetPt    (ctx, "SelNone")));
+    // vh_nocuts.push_back(std::unique_ptr<Hists>(new vlq2hl_hist::SubLeadingJetPt (ctx, "SelNone")));
     vh_nocuts.push_back(std::unique_ptr<Hists>(new vlq2hl_hist::NBTags          (ctx, "SelNone")));
     vh_nocuts.push_back(std::unique_ptr<Hists>(new vlq2hl_hist::NFwdJets        (ctx, "SelNone")));
 
@@ -183,8 +183,8 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     vh_nm1.push_back(std::unique_ptr<Hists>(new vlq2hl_hist::NLeptons       (ctx, "SelNm1")));
     vh_nm1.push_back(std::unique_ptr<Hists>(new vlq2hl_hist::LeptonPt       (ctx, "SelNm1")));
     vh_nm1.push_back(std::unique_ptr<Hists>(new vlq2hl_hist::NJets          (ctx, "SelNm1")));
-    vh_nm1.push_back(std::unique_ptr<Hists>(new vlq2hl_hist::LeadingJetPt   (ctx, "SelNm1")));
-    vh_nm1.push_back(std::unique_ptr<Hists>(new vlq2hl_hist::SubLeadingJetPt(ctx, "SelNm1")));
+    // vh_nm1.push_back(std::unique_ptr<Hists>(new vlq2hl_hist::LeadingJetPt   (ctx, "SelNm1")));
+    // vh_nm1.push_back(std::unique_ptr<Hists>(new vlq2hl_hist::SubLeadingJetPt(ctx, "SelNm1")));
     vh_nm1.push_back(std::unique_ptr<Hists>(new vlq2hl_hist::NBTags         (ctx, "SelNm1")));
     vh_nm1.push_back(std::unique_ptr<Hists>(new vlq2hl_hist::NFwdJets       (ctx, "SelNm1")));
 

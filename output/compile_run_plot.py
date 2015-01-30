@@ -5,14 +5,15 @@ cwd = os.getcwd()
 print cwd
 
 # compile
-os.chdir('..')
-if os.system('make'):
-    print 'ERROR compiling own analysis. Exit.'
+os.chdir('../../common')
+if os.system('make -j 9'):
+    print 'ERROR compiling common package. Exit.'
     exit(-1)
 
-os.chdir('../common')
-if os.system('make'):
-    print 'ERROR compiling common package. Exit.'
+os.chdir(cwd)
+os.chdir('../')
+if os.system('make -j 9'):
+    print 'ERROR compiling own analysis. Exit.'
     exit(-1)
 
 # run sframe

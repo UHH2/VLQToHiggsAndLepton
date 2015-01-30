@@ -174,6 +174,42 @@ private:
 };  // class GenHists
 
 
+class SingleLepTrigHists: public Hists {
+public:
+    SingleLepTrigHists(Context & ctx,
+                  const std::string & dir,
+                  const std::string & trig_path,
+                  bool is_ele):
+        Hists(ctx, dir),
+        trig_path_(trig_path + '*'),
+        is_ele_(is_ele),
+        eff_sub_(book<TH1F>((trig_path+"_eff_sub").c_str(), "p_{T}", 100, 0, 1000)),
+        eff_tot_(book<TH1F>((trig_path+"_eff_tot").c_str(), "p_{T}", 100, 0, 1000)) {}
+
+    virtual void fill(const uhh2::Event & e) override {
+        float pt;
+        if (is_ele_) {
+            pt = e.electrons->size() ? e.electrons->at(0).pt() : -1.;
+        } else {
+            pt = e.muons->size() ? e.muons->at(0).pt() : -1.;
+        }
+        if (pt > 0.) {
+            eff_tot_->Fill(pt, e.weight);
+            auto trg_idx = e.get_trigger_index(trig_path_);
+            if (e.passes_trigger(trg_idx)) {
+                eff_sub_->Fill(pt, e.weight);
+            }
+        }
+    }
+
+private:
+    const std::string trig_path_;
+    bool is_ele_;
+    TH1F * eff_sub_;
+    TH1F * eff_tot_;
+};  // class SingleLepTrigHists
+
+
 namespace vlq2hl_hist {
 using namespace uhh2;
 

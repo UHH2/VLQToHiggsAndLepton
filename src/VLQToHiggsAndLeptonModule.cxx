@@ -120,7 +120,8 @@ private:
     
     // store the Hists collection
     std::unique_ptr<Hists> gen_hists;
-    std::vector<std::unique_ptr<Hists>> v_sanity_hists,
+    std::vector<std::unique_ptr<Hists>> v_trig_hists,
+                                        v_sanity_hists,
                                         vh_nocuts,
                                         vh_nm1;
 };
@@ -187,6 +188,9 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     // vh_nm1.push_back(std::unique_ptr<Hists>(new vlq2hl_hist::SubLeadingJetPt(ctx, "SelNm1")));
     vh_nm1.push_back(std::unique_ptr<Hists>(new vlq2hl_hist::NBTags         (ctx, "SelNm1")));
     vh_nm1.push_back(std::unique_ptr<Hists>(new vlq2hl_hist::NFwdJets       (ctx, "SelNm1")));
+
+    v_trig_hists.push_back(std::unique_ptr<Hists>(new SingleLepTrigHists(ctx, "SingleLepTrig", "HLT_Ele95_CaloIdVT_GsfTrkIdT_v", true)));
+    v_trig_hists.push_back(std::unique_ptr<Hists>(new SingleLepTrigHists(ctx, "SingleLepTrig", "HLT_Mu40_v", false)));
 
     v_sanity_hists.push_back(std::unique_ptr<Hists>(new ElectronHists(ctx, "SanityCheckEle", true)));
     v_sanity_hists.push_back(std::unique_ptr<Hists>(new MuonHists(ctx, "SanityCheckMu")));

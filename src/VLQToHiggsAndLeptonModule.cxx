@@ -53,7 +53,7 @@ private:
 class NBTagProducer: public AnalysisModule {
 public:
     explicit NBTagProducer(Context & ctx,
-                           CSVBTag::wp wp = CSVBTag::WP_MEDIUM):
+                           CSVBTag::wp wp = CSVBTag::WP_LOOSE):
         hndl(ctx.get_handle<int>("n_btags")),
         tagger(CSVBTag(wp)) {}
 
@@ -148,7 +148,7 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     v_pre_modules.push_back(std::unique_ptr<AnalysisModule>(new NBTagProducer(ctx)));
     v_pre_modules.push_back(std::unique_ptr<AnalysisModule>(new ElectronCleaner(
         AndId<Electron>(
-            ElectronID_CSA14_50ns_medium,
+            ElectronID_PHYS14_25ns_medium,
             PtEtaCut(20.0, 2.4)
         )
     )));
@@ -196,7 +196,7 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     v_sanity_hists.push_back(std::unique_ptr<Hists>(new MuonHists(ctx, "SanityCheckMu")));
     v_sanity_hists.push_back(std::unique_ptr<Hists>(new EventHists(ctx, "SanityCheckEvent")));
     v_sanity_hists.push_back(std::unique_ptr<Hists>(new JetHists(ctx, "SanityCheckJets")));
-    v_sanity_hists.push_back(std::unique_ptr<Hists>(new JetHists(ctx, "SanityCheckFwdJets", "fwd_jets")));
+    v_sanity_hists.push_back(std::unique_ptr<Hists>(new JetHists(ctx, "SanityCheckFwdJets", "fwd_jets", true, 2.4, 6.)));
 
     if (ctx.get("dataset_version") == "TpJ_TH_M800_Tlep") {
         gen_hists.reset(new GenHists(ctx, "GenHists"));
@@ -243,8 +243,13 @@ bool VLQToHiggsAndLeptonModule::process(Event & event) {
     }
 
     // selection: no cuts
-    for (unsigned i=0; i<vh_nocuts.size(); ++i) {
-        vh_nocuts[i]->fill(event);
+    for (auto & hist : vh_nocuts) {
+        hist->fill(event);
+    }
+
+    // trigger
+    for (auto & hist : v_trig_hists) {
+         hist->fill(event);
     }
 
     // selection: n-1

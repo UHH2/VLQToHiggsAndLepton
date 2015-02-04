@@ -47,7 +47,7 @@ def plotter_factory(**kws):
 p = varial.tools.mk_rootfile_plotter(
     name=dirname,
     plotter_factory=plotter_factory,
-    combine_files=True
+    combine_files=True,
 )
 time.sleep(1)
 p.run()

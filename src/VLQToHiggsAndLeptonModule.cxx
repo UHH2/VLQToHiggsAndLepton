@@ -196,7 +196,7 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     v_sanity_hists.push_back(std::unique_ptr<Hists>(new MuonHists(ctx, "SanityCheckMu")));
     v_sanity_hists.push_back(std::unique_ptr<Hists>(new EventHists(ctx, "SanityCheckEvent")));
     v_sanity_hists.push_back(std::unique_ptr<Hists>(new JetHists(ctx, "SanityCheckJets")));
-    v_sanity_hists.push_back(std::unique_ptr<Hists>(new JetHists(ctx, "SanityCheckFwdJets", "fwd_jets", true, 2.4, 6.)));
+    v_sanity_hists.push_back(std::unique_ptr<Hists>(new JetHists(ctx, "SanityCheckFwdJets", 4, "fwd_jets")));
 
     if (ctx.get("dataset_version") == "TpJ_TH_M800_Tlep") {
         gen_hists.reset(new GenHists(ctx, "GenHists"));

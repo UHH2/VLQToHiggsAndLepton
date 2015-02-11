@@ -1,30 +1,18 @@
 #!/usr/bin/env python
 
-import ROOT
-ROOT.gROOT.SetBatch()
-ROOT.gROOT.ProcessLine('gErrorIgnoreLevel = kError;')
+import common
+import settings
 
 import os
 import time
 import varial.tools
 import varial.generators as gen
-import varial.settings as settings
 
 dirname = 'VLQ'
-settings.defaults_Legend['x_pos'] = 0.83
-settings.defaults_Legend['label_width'] = 0.33
-
-def label_axes(wrps):
-    for w in wrps:
-        if 'TH1' in w.type and w.histo.GetXaxis().GetTitle() == '':
-            w.histo.GetXaxis().SetTitle(w.histo.GetTitle())
-            w.histo.GetYaxis().SetTitle('events')
-            w.histo.SetTitle('')
-        yield w
 
 
 def loader_hook(wrps):
-    wrps = label_axes(wrps)
+    wrps = common.label_axes(wrps)
     wrps = gen.switch(
         wrps,
         lambda w: w.in_file_path[0] == 'GenHists',
@@ -49,10 +37,12 @@ p = varial.tools.mk_rootfile_plotter(
     plotter_factory=plotter_factory,
     combine_files=True,
 )
-time.sleep(1)
-p.run()
-varial.tools.WebCreator().run()
-os.system('rm -r ~/www/%s' % dirname)
-os.system('mv -f %s ~/www' % dirname)
+
+if __name__ == '__main__':
+    time.sleep(1)
+    p.run()
+    varial.tools.WebCreator().run()
+    os.system('rm -r ~/www/%s' % dirname)
+    os.system('mv -f %s ~/www' % dirname)
 
 

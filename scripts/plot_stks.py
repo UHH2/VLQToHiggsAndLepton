@@ -1,39 +1,16 @@
 #!/usr/bin/env python
 
-import ROOT
-ROOT.gROOT.SetBatch()
-ROOT.gROOT.ProcessLine('gErrorIgnoreLevel = kError;')
+import common
+import settings
 
 import os
 import time
-import varial.analysis as ana
 import varial.generators as gen
 import varial.rendering as rnd
-import varial.sample as smpl
-import varial.settings as settings
 import varial.tools
 
-dirname = 'VLQstk'
-settings.defaults_Legend['x_pos'] = 0.80
-settings.defaults_Legend['label_width'] = 0.36
-settings.defaults_Legend['label_height'] = 0.03
-# settings.debug_mode = True
-settings.box_text_size = 0.03
-settings.colors = {
-    'TTJets': 632, 
-    'WJets': 878,
-    'ZJets': 596, 
-    'TpJ_TH_M800_Tlep': 870, 
-    'TpJ_TH_M800_NonTlep': 434,
-}
 
-def label_axes(wrps):
-    for w in wrps:
-        if 'TH1' in w.type and w.histo.GetXaxis().GetTitle() == '':
-            w.histo.GetXaxis().SetTitle(w.histo.GetTitle())
-            w.histo.GetYaxis().SetTitle('events')
-            w.histo.SetTitle('')
-        yield w
+dirname = 'VLQstk'
 
 
 def loader_hook(wrps):
@@ -46,7 +23,7 @@ def loader_hook(wrps):
         lumi=lambda w: 0.01 if 'TpJ_TH_M' in w.sample else 1.
     )
     wrps = gen.imap_conditional(wrps, lambda w: 'TpJ_TH_M800' in w.sample, gen.op.norm_to_lumi)
-    wrps = label_axes(wrps)
+    wrps = common.label_axes(wrps)
     return wrps
 
 
@@ -63,10 +40,12 @@ p = varial.tools.mk_rootfile_plotter(
     plotter_factory=plotter_factory,
     combine_files=True
 )
-time.sleep(1)
-p.run()
-varial.tools.WebCreator().run()
-os.system('rm -r ~/www/%s' % dirname)
-os.system('mv -f %s ~/www' % dirname)
+
+if __name__ == '__main__':
+    time.sleep(1)
+    p.run()
+    varial.tools.WebCreator().run()
+    os.system('rm -r ~/www/%s' % dirname)
+    os.system('mv -f %s ~/www' % dirname)
 
 

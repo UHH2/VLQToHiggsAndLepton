@@ -14,14 +14,7 @@ dirname = 'VLQstk'
 
 
 def loader_hook(wrps):
-    wrps = gen.gen_add_wrp_info(
-        wrps,
-        sample=lambda w: w.file_path.split('.')[-2],
-        analyzer=lambda w: w.in_file_path[0],
-        legend=lambda w: ('100* ' if 'TpJ_TH_M' in w.sample else '') + w.sample,
-        is_signal=lambda w: 'TpJ_TH_M' in w.sample,
-        lumi=lambda w: 0.01 if 'TpJ_TH_M' in w.sample else 1.
-    )
+    wrps = common.add_wrp_info(wrps)
     wrps = gen.imap_conditional(wrps, lambda w: 'TpJ_TH_M800' in w.sample, gen.op.norm_to_lumi)
     wrps = common.label_axes(wrps)
     return wrps

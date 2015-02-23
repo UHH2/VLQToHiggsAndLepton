@@ -4,7 +4,7 @@ import os
 cwd = os.getcwd()
 print cwd
 
-if not os.path.exists('../scripts/compile_run_plot.py'):
+if not os.path.exists('../python/compile_run_plot.py'):
     print 'ERROR script must be executed in a dir next to "scripts". Exit.'
     exit(-1)
 
@@ -27,6 +27,6 @@ if os.system('sframe_main ../config/VLQToHiggsAndLepton.xml'):
     exit(-1)
 
 # plot
-os.system('./../scripts/plot.py')
-os.system('./../scripts/plot_stks.py')
+os.system('./../python/plot.py')
+os.system('./../python/plot_stks.py')
 

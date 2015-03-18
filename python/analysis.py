@@ -9,7 +9,7 @@ import varial.main
 import varial.tools
 
 tc = varial.tools.ToolChain('Main', [
-#    plot_stks.p,
+    #plot_stks.p,
     sensitivity.tc,
     varial.tools.WebCreator(),
     varial.tools.CopyTool('~/www/test'),

@@ -28,7 +28,6 @@ def add_wrp_info(wrps):
 
 def merge_decay_channels(wrps, postfixes=('_Tlep', '_NonTlep')):
     """histos must be sorted!!"""
-    name = ''
     buffer = []
     for w in wrps:
         if any(w.sample.endswith(p) for p in postfixes):

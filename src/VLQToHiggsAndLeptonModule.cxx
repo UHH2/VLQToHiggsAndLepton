@@ -74,6 +74,32 @@ private:
 };  // class NBTagProducer
 
 
+class NLeadingBTagProducer: public AnalysisModule {
+public:
+    explicit NLeadingBTagProducer(Context & ctx,
+                                  CSVBTag::wp wp = CSVBTag::WP_LOOSE):
+        hndl(ctx.get_handle<int>("n_leading_btags")),
+        tagger(CSVBTag(wp)) {}
+
+    bool process(Event & event){
+        int nbtag = 0;
+        for(const Jet & j : *event.jets){
+            if (tagger(j, event)) {
+                ++nbtag;
+            } else {
+                break;
+            }
+        }
+        event.set(hndl, nbtag);
+        return true;
+    }
+
+private:
+    Event::Handle<int> hndl;
+    CSVBTag tagger;
+};  // class NLeadingBTagProducer
+
+
 bool isTlepEvent(const std::vector<GenParticle> * gps) {
     for (const auto & gp : *gps) {
         if (abs(gp.pdgId()) == 6) {
@@ -141,11 +167,12 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
         cout << " " << kv.first << " = " << kv.second << endl;
     }
     
-    // 1. setup other modules. Here, only the jet cleaner
+    // 1. setup modules to prepare the event.
     v_pre_modules.push_back(std::unique_ptr<AnalysisModule>(new JetCorrector(JERFiles::PHYS14_L123_MC)));
     v_pre_modules.push_back(std::unique_ptr<AnalysisModule>(new JetCleaner(30.0, 7.0)));
     v_pre_modules.push_back(std::unique_ptr<AnalysisModule>(new FwdJetSwitch(ctx)));
     v_pre_modules.push_back(std::unique_ptr<AnalysisModule>(new NBTagProducer(ctx)));
+    v_pre_modules.push_back(std::unique_ptr<AnalysisModule>(new NLeadingBTagProducer(ctx)));
     v_pre_modules.push_back(std::unique_ptr<AnalysisModule>(new ElectronCleaner(
         AndId<Electron>(
             ElectronID_PHYS14_25ns_medium,
@@ -178,6 +205,7 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     // vh_nocuts.push_back(std::unique_ptr<Hists>(new vlq2hl_hist::LeadingJetPt    (ctx, "SelNone")));
     // vh_nocuts.push_back(std::unique_ptr<Hists>(new vlq2hl_hist::SubLeadingJetPt (ctx, "SelNone")));
     vh_nocuts.push_back(std::unique_ptr<Hists>(new vlq2hl_hist::NBTags          (ctx, "SelNone")));
+    vh_nocuts.push_back(std::unique_ptr<Hists>(new vlq2hl_hist::NLeadingBTags   (ctx, "SelNone")));
     vh_nocuts.push_back(std::unique_ptr<Hists>(new vlq2hl_hist::NFwdJets        (ctx, "SelNone")));
 
     vh_nm1.push_back(std::unique_ptr<Hists>(new vlq2hl_hist::Trigger        (ctx, "SelNm1")));

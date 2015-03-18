@@ -293,6 +293,22 @@ private:
     TH1F * h;
 };  // class NBTags
 
+class NLeadingBTags: public Hists {
+public:
+    NLeadingBTags(Context & ctx, const std::string & dir):
+        Hists(ctx, dir),
+        hndl(ctx.get_handle<int>("n_leading_btags")),
+        h(book<TH1F>("NLeadingBTags", ";N_{b-tag leading};events", 11, -.5, 10.5)) {}
+
+    virtual void fill(const uhh2::Event & e) override {
+        h->Fill(e.get(hndl), e.weight);
+    }
+
+private:
+    Event::Handle<int> hndl;
+    TH1F * h;
+};  // class NLeadingBTags
+
 class NFwdJets: public Hists {
 public:
     NFwdJets(Context & ctx, const std::string & dir):

@@ -83,3 +83,30 @@ private:
     Event::Handle<int> hndl;
     CSVBTag tagger;
 };  // class NLeadingBTagProducer
+
+
+class STCalculator: public uhh2::AnalysisModule {
+public:
+    explicit STCalculator(uhh2::Context & ctx):
+        h_st(ctx.get_handle<double>("ST")),
+        h_primlep(ctx.get_handle<FlavorParticle>("PrimaryLepton")) {}
+
+    virtual bool process(uhh2::Event & event) override {
+        if (!event.is_valid(h_primlep)) {
+            return false;
+        }
+        float st = event.get(h_primlep).pt();
+        st += event.met->pt();
+        for (const auto & j : *event.jets) {
+            if (fabs(j.eta()) < 2.4) {
+                st += j.pt();
+            }
+        }
+        event.set(h_st, st);
+        return true;
+    }
+
+private:
+    uhh2::Event::Handle<double> h_st;
+    uhh2::Event::Handle<FlavorParticle> h_primlep;
+};  // class STCalculator

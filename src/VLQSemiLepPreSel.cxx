@@ -5,7 +5,6 @@
 #include "UHH2/core/include/AnalysisModule.h"
 #include "UHH2/core/include/Event.h"
 
-#include "UHH2/common/include/EventVariables.h"
 #include "UHH2/common/include/CleaningModules.h"
 #include "UHH2/common/include/ElectronIds.h"
 #include "UHH2/common/include/MuonIds.h"
@@ -13,6 +12,7 @@
 #include "UHH2/common/include/JetCorrections.h"
 #include "UHH2/common/include/TTbarReconstruction.h"
 
+#include "UHH2/VLQToHiggsAndLepton/include/VLQCommonModules.h"
 #include "UHH2/VLQToHiggsAndLepton/include/VLQSemiLepPreSelHists.h"
 
 
@@ -29,12 +29,18 @@ private:
     std::string version;
     // modules for setting up collections and cleaning
     std::vector<std::unique_ptr<AnalysisModule>> v_pre_modules;
+
     Event::Handle<FlavorParticle> h_primlep;
+    Event::Handle<double> h_st;
+
     std::unique_ptr<VLQSemiLepPreSelHists> hists;
 };
 
 
-VLQSemiLepPreSel::VLQSemiLepPreSel(Context & ctx){
+VLQSemiLepPreSel::VLQSemiLepPreSel(Context & ctx):
+    h_primlep(ctx.get_handle<FlavorParticle>("PrimaryLepton")),
+    h_st(ctx.get_handle<double>("ST"))
+{
 
     // If needed, access the configuration of the module here, e.g.:
     // string testvalue = ctx.get("TestKey", "<not set>");
@@ -51,7 +57,6 @@ VLQSemiLepPreSel::VLQSemiLepPreSel(Context & ctx){
     // 1. setup modules to prepare the event.
     v_pre_modules.push_back(std::unique_ptr<AnalysisModule>(new JetCorrector(JERFiles::PHYS14_L123_MC)));
     v_pre_modules.push_back(std::unique_ptr<AnalysisModule>(new JetCleaner(30.0, 7.0)));
-    v_pre_modules.push_back(std::unique_ptr<AnalysisModule>(new PrimaryLepton(ctx)));
     v_pre_modules.push_back(std::unique_ptr<AnalysisModule>(new ElectronCleaner(
         AndId<Electron>(
             ElectronID_PHYS14_25ns_medium,
@@ -64,54 +69,46 @@ VLQSemiLepPreSel::VLQSemiLepPreSel(Context & ctx){
             PtEtaCut(20.0, 2.4)
         )
     )));
-    v_pre_modules.push_back(std::unique_ptr<AnalysisModule>(new HTCalculator(ctx)));
+    v_pre_modules.push_back(std::unique_ptr<AnalysisModule>(new PrimaryLepton(ctx)));
+    v_pre_modules.push_back(std::unique_ptr<AnalysisModule>(new STCalculator(ctx)));
 
-    h_primlep = ctx.get_handle<FlavorParticle>("PrimaryLepton");
     hists.reset(new VLQSemiLepPreSelHists(ctx, "PreSelCtrl"));
 }
 
 
 bool VLQSemiLepPreSel::process(Event & event) {
 
+    // reject event if no jets or lepton
+    if (!event.jets->size()) {
+        return false;
+    }
+    if (!(event.muons->size() || event.electrons->size())) {
+        return false;
+    }
+
     // run all event modules
     for (auto & mod : v_pre_modules) {
          mod->process(event);
     }
 
-    // reject event if no good lepton or jets
+    // test again + good lepton
+    if (!event.jets->size()) {
+        return false;
+    }
+    if (!(event.muons->size() || event.electrons->size())) {
+        return false;
+    }
     if (!event.is_valid(h_primlep)) {
         return false;
     }
-    if (!event.jets || !event.jets->size()) {
-        return false;
-    }
-
-    // mk data
-    float lep_pt = event.get(h_primlep).pt();
-    float lj_pt = event.jets->at(0).pt();
-    float st = lep_pt;
-    st += event.met->pt();
-    for (const auto & j : *event.jets) {
-        float pt = j.pt();
-        float abseta = fabs(j.eta());
-        if (pt > 30. && abseta < 2.4) {
-            st += pt;
-        }
-    }
 
     // fill ctrl hists
-    hists->lepPt->Fill(lep_pt);
-    hists->leadingJetPt->Fill(lj_pt);
-    hists->st->Fill(st);
-    if (event.electrons && event.electrons->size()) {
-        hists->elePt->Fill(event.electrons->at(0).pt());
-    }
-    if (event.muons && event.muons->size()) {
-        hists->muoPt->Fill(event.muons->at(0).pt());
-    }
+    hists->fill(event);
 
     // decide
-    return lep_pt >= 50. && lj_pt >= 200. && st >= 500.;
+    return event.get(h_primlep).pt() >= 50.
+           && event.jets->at(0).pt() >= 200.
+           && event.get(h_st) >= 500.;
 }
 
 UHH2_REGISTER_ANALYSIS_MODULE(VLQSemiLepPreSel)

@@ -2,9 +2,10 @@
 <!DOCTYPE JobConfiguration PUBLIC "" "JobConfig.dtd"
 [
 <!ENTITY WJets SYSTEM "/afs/desy.de/user/t/tholenhe/xxl-af-cms/CMSSW_7_2_1_patch1/src/UHH2/common/datasets/MC_WJets_LNu_20x25.xml">
-<!ENTITY ZJets SYSTEM "/afs/desy.de/user/t/tholenhe/xxl-af-cms/CMSSW_7_2_1_patch1/src/UHH2/common/datasets/MC_ZJets_LNu_20x25.xml">
+<!ENTITY ZJets SYSTEM "/afs/desy.de/user/t/tholenhe/xxl-af-cms/CMSSW_7_2_1_patch1/src/UHH2/common/datasets/MC_ZJets_LL_20x25.xml">
 <!ENTITY TTbar SYSTEM "/afs/desy.de/user/t/tholenhe/xxl-af-cms/CMSSW_7_2_1_patch1/src/UHH2/common/datasets/MC_TTJets_20x25.xml">
 <!ENTITY TpJ_TH_M800 SYSTEM "/afs/desy.de/user/t/tholenhe/xxl-af-cms/CMSSW_7_2_1_patch1/src/UHH2/common/datasets/MC_TpJ_TH_M800_20x25.xml">
+<!ENTITY TpJ_TH_M1200 SYSTEM "/afs/desy.de/user/t/tholenhe/xxl-af-cms/CMSSW_7_2_1_patch1/src/UHH2/common/datasets/MC_TpJ_TH_M1200_20x25.xml">
 ]
 >
 
@@ -13,15 +14,18 @@
     <Library Name="libSUHH2VLQToHiggsAndLepton"/>
     <Package Name="SUHH2VLQToHiggsAndLepton.par" />
 
-   <!-- <Cycle Name="uhh2::AnalysisModuleRunner" OutputDirectory="./" PostFix="" TargetLumi="20000" >  -->
+   <!-- <Cycle Name="uhh2::AnalysisModuleRunner" OutputDirectory="./" PostFix="" TargetLumi="20000" > -->
    <Cycle Name="uhh2::AnalysisModuleRunner"  RunMode="PROOF" ProofServer="lite://"  ProofWorkDir="/nfs/dust/cms/user/tholenhe/proof-wd/" ProofNodes="20" OutputDirectory="./" PostFix="" TargetLumi="20000" >
 <!--
  ( INFO  )  SInputData         : Input type "MC" version "TpJ_TH_M800_Tlep" : 99900 events
  ( INFO  )  SInputData         : Input type "MC" version "TpJ_TH_M800_NonTlep" : 99900 events
+ ( INFO  )  SInputData         : Input type "MC" version "TpJ_TH_M1200_Tlep" : 100000 events
+ ( INFO  )  SInputData         : Input type "MC" version "TpJ_TH_M1200_NonTlep" : 100000 events
  ( INFO  )  SInputData         : Input type "MC" version "TTJets" : 25446993 events
  ( INFO  )  SInputData         : Input type "MC" version "WJets" : 10017462 events
  ( INFO  )  SInputData         : Input type "MC" version "ZJets" : 2829164 events
 -->
+
         <InputData Lumi="99900" NEventsMax="-1" Type="MC" Version="TpJ_TH_M800_Tlep" Cacheable="False">
             &TpJ_TH_M800;
             <InputTree Name="AnalysisTree" />
@@ -30,6 +34,15 @@
             &TpJ_TH_M800;
             <InputTree Name="AnalysisTree" />
         </InputData>
+        <InputData Lumi="100000" NEventsMax="-1" Type="MC" Version="TpJ_TH_M1200_Tlep" Cacheable="False">
+            &TpJ_TH_M1200;
+            <InputTree Name="AnalysisTree" />
+        </InputData>
+        <InputData Lumi="100000" NEventsMax="-1" Type="MC" Version="TpJ_TH_M1200_NonTlep" Cacheable="False">
+            &TpJ_TH_M1200;
+            <InputTree Name="AnalysisTree" />
+        </InputData>
+
         <InputData Lumi="31571" NEventsMax="-1" Type="MC" Version="TTJets" Cacheable="False">
             &TTbar;
             <InputTree Name="AnalysisTree" />
@@ -48,7 +61,7 @@
             <Item Name="ElectronCollection" Value="slimmedElectrons" />
             <Item Name="MuonCollection" Value="slimmedMuons" /> 
             <Item Name="TauCollection" Value="slimmedTaus" />
-            <Item Name="JetCollection" Value="slimmedJets" />
+            <Item Name="JetCollection" Value="patJetsAk4PFCHS" />
             <Item Name="METName" Value="slimmedMETs" />
             <Item Name="GenParticleCollection" Value="GenParticles" />
 

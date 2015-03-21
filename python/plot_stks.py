@@ -10,7 +10,7 @@ import varial.rendering as rnd
 import varial.tools
 
 
-dirname = 'VLQstk'
+dirname = 'VLQ3stk'
 
 
 def loader_hook(wrps):

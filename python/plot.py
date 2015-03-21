@@ -8,7 +8,7 @@ import time
 import varial.tools
 import varial.generators as gen
 
-dirname = 'VLQ'
+dirname = 'VLQ3'
 
 
 def loader_hook(wrps):

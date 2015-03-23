@@ -4,6 +4,7 @@
 
 #include "UHH2/core/include/AnalysisModule.h"
 #include "UHH2/core/include/Event.h"
+#include "UHH2/core/include/Hists.h"
 
 #include "UHH2/common/include/CleaningModules.h"
 #include "UHH2/common/include/ElectronIds.h"
@@ -12,8 +13,11 @@
 #include "UHH2/common/include/JetCorrections.h"
 #include "UHH2/common/include/TTbarReconstruction.h"
 
+#include "UHH2/VLQToHiggsAndLepton/include/AdditionalModules.h"
 #include "UHH2/VLQToHiggsAndLepton/include/VLQCommonModules.h"
 #include "UHH2/VLQToHiggsAndLepton/include/VLQSemiLepPreSelHists.h"
+#include "UHH2/VLQToHiggsAndLepton/include/VLQToHiggsPairProdHists.h"
+#include "UHH2/VLQToHiggsAndLepton/include/VLQGenHists.h"
 
 
 using namespace std;
@@ -33,7 +37,8 @@ private:
     Event::Handle<FlavorParticle> h_primlep;
     Event::Handle<double> h_st;
 
-    std::unique_ptr<VLQSemiLepPreSelHists> hists;
+    std::vector<std::unique_ptr<Hists>> v_hists;
+    std::vector<std::unique_ptr<Hists>> v_hists_post;
 };
 
 
@@ -71,8 +76,16 @@ VLQSemiLepPreSel::VLQSemiLepPreSel(Context & ctx):
     )));
     v_pre_modules.push_back(std::unique_ptr<AnalysisModule>(new PrimaryLepton(ctx)));
     v_pre_modules.push_back(std::unique_ptr<AnalysisModule>(new STCalculator(ctx)));
+    v_pre_modules.push_back(std::unique_ptr<AnalysisModule>(new NBTagProducer(ctx)));
+    v_pre_modules.push_back(std::unique_ptr<AnalysisModule>(new CMSTopTagCalculator(ctx, "n_toptags")));
 
-    hists.reset(new VLQSemiLepPreSelHists(ctx, "PreSelCtrl"));
+    v_hists.push_back(std::unique_ptr<Hists>(new VLQSemiLepPreSelHists(ctx, "PreSelCtrlPre")));
+    v_hists.push_back(std::unique_ptr<Hists>(new HistCollector(ctx, "EventsHistsPre")));
+    v_hists.push_back(std::unique_ptr<Hists>(new VLQGenHists(ctx, "GenHistsPre")));
+
+    v_hists_post.push_back(std::unique_ptr<Hists>(new VLQSemiLepPreSelHists(ctx, "PreSelCtrlPost")));
+    v_hists_post.push_back(std::unique_ptr<Hists>(new HistCollector(ctx, "EventsHistsPost")));
+    v_hists_post.push_back(std::unique_ptr<Hists>(new VLQGenHists(ctx, "GenHistsPost")));
 }
 
 
@@ -103,12 +116,23 @@ bool VLQSemiLepPreSel::process(Event & event) {
     }
 
     // fill ctrl hists
-    hists->fill(event);
+    for (auto & h : v_hists) {
+        h->fill(event);
+    }
 
     // decide
-    return event.get(h_primlep).pt() >= 50.
-           && event.jets->at(0).pt() >= 200.
-           && event.get(h_st) >= 500.;
+    bool accept = event.get(h_primlep).pt() >= 50.
+                  && event.jets->at(0).pt() >= 200.
+                  && event.get(h_st) >= 500.;
+
+    // fill ctrl hists after selection
+    if (accept) {
+        for (auto & h : v_hists_post) {
+            h->fill(event);
+        }
+    }
+
+    return accept;
 }
 
 UHH2_REGISTER_ANALYSIS_MODULE(VLQSemiLepPreSel)

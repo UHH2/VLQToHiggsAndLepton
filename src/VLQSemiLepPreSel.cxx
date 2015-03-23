@@ -85,7 +85,7 @@ VLQSemiLepPreSel::VLQSemiLepPreSel(Context & ctx):
 
     v_hists_post.push_back(std::unique_ptr<Hists>(new VLQSemiLepPreSelHists(ctx, "PreSelCtrlPost")));
     v_hists_post.push_back(std::unique_ptr<Hists>(new HistCollector(ctx, "EventsHistsPost")));
-    v_hists_post.push_back(std::unique_ptr<Hists>(new VLQGenHists(ctx, "GenHistsPost")));
+    //v_hists_post.push_back(std::unique_ptr<Hists>(new VLQGenHists(ctx, "GenHistsPost")));
 }
 
 

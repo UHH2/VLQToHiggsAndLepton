@@ -325,6 +325,22 @@ private:
     TH1F * h;
 };  // class NFwdJets
 
+class NHTags: public Hists {
+public:
+    NHTags(Context & ctx, const std::string & dir):
+        Hists(ctx, dir),
+        hndl(ctx.get_handle<int>("n_higgs_tags")),
+        h(book<TH1F>("NHTags", ";N_{H jet};events", 11, -.5, 10.5)) {}
+
+    virtual void fill(const uhh2::Event & e) override {
+        h->Fill(e.get(hndl), e.weight);
+    }
+
+private:
+    Event::Handle<int> hndl;
+    TH1F * h;
+};  // class NHTags
+
 class NLeptons: public Hists {
 public:
     NLeptons(Context & ctx, const std::string & dir):

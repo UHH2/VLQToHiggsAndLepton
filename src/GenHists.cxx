@@ -1,1 +1,0 @@
-../../VLQToHiggsPairProd/src/GenHists.cxx

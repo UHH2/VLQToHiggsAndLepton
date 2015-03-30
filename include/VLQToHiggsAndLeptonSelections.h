@@ -72,6 +72,23 @@ private:
     int nmin, nmax;
 };  // class NFwdJets
 
+class NHTags: public Selection {
+public:
+    /// In case nmax=-1, no cut on the maximum is applied.
+    explicit NHTags(Context & ctx, int nmin_, int nmax_ = -1):
+        hndl(ctx.get_handle<int>("n_higgs_tags")),
+        nmin(nmin_), nmax(nmax_) {}
+
+    bool passes(const Event & e) override {
+        int n = e.get(hndl);
+        return n >= nmin && (nmax < 0 || n <= nmax);
+    }
+
+private:
+    Event::Handle<int> hndl;
+    int nmin, nmax;
+};  // class NHTags
+
 class NLeptons: public Selection {
 public:
     explicit NLeptons(int nmin_, int nmax_ = -1):

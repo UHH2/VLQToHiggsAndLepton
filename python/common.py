@@ -4,6 +4,7 @@ ROOT.gROOT.ProcessLine('gErrorIgnoreLevel = kError;')
 
 
 import varial
+import varial.history
 
 
 def label_axes(wrps):
@@ -15,34 +16,39 @@ def label_axes(wrps):
         yield w
 
 
+signal_indicators = ['_M800_', '_M1000_', '_M1200_']
+
+
 def add_wrp_info(wrps):
     return varial.generators.gen_add_wrp_info(
         wrps,
         sample=lambda w: w.file_path.split('.')[-2],
         analyzer=lambda w: w.in_file_path.split('/')[0],
-        legend=lambda w: ('100* ' if 'TpJ_TH_M' in w.sample else '') + w.sample,
-        is_signal=lambda w: 'TpJ_TH_M' in w.sample,
-        lumi=lambda w: 0.01 if 'TpJ_TH_M' in w.sample else 1.
+        legend=lambda w: w.sample,
+        is_signal=lambda w: any(s in w.sample for s in signal_indicators),
     )
 
 
+@varial.history.track_history
+def merge_decay_channel(w):
+    return w
+
 def merge_decay_channels(wrps, postfixes=('_Tlep', '_NonTlep')):
     """histos must be sorted!!"""
-    buffer = []
+    buf = []
     for w in wrps:
         if any(w.sample.endswith(p) for p in postfixes):
-            buffer.append(w)
-            if len(buffer) == len(postfixes):
-                res = varial.operations.sum(buffer)
-                res.sample = ''.join(res.sample[:-len(p)] 
-                                     for p in postfixes 
-                                     if res.sample.endswith(p))
-                res.legend = ''.join(res.legend[:-len(p)] 
-                                     for p in postfixes 
-                                     if res.legend.endswith(p))
-                buffer = []
-                yield res
+            buf.append(w)
+            if len(buf) == len(postfixes):
+                res = varial.operations.sum(buf)
+                res.sample = next(res.sample[:-len(p)]
+                                  for p in postfixes
+                                  if res.sample.endswith(p))
+                res.legend = next(res.legend[:-len(p)]
+                                  for p in postfixes
+                                  if res.legend.endswith(p))
+                res.file_path = ''
+                buf = []
+                yield merge_decay_channel(res)
         else:
             yield w
-
-

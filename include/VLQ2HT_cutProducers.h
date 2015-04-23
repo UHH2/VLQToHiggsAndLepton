@@ -2,6 +2,7 @@
 
 #include "UHH2/core/include/AnalysisModule.h"
 #include "UHH2/core/include/Event.h"
+#include "UHH2/core/include/Utils.h"
 
 using namespace uhh2;
 
@@ -132,4 +133,31 @@ public:
 private:
     Event::Handle<float> h;
     Event::Handle<FlavorParticle> h_prim_lep;
+};
+
+
+class LorentzVectorInfoProducer: public AnalysisModule {
+public:
+    explicit LorentzVectorInfoProducer(Context & ctx, const string & name):
+        h_input(ctx.get_handle<LorentzVector>(name)),
+        h_mass(ctx.get_handle<float>(name + "_mass")),
+        h_eta(ctx.get_handle<float>(name + "_eta")),
+        h_pt(ctx.get_handle<float>(name + "_pt")) {}
+
+    virtual bool process(Event & e) override {
+        if (e.is_valid(h_input)) {
+            const auto & vec = e.get(h_input);
+            e.set(h_mass, inv_mass_save(vec));
+            e.set(h_pt, vec.pt());
+            e.set(h_eta, vec.eta());
+            return true;
+        }
+        return false;
+    }
+
+private:
+    Event::Handle<LorentzVector> h_input;
+    Event::Handle<float> h_mass;
+    Event::Handle<float> h_eta;
+    Event::Handle<float> h_pt;
 };

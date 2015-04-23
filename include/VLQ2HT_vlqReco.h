@@ -6,6 +6,7 @@
 #include "UHH2/core/include/AnalysisModule.h"
 #include "UHH2/core/include/Event.h"
 #include "UHH2/core/include/Particle.h"
+#include "UHH2/core/include/Utils.h"
 
 
 using namespace uhh2;
@@ -15,29 +16,29 @@ using namespace std;
 class VlqReco: public AnalysisModule {
 public:
     VlqReco(Context & ctx):
-        h_h_jets(ctx.get_handle<vector<TopJet>>("h_jets")),
+        h_higgs(ctx.get_handle<LorentzVector>("h")),
         h_top_lep(ctx.get_handle<LorentzVector>("tlep")),
-        h_vlq_mass(ctx.get_handle<float>("vlq_mass")),
-        h_vlq_pt(ctx.get_handle<float>("vlq_pt")),
-        h_vlq_eta(ctx.get_handle<float>("vlq_eta")) {}
+        h_vlq(ctx.get_handle<LorentzVector>("vlq")),
+        h_dr_higg_top(ctx.get_handle<float>("dr_higg_top"))
+    {}
 
     virtual bool process(Event & event) override {
-        const auto & h_jets = event.get(h_h_jets);
-        if (!(event.is_valid(h_top_lep) && h_jets.size())) {
+        if (!(event.is_valid(h_top_lep) && event.is_valid(h_higgs))) {
             return false;
         }
+        const auto & higgs = event.get(h_higgs);
+        const auto & top_lep = event.get(h_top_lep);
 
-        LorentzVector vlq_v4 = event.get(h_top_lep) + h_jets[0].v4();
-        event.set(h_vlq_mass, inv_mass(vlq_v4));
-        event.set(h_vlq_pt, vlq_v4.pt());
-        event.set(h_vlq_eta, vlq_v4.eta());
+        LorentzVector vlq_v4 = top_lep + higgs;
+        event.set(h_vlq, vlq_v4);
+        event.set(h_dr_higg_top, deltaR(top_lep, higgs));
+
         return true;
     }
 
 private:
-    Event::Handle<vector<TopJet>> h_h_jets;
+    Event::Handle<LorentzVector> h_higgs;
     Event::Handle<LorentzVector> h_top_lep;
-    Event::Handle<float> h_vlq_mass;
-    Event::Handle<float> h_vlq_pt;
-    Event::Handle<float> h_vlq_eta;
+    Event::Handle<LorentzVector> h_vlq;
+    Event::Handle<float> h_dr_higg_top;
 };

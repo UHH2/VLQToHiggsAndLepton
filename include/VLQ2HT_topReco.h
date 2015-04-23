@@ -9,24 +9,11 @@
 #include "UHH2/core/include/Particle.h"
 #include "UHH2/common/include/TTbarReconstruction.h"
 
+#include "UHH2/VLQSemiLepPreSel/include/VLQCommonModules.h"
 
 using namespace uhh2;
 using namespace std;
 
-
-namespace {
-
-// invariant mass of a LorentzVector, but save for timelike / spacelike vectors
-float inv_mass(const LorentzVector & p4){
-    if(p4.isTimelike()){
-            return p4.mass();
-    }
-    else{
-        return -sqrt(-p4.mass2());
-    }
-}
-
-}
 
 class TopLeptRecoHyp {
 public:
@@ -37,7 +24,6 @@ public:
     vector<Particle>    toplep_jets;
     map<string, float>  discriminators;
 };
-
 
 
 class TopLepHypProducer: public AnalysisModule {
@@ -70,8 +56,7 @@ public:
         for(const auto & neutrino_p4 : neutrino_hyps) {
             const LorentzVector wlep_v4 = lepton.v4() + neutrino_p4;
             for (const auto & b_jet : b_jets) {
-                LorentzVector toplep_v4 = wlep_v4;
-                toplep_v4 += b_jet.v4();
+                LorentzVector toplep_v4 = wlep_v4 + b_jet.v4();
 
                 // push new hyp
                 reco_hyps.emplace_back();
@@ -83,7 +68,7 @@ public:
 
                 // up to one radiated jet
                 for (const auto & jet : *event.jets) {
-                    if (deltaR(jet, b_jet) < 1e-3) {
+                    if (deltaR(jet, b_jet) < 0.1) {
                         continue;
                     }
                     LorentzVector toplep_j_v4 = toplep_v4 + jet.v4();
@@ -96,6 +81,23 @@ public:
                     hyp.neutrino_v4 = neutrino_p4;
                     hyp.toplep_jets.push_back(jet);
                     reco_hyps.push_back(hyp);
+
+                    for (const auto & jet2 : *event.jets) {
+                        if (deltaR(jet2, b_jet) < 0.1 || deltaR(jet2, jet) < 0.1 ) {
+                            continue;
+                        }
+                        LorentzVector toplep_j_j_v4 = toplep_j_v4 + jet2.v4();
+
+                        // push new hyp
+                        TopLeptRecoHyp hyp;
+                        hyp.toplep_v4 = toplep_j_j_v4;
+                        hyp.blep_v4 = b_jet.v4();
+                        hyp.lepton = lepton;
+                        hyp.neutrino_v4 = neutrino_p4;
+                        hyp.toplep_jets.push_back(jet);
+                        hyp.toplep_jets.push_back(jet2);
+                        reco_hyps.push_back(hyp);
+                    }
                 }
             }
         }
@@ -111,36 +113,13 @@ private:
 };  // TopLepHypProducer
 
 
-const TopLeptRecoHyp * get_best_hypothesis(
-    const vector<TopLeptRecoHyp> & hyps,
-    const string & label,
-    float & chi2)
-{
-    const TopLeptRecoHyp * best = nullptr;
-    float current_best_disc = numeric_limits<float>::infinity();
-    for(const auto & hyp : hyps){
-        if(!hyp.discriminators.count(label)) continue;
-        float disc = hyp.discriminators.find(label)->second;
-        if(disc < current_best_disc){
-            best = &hyp;
-            current_best_disc = disc;
-        }
-    }
-    chi2 = current_best_disc;
-    return best;  // note: might be nullptr
-}
-
-
 class TopLepChi2Discr: public AnalysisModule {
 public:
     TopLepChi2Discr(Context & ctx,
-                      const string & rechyps_name):
+                    const string & rechyps_name):
         h_hyps(ctx.get_handle<vector<TopLeptRecoHyp>>(rechyps_name)),
         h_top_lep(ctx.get_handle<LorentzVector>("tlep")),
-        h_top_lep_chi2(ctx.get_handle<float>("tlep_chi2")),
-        h_top_lep_mass(ctx.get_handle<float>("tlep_mass")),
-        h_top_lep_pt(ctx.get_handle<float>("tlep_pt")),
-        h_top_lep_eta(ctx.get_handle<float>("tlep_eta")) {}
+        h_top_lep_chi2(ctx.get_handle<float>("tlep_chi2")) {}
 
     virtual bool process(Event & event) override {
         if (!event.is_valid(h_hyps)) {
@@ -148,11 +127,11 @@ public:
         }
 
         auto & hyps = event.get(h_hyps);
-        const double mass_tlep = 174;
-        const double mass_tlep_sigma = 18;
+        const float mass_tlep = 174;
+        const float mass_tlep_sigma = 18;
         for(auto & hyp: hyps){
-            double mass_tlep_rec = inv_mass(hyp.toplep_v4);
-            double chi2_tlep = pow((mass_tlep_rec - mass_tlep) / mass_tlep_sigma, 2);
+            float mass_tlep_rec = inv_mass_save(hyp.toplep_v4);
+            float chi2_tlep = pow((mass_tlep_rec - mass_tlep) / mass_tlep_sigma, 2);
             hyp.discriminators["Chi2_tlep"] = chi2_tlep;
         }
 
@@ -161,9 +140,6 @@ public:
         if (best_hyp) {
             event.set(h_top_lep, best_hyp->toplep_v4);
             event.set(h_top_lep_chi2, chi2);
-            event.set(h_top_lep_mass, inv_mass(best_hyp->toplep_v4));
-            event.set(h_top_lep_pt, best_hyp->toplep_v4.pt());
-            event.set(h_top_lep_eta, best_hyp->toplep_v4.eta());
             return true;
         }
         return false;
@@ -173,7 +149,4 @@ private:
     Event::Handle<vector<TopLeptRecoHyp>> h_hyps;
     Event::Handle<LorentzVector> h_top_lep;
     Event::Handle<float> h_top_lep_chi2;
-    Event::Handle<float> h_top_lep_mass;
-    Event::Handle<float> h_top_lep_pt;
-    Event::Handle<float> h_top_lep_eta;
 };

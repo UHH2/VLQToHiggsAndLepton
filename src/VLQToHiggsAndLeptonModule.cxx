@@ -25,7 +25,9 @@
 #include "UHH2/VLQToHiggsAndLepton/include/VLQ2HT_hists.h"
 #include "UHH2/VLQToHiggsAndLepton/include/VLQ2HT_selection.h"
 #include "UHH2/VLQToHiggsAndLepton/include/VLQ2HT_topReco.h"
+#include "UHH2/VLQToHiggsAndLepton/include/VLQ2HT_higgsReco.h"
 #include "UHH2/VLQToHiggsAndLepton/include/VLQ2HT_vlqReco.h"
+#include "UHH2/VLQToHiggsAndLepton/include/VLQ2HT_eventHypDiscr.h"
 
 using namespace std;
 
@@ -77,6 +79,7 @@ private:
     
     // store the Hists collection
     std::unique_ptr<Hists> gen_hists;
+    std::unique_ptr<Hists> gen_reco_hists;
     std::vector<std::unique_ptr<Hists>> v_trig_hists,
                                         v_sanity_hists,
                                         vh_nocuts,
@@ -112,7 +115,8 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     v_pre_modules.push_back(std::unique_ptr<AnalysisModule>(new NLeadingBTagProducer(ctx)));
     v_pre_modules.push_back(std::unique_ptr<AnalysisModule>(new HJetsProducer(ctx, "patJetsCa15CHSJetsFilteredPacked")));
     v_pre_modules.push_back(std::unique_ptr<AnalysisModule>(new TopLepHypProducer(ctx, NeutrinoReconstruction)));
-    v_pre_modules.push_back(std::unique_ptr<AnalysisModule>(new TopLepChi2Discr(ctx, "LeptTopHyps")));
+    v_pre_modules.push_back(std::unique_ptr<AnalysisModule>(new HiggsHypProducer(ctx)));
+    v_pre_modules.push_back(std::unique_ptr<AnalysisModule>(new EventHypDiscr(ctx, "LeptTopHyps", "HiggsHyps")));
     v_pre_modules.push_back(std::unique_ptr<AnalysisModule>(new VlqReco(ctx)));
     // TODO : 2d-cut
 
@@ -125,25 +129,33 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     v_pre_modules.push_back(std::unique_ptr<AnalysisModule>(new SubleadingJetPtProducer(ctx)));
     v_pre_modules.push_back(std::unique_ptr<AnalysisModule>(new LeptonPtProducer(ctx)));
 
+    v_pre_modules.push_back(std::unique_ptr<AnalysisModule>(new LorentzVectorInfoProducer(ctx, "tlep")));
+    v_pre_modules.push_back(std::unique_ptr<AnalysisModule>(new LorentzVectorInfoProducer(ctx, "h")));
+    v_pre_modules.push_back(std::unique_ptr<AnalysisModule>(new LorentzVectorInfoProducer(ctx, "vlq")));
+
     // 2. set up selections:
-    v_sel.push_back(std::unique_ptr<Selection>(new HandleSelection<int>     (ctx, "trigger_accept",     1)));
-    v_sel.push_back(std::unique_ptr<Selection>(new HandleSelection<int>     (ctx, "n_jets",             2)));
-    v_sel.push_back(std::unique_ptr<Selection>(new HandleSelection<int>     (ctx, "n_leptons",          1, 1)));
-    v_sel.push_back(std::unique_ptr<Selection>(new HandleSelection<int>     (ctx, "n_fwd_jets",         1)));
-    v_sel.push_back(std::unique_ptr<Selection>(new HandleSelection<int>     (ctx, "n_btags",            2)));
-    v_sel.push_back(std::unique_ptr<Selection>(new HandleSelection<int>     (ctx, "n_leading_btags",    0)));
-    v_sel.push_back(std::unique_ptr<Selection>(new HandleSelection<int>     (ctx, "n_higgs_tags",       1)));
-    v_sel.push_back(std::unique_ptr<Selection>(new HandleSelection<float>   (ctx, "leading_jet_pt",     250)));
-    v_sel.push_back(std::unique_ptr<Selection>(new HandleSelection<float>   (ctx, "subleading_jet_pt",  65)));
+    v_sel.push_back(std::unique_ptr<Selection>(new HandleSelection<int>     (ctx, "trigger_accept"      , 1)));
+    v_sel.push_back(std::unique_ptr<Selection>(new HandleSelection<int>     (ctx, "n_jets"              , 2)));
+    v_sel.push_back(std::unique_ptr<Selection>(new HandleSelection<int>     (ctx, "n_leptons"           , 1)));
+    v_sel.push_back(std::unique_ptr<Selection>(new HandleSelection<int>     (ctx, "n_fwd_jets"          , 1)));
+    v_sel.push_back(std::unique_ptr<Selection>(new HandleSelection<int>     (ctx, "n_btags"             , 2)));
+    v_sel.push_back(std::unique_ptr<Selection>(new HandleSelection<int>     (ctx, "n_leading_btags"     , 0)));
+    v_sel.push_back(std::unique_ptr<Selection>(new HandleSelection<int>     (ctx, "n_higgs_tags"        , 1)));
+    v_sel.push_back(std::unique_ptr<Selection>(new HandleSelection<float>   (ctx, "leading_jet_pt"      , 250)));
+    v_sel.push_back(std::unique_ptr<Selection>(new HandleSelection<float>   (ctx, "subleading_jet_pt"   , 65)));
     v_sel.push_back(std::unique_ptr<Selection>(new HandleSelection<float>   (ctx, "primary_lepton_pt"   )));
     v_sel.push_back(std::unique_ptr<Selection>(new HandleSelection<double>  (ctx, "ST"                  )));
-    v_sel.push_back(std::unique_ptr<Selection>(new HandleSelection<float>   (ctx, "tlep_chi2"           )));
+    v_sel.push_back(std::unique_ptr<Selection>(new HandleSelection<float>   (ctx, "event_chi2"          )));
+    v_sel.push_back(std::unique_ptr<Selection>(new HandleSelection<float>   (ctx, "h_mass"              )));
+    v_sel.push_back(std::unique_ptr<Selection>(new HandleSelection<float>   (ctx, "h_pt"                )));
+    v_sel.push_back(std::unique_ptr<Selection>(new HandleSelection<float>   (ctx, "h_eta"               )));
     v_sel.push_back(std::unique_ptr<Selection>(new HandleSelection<float>   (ctx, "tlep_mass"           )));
     v_sel.push_back(std::unique_ptr<Selection>(new HandleSelection<float>   (ctx, "tlep_pt"             )));
     v_sel.push_back(std::unique_ptr<Selection>(new HandleSelection<float>   (ctx, "tlep_eta"            )));
-    v_sel.push_back(std::unique_ptr<Selection>(new HandleSelection<float>   (ctx, "vlq_mass"           )));
-    v_sel.push_back(std::unique_ptr<Selection>(new HandleSelection<float>   (ctx, "vlq_pt"             )));
-    v_sel.push_back(std::unique_ptr<Selection>(new HandleSelection<float>   (ctx, "vlq_eta"            )));
+    v_sel.push_back(std::unique_ptr<Selection>(new HandleSelection<float>   (ctx, "vlq_mass"            )));
+    v_sel.push_back(std::unique_ptr<Selection>(new HandleSelection<float>   (ctx, "vlq_pt"              )));
+    v_sel.push_back(std::unique_ptr<Selection>(new HandleSelection<float>   (ctx, "vlq_eta"             )));
+    v_sel.push_back(std::unique_ptr<Selection>(new HandleSelection<float>   (ctx, "dr_higg_top"         )));
 
     // 3. Set up Hists classes:
     vh_nocuts.push_back(std::unique_ptr<Hists>(new vlq2hl_hist::Trigger         (ctx, "SelNone")));
@@ -157,13 +169,17 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     vh_nocuts.push_back(std::unique_ptr<Hists>(new vlq2hl_hist::SubLeadingJetPt (ctx, "SelNone")));
     vh_nocuts.push_back(std::unique_ptr<Hists>(new vlq2hl_hist::PrimaryLeptonPt (ctx, "SelNone")));
     vh_nocuts.push_back(std::unique_ptr<Hists>(new vlq2hl_hist::ST              (ctx, "SelNone")));
-    vh_nocuts.push_back(std::unique_ptr<Hists>(new vlq2hl_hist::TopLepChi2      (ctx, "SelNone")));
+    vh_nocuts.push_back(std::unique_ptr<Hists>(new vlq2hl_hist::EventChi2       (ctx, "SelNone")));
+    vh_nocuts.push_back(std::unique_ptr<Hists>(new vlq2hl_hist::HiggsMass       (ctx, "SelNone")));
+    vh_nocuts.push_back(std::unique_ptr<Hists>(new vlq2hl_hist::HiggsPt         (ctx, "SelNone")));
+    vh_nocuts.push_back(std::unique_ptr<Hists>(new vlq2hl_hist::HiggsEta        (ctx, "SelNone")));
     vh_nocuts.push_back(std::unique_ptr<Hists>(new vlq2hl_hist::TopLepMass      (ctx, "SelNone")));
     vh_nocuts.push_back(std::unique_ptr<Hists>(new vlq2hl_hist::TopLepPt        (ctx, "SelNone")));
     vh_nocuts.push_back(std::unique_ptr<Hists>(new vlq2hl_hist::TopLepEta       (ctx, "SelNone")));
     vh_nocuts.push_back(std::unique_ptr<Hists>(new vlq2hl_hist::VlqMass         (ctx, "SelNone")));
     vh_nocuts.push_back(std::unique_ptr<Hists>(new vlq2hl_hist::VlqPt           (ctx, "SelNone")));
     vh_nocuts.push_back(std::unique_ptr<Hists>(new vlq2hl_hist::VlqEta          (ctx, "SelNone")));
+    vh_nocuts.push_back(std::unique_ptr<Hists>(new vlq2hl_hist::DrHiggTop       (ctx, "SelNone")));
 
     vh_nm1.push_back(std::unique_ptr<Hists>(new vlq2hl_hist::Trigger         (ctx, "SelNm1")));
     vh_nm1.push_back(std::unique_ptr<Hists>(new vlq2hl_hist::NJets           (ctx, "SelNm1")));
@@ -176,13 +192,17 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     vh_nm1.push_back(std::unique_ptr<Hists>(new vlq2hl_hist::SubLeadingJetPt (ctx, "SelNm1")));
     vh_nm1.push_back(std::unique_ptr<Hists>(new vlq2hl_hist::PrimaryLeptonPt (ctx, "SelNm1")));
     vh_nm1.push_back(std::unique_ptr<Hists>(new vlq2hl_hist::ST              (ctx, "SelNm1")));
-    vh_nm1.push_back(std::unique_ptr<Hists>(new vlq2hl_hist::TopLepChi2      (ctx, "SelNm1")));
+    vh_nm1.push_back(std::unique_ptr<Hists>(new vlq2hl_hist::EventChi2       (ctx, "SelNm1")));
+    vh_nm1.push_back(std::unique_ptr<Hists>(new vlq2hl_hist::HiggsMass       (ctx, "SelNm1")));
+    vh_nm1.push_back(std::unique_ptr<Hists>(new vlq2hl_hist::HiggsPt         (ctx, "SelNm1")));
+    vh_nm1.push_back(std::unique_ptr<Hists>(new vlq2hl_hist::HiggsEta        (ctx, "SelNm1")));
     vh_nm1.push_back(std::unique_ptr<Hists>(new vlq2hl_hist::TopLepMass      (ctx, "SelNm1")));
     vh_nm1.push_back(std::unique_ptr<Hists>(new vlq2hl_hist::TopLepPt        (ctx, "SelNm1")));
     vh_nm1.push_back(std::unique_ptr<Hists>(new vlq2hl_hist::TopLepEta       (ctx, "SelNm1")));
     vh_nm1.push_back(std::unique_ptr<Hists>(new vlq2hl_hist::VlqMass         (ctx, "SelNm1")));
     vh_nm1.push_back(std::unique_ptr<Hists>(new vlq2hl_hist::VlqPt           (ctx, "SelNm1")));
     vh_nm1.push_back(std::unique_ptr<Hists>(new vlq2hl_hist::VlqEta          (ctx, "SelNm1")));
+    vh_nm1.push_back(std::unique_ptr<Hists>(new vlq2hl_hist::DrHiggTop       (ctx, "SelNm1")));
 
     v_trig_hists.push_back(std::unique_ptr<Hists>(new SingleLepTrigHists(ctx, "SingleLepTrig", "HLT_Ele95_CaloIdVT_GsfTrkIdT_v", true)));
     v_trig_hists.push_back(std::unique_ptr<Hists>(new SingleLepTrigHists(ctx, "SingleLepTrig", "HLT_Mu40_v", false)));
@@ -194,7 +214,11 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     v_sanity_hists.push_back(std::unique_ptr<Hists>(new JetHists(ctx, "SanityCheckFwdJets", 4, "fwd_jets")));
 
     if (version.substr(version.size() - 5, 100) == "_Tlep") {
-        gen_hists.reset(new GenHists(ctx, "GenHists"));
+        gen_hists.reset(new VLQ2HTGenHists(ctx, "GenHists"));
+    }
+
+    if (version.substr(version.size() - 4, 100) == "Tlep") {
+        gen_reco_hists.reset(new VLQ2HTRecoGenComparison(ctx, "GenRecoHists"));
     }
 
     //cut_ofstream = ofstream(version + "_cuts.txt", ofstream::out);
@@ -246,6 +270,9 @@ bool VLQToHiggsAndLeptonModule::process(Event & event) {
     if (all_accepted) {
         for (auto & hist : v_sanity_hists) {
             hist->fill(event);
+        }
+        if (gen_reco_hists) {
+            gen_reco_hists->fill(event);
         }
     }
 

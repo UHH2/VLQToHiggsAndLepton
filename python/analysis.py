@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import common
-import settings
+import vlq_settings
 import plot_stks
 import sensitivity
 

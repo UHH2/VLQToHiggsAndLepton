@@ -310,4 +310,21 @@ public:
         HandleHist(ctx, dir, "tlep_chi2","lept. top chi2",50,0,100) {}
 };
 
+class VlqPt: public HandleHist<float> {
+public:
+    VlqPt(Context & ctx, const std::string & dir):
+        HandleHist(ctx, dir, "vlq_pt","VLQ p_{T}",50,0,2000) {}
+};
+
+class VlqEta: public HandleHist<float> {
+public:
+    VlqEta(Context & ctx, const std::string & dir):
+        HandleHist(ctx, dir, "vlq_eta","VLQ #eta",100,-5.,5.) {}
+};
+
+class VlqMass: public HandleHist<float> {
+public:
+    VlqMass(Context & ctx, const std::string & dir):
+        HandleHist(ctx, dir, "vlq_mass","VLQ mass",50,0,2000) {}
+};
 }

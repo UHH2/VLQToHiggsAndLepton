@@ -16,7 +16,7 @@ using namespace std;
 
 namespace {
 
-// invariant mass of a lorentzVector, but save for timelike / spacelike vectors
+// invariant mass of a LorentzVector, but save for timelike / spacelike vectors
 float inv_mass(const LorentzVector & p4){
     if(p4.isTimelike()){
             return p4.mass();
@@ -131,44 +131,49 @@ const TopLeptRecoHyp * get_best_hypothesis(
 }
 
 
-class TopLepChi2Discr: public uhh2::AnalysisModule {
+class TopLepChi2Discr: public AnalysisModule {
 public:
-    TopLepChi2Discr(uhh2::Context & ctx,
-                      const std::string & rechyps_name):
+    TopLepChi2Discr(Context & ctx,
+                      const string & rechyps_name):
         h_hyps(ctx.get_handle<vector<TopLeptRecoHyp>>(rechyps_name)),
+        h_top_lep(ctx.get_handle<LorentzVector>("tlep")),
         h_top_lep_chi2(ctx.get_handle<float>("tlep_chi2")),
         h_top_lep_mass(ctx.get_handle<float>("tlep_mass")),
         h_top_lep_pt(ctx.get_handle<float>("tlep_pt")),
         h_top_lep_eta(ctx.get_handle<float>("tlep_eta")) {}
 
-    virtual bool process(uhh2::Event & event) override {
-        if (event.is_valid(h_hyps)) {
-            auto & hyps = event.get(h_hyps);
-            const double mass_tlep = 174;
-            const double mass_tlep_sigma = 18;
-            for(auto & hyp: hyps){
-                double mass_tlep_rec = inv_mass(hyp.toplep_v4);
-                double chi2_tlep = pow((mass_tlep_rec - mass_tlep) / mass_tlep_sigma, 2);
-                hyp.discriminators["Chi2_tlep"] = chi2_tlep;
-            }
+    virtual bool process(Event & event) override {
+        if (!event.is_valid(h_hyps)) {
+            return false;
+        }
 
-            float chi2;
-            auto best_hyp = get_best_hypothesis(hyps, "Chi2_tlep", chi2);
-            if (best_hyp) {
-                event.set(h_top_lep_chi2, chi2);
-                event.set(h_top_lep_mass, inv_mass(best_hyp->toplep_v4));
-                event.set(h_top_lep_pt, best_hyp->toplep_v4.pt());
-                event.set(h_top_lep_eta, best_hyp->toplep_v4.eta());
-                return true;
-            }
+        auto & hyps = event.get(h_hyps);
+        const double mass_tlep = 174;
+        const double mass_tlep_sigma = 18;
+        for(auto & hyp: hyps){
+            double mass_tlep_rec = inv_mass(hyp.toplep_v4);
+            double chi2_tlep = pow((mass_tlep_rec - mass_tlep) / mass_tlep_sigma, 2);
+            hyp.discriminators["Chi2_tlep"] = chi2_tlep;
+        }
+
+        float chi2;
+        auto best_hyp = get_best_hypothesis(hyps, "Chi2_tlep", chi2);
+        if (best_hyp) {
+            event.set(h_top_lep, best_hyp->toplep_v4);
+            event.set(h_top_lep_chi2, chi2);
+            event.set(h_top_lep_mass, inv_mass(best_hyp->toplep_v4));
+            event.set(h_top_lep_pt, best_hyp->toplep_v4.pt());
+            event.set(h_top_lep_eta, best_hyp->toplep_v4.eta());
+            return true;
         }
         return false;
     }
 
 private:
-    uhh2::Event::Handle<std::vector<TopLeptRecoHyp>> h_hyps;
-    uhh2::Event::Handle<float> h_top_lep_chi2;
-    uhh2::Event::Handle<float> h_top_lep_mass;
-    uhh2::Event::Handle<float> h_top_lep_pt;
-    uhh2::Event::Handle<float> h_top_lep_eta;
+    Event::Handle<vector<TopLeptRecoHyp>> h_hyps;
+    Event::Handle<LorentzVector> h_top_lep;
+    Event::Handle<float> h_top_lep_chi2;
+    Event::Handle<float> h_top_lep_mass;
+    Event::Handle<float> h_top_lep_pt;
+    Event::Handle<float> h_top_lep_eta;
 };

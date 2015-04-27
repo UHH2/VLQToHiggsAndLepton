@@ -41,26 +41,30 @@ public:
         assert(event.jets);
         const auto & b_jets = event.get(h_b_jets);
         const auto & h_jets = event.get(h_h_jets);
-        if (b_jets.size() < 3 || !h_jets.size()) {
+        if (b_jets.size() < 3 && !h_jets.size()) {
             return false;
         }
         vector<HiggsRecoHyp> reco_hyps;
 
         if (h_jets.size()) {
             // first option: from higgs-tagged jets
+
             for (const auto & hj : h_jets) {
                 reco_hyps.emplace_back(
                     hj.v4(),
-                    vector<TopJet>({hj})
+                    vector<TopJet>({hj}),
+                    hj.subjets()
                 );
             }
         } else {
             // else try combos from b-jets
-            for (const auto & bj1 : b_jets) {
-                for (const auto & bj2 : b_jets) {
-                    if (deltaR(bj1, bj2) < 0.1) {
-                        continue;
-                    }
+
+            for (unsigned i1 = 0; i1 < b_jets.size() - 1; i1++) {
+                const auto &bj1 = b_jets[i1];
+
+                for (unsigned i2 = i1 + 1; i2 < b_jets.size(); i2++) {
+                    const auto &bj2 = b_jets[i2];
+
                     LorentzVector higgs_v4 = bj1.v4() + bj2.v4();
                     reco_hyps.emplace_back(
                         higgs_v4,

@@ -13,7 +13,6 @@ import varial.generators as gen
 dir_input = './'
 
 
-
 #def loader_hook(wrps):
 #    wrps = (w for w in wrps if w.histo.Integral() > 1e-20)
 #    wrps = common.label_axes(wrps)

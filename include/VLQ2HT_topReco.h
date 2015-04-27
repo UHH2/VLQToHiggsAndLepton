@@ -11,17 +11,21 @@
 
 #include "UHH2/VLQSemiLepPreSel/include/VLQCommonModules.h"
 
+
 using namespace uhh2;
 using namespace std;
 
 
 class TopLeptRecoHyp {
 public:
-    LorentzVector       blep_v4;
-    LorentzVector       neutrino_v4;
+    TopLeptRecoHyp(const LorentzVector &t, const LorentzVector &b, const Particle &l,
+                   const LorentzVector &n, const vector<Jet> &tjs = vector<Jet>()):
+        toplep_v4(t), blep_v4(b), lepton(l), neutrino_v4(n), toplep_jets(tjs) {}
     LorentzVector       toplep_v4;
+    LorentzVector       blep_v4;
     Particle            lepton;
-    vector<Particle>    toplep_jets;
+    LorentzVector       neutrino_v4;
+    vector<Jet>         toplep_jets;
     map<string, float>  discriminators;
 };
 
@@ -58,45 +62,47 @@ public:
             for (const auto & b_jet : b_jets) {
                 LorentzVector toplep_v4 = wlep_v4 + b_jet.v4();
 
-                // push new hyp
-                reco_hyps.emplace_back();
-                auto & hyp = reco_hyps.back();
-                hyp.toplep_v4 = toplep_v4;
-                hyp.blep_v4 = b_jet.v4();
-                hyp.lepton = lepton;
-                hyp.neutrino_v4 = neutrino_p4;
+                reco_hyps.emplace_back(
+                    toplep_v4,
+                    b_jet.v4(),
+                    lepton,
+                    neutrino_p4
+                );
 
-                // up to one radiated jet
-                for (const auto & jet : *event.jets) {
+                // first radiated jet
+                for (unsigned i1 = 0; i1 < event.jets->size(); i1++) {
+                    const auto &jet = event.jets->at(i1);
+
                     if (deltaR(jet, b_jet) < 0.1) {
                         continue;
                     }
                     LorentzVector toplep_j_v4 = toplep_v4 + jet.v4();
 
-                    // push new hyp
-                    TopLeptRecoHyp hyp;
-                    hyp.toplep_v4 = toplep_j_v4;
-                    hyp.blep_v4 = b_jet.v4();
-                    hyp.lepton = lepton;
-                    hyp.neutrino_v4 = neutrino_p4;
-                    hyp.toplep_jets.push_back(jet);
-                    reco_hyps.push_back(hyp);
+                    reco_hyps.emplace_back(
+                        toplep_j_v4,
+                        b_jet.v4(),
+                        lepton,
+                        neutrino_p4,
+                        vector<Jet>({jet})
+                    );
 
-                    for (const auto & jet2 : *event.jets) {
-                        if (deltaR(jet2, b_jet) < 0.1 || deltaR(jet2, jet) < 0.1 ) {
+                    // second radiated jet
+                    for (unsigned i2 = i1 + 1; i2 < event.jets->size(); i2++) {
+                        const auto &jet2 = event.jets->at(i2);
+
+                        if (deltaR(jet2, b_jet) < 0.1) {
                             continue;
                         }
                         LorentzVector toplep_j_j_v4 = toplep_j_v4 + jet2.v4();
 
                         // push new hyp
-                        TopLeptRecoHyp hyp;
-                        hyp.toplep_v4 = toplep_j_j_v4;
-                        hyp.blep_v4 = b_jet.v4();
-                        hyp.lepton = lepton;
-                        hyp.neutrino_v4 = neutrino_p4;
-                        hyp.toplep_jets.push_back(jet);
-                        hyp.toplep_jets.push_back(jet2);
-                        reco_hyps.push_back(hyp);
+                        reco_hyps.emplace_back(
+                            toplep_j_j_v4,
+                            b_jet.v4(),
+                            lepton,
+                            neutrino_p4,
+                            vector<Jet>({jet, jet2})
+                        );
                     }
                 }
             }

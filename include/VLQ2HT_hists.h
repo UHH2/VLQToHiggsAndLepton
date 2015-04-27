@@ -6,40 +6,18 @@
 #include "TH1F.h"
 #include "TH2F.h"
 
+#include "UHH2/VLQToHiggsAndLepton/include/HandleHist.h"
+#include "UHH2/VLQToHiggsAndLepton/include/SelectionItem.h"
 
+using namespace std;
 using namespace uhh2;
-
-
-template<class HANDLETYPE>
-class HandleHist: public uhh2::Hists {
-public:
-    template<class... TARGS>
-    explicit HandleHist(uhh2::Context & ctx,
-                        const std::string & dirname,
-                        const std::string & handlename,
-                        TARGS... args):
-        uhh2::Hists(ctx, dirname),
-        hndl(ctx.get_handle<HANDLETYPE>(handlename)) {
-            hist=book<TH1F>(handlename.c_str(), args...);
-        }
-
-    virtual void fill(const uhh2::Event & e) override {
-        if (e.is_valid(hndl)) {
-            hist->Fill(e.get(hndl), e.weight);
-        }
-    }
-
-private:
-    uhh2::Event::Handle<HANDLETYPE> hndl;
-    TH1F * hist;
-};
 
 
 class SingleLepTrigHists: public Hists {
 public:
     SingleLepTrigHists(Context & ctx,
-                  const std::string & dir,
-                  const std::string & trig_path,
+                  const string & dir,
+                  const string & trig_path,
                   bool is_ele):
         Hists(ctx, dir),
         trig_path_(trig_path + '*'),
@@ -64,176 +42,109 @@ public:
     }
 
 private:
-    const std::string trig_path_;
+    const string trig_path_;
     bool is_ele_;
     TH1F * eff_sub_;
     TH1F * eff_tot_;
 };  // class SingleLepTrigHists
 
 
-namespace vlq2hl_hist {
-using namespace uhh2;
-
-class Trigger: public HandleHist<int> {
+class Nm1SelHists: public Hists {
 public:
-    Trigger(Context & ctx, const std::string & dir):
-        HandleHist(ctx, dir, "trigger_accept", ";ele+Jets OR mu+Jets;events", 2, -.5, 1.5) {}
-};
+    explicit Nm1SelHists(Context & ctx,
+                         const string & dir,
+                         const SelItemsHelper & sel_helper):
+        Hists(ctx, dir),
+        h_sel_res(ctx.get_handle<vector<bool>>("sel_accept"))
+    {
+        sel_helper.fill_hists_vector(v_hists, dir);
+    }
 
-class NJets: public HandleHist<int> {
-public:
-    NJets(Context & ctx, const std::string & dir):
-        HandleHist(ctx, dir, "n_jets", ";N_{jet};events", 21, -.5, 20.5) {}
-};
+    virtual void fill(const Event & event) override {
+        const auto & v_accept = event.get(h_sel_res);
+        for (unsigned i=0; i<v_hists.size(); ++i) {
+            bool accept_nm1 = true;
+            for (unsigned j=0; j<v_accept.size(); ++j) {
+                if (i==j) {
+                    continue;
+                }
+                if (!v_accept[j]) {
+                    accept_nm1 = false;
+                    break;
+                }
+            }
+            if (accept_nm1) {
+                v_hists[i]->fill(event);
+            }
+        }
+    }
 
-class NLeptons: public HandleHist<int> {
-public:
-    NLeptons(Context & ctx, const std::string & dir):
-        HandleHist(ctx, dir, "n_leptons", ";N_{lepton};events", 11, -.5, 10.5) {}
-};
-
-class NFwdJets: public HandleHist<int> {
-public:
-    NFwdJets(Context & ctx, const std::string & dir):
-        HandleHist(ctx, dir, "n_fwd_jets", ";N_{fwd jet};events", 11, -.5, 10.5) {}
-};
-
-class NBTags: public HandleHist<int> {
-public:
-    NBTags(Context & ctx, const std::string & dir):
-        HandleHist(ctx, dir, "n_btags", ";N_{b-tag};events", 11, -.5, 10.5) {}
-};
-
-class NLeadingBTags: public HandleHist<int> {
-public:
-    NLeadingBTags(Context & ctx, const std::string & dir):
-        HandleHist(ctx, dir, "n_leading_btags", ";N_{b-tag leading};events", 11, -.5, 10.5) {}
-};
-
-class NHTags: public HandleHist<int> {
-public:
-    NHTags(Context & ctx, const std::string & dir):
-        HandleHist(ctx, dir, "n_higgs_tags", ";N_{H jet};events", 11, -.5, 10.5) {}
-};
-
-class LeadingJetPt: public HandleHist<float> {
-public:
-    LeadingJetPt(Context & ctx, const std::string & dir):
-        HandleHist(ctx, dir, "leading_jet_pt","leading jet p_{T}",50,100,1500) {}
-};
-
-class SubLeadingJetPt: public HandleHist<float> {
-public:
-    SubLeadingJetPt(Context & ctx, const std::string & dir):
-        HandleHist(ctx, dir, "subleading_jet_pt","sub-leading jet p_{T}",50,100,1500) {}
-};
-
-class PrimaryLeptonPt: public HandleHist<float> {
-public:
-    PrimaryLeptonPt(Context & ctx, const std::string & dir):
-        HandleHist(ctx, dir, "primary_lepton_pt","primary lepton p_{T}",50,100,1500) {}
-};
-
-class ST: public HandleHist<double> {
-public:
-    ST(Context & ctx, const std::string & dir):
-        HandleHist(ctx, dir, "ST", ";ST;events", 100, 0, 5000) {}
+private:
+    Event::Handle<vector<bool>> h_sel_res;
+    vector<unique_ptr<Hists>> v_hists;
 };
 
 
-class EventChi2: public HandleHist<float> {
+class VLQ2HTCutflow: public Hists {
 public:
-    EventChi2(Context & ctx, const std::string & dir):
-        HandleHist(ctx, dir, "event_chi2","event chi2",50,0,100) {}
+    VLQ2HTCutflow(Context & ctx,
+                  const string & dir,
+                  const SelItemsHelper & sel_helper):
+        Hists(ctx, dir),
+        h(book<TH1F>("cutflow", ";;events", 1, 0, -1)),
+        names(sel_helper.get_item_names()),
+        h_sel(ctx.get_handle<vector<bool>>("sel_accept"))
+    {
+        h->SetBit(TH1::kCanRebin);
+        h->Fill("pre-sel.", 1e-7);
+        for (const string & name : names) {
+            h->Fill(name.c_str(), 1e-7);
+        }
+    }
+
+    virtual void fill(const uhh2::Event & e) override {
+        float w = e.weight;
+        const auto & sel = e.get(h_sel);
+        h->Fill("pre-sel.", w);
+        for (unsigned i = 0; i < names.size(); ++i) {
+            if (sel[i]) {
+                h->Fill(names[i].c_str(), w);
+            } else {
+                break;
+            }
+        }
+    }
+
+private:
+    TH1F * h;
+    const vector<string> & names;
+    Event::Handle<vector<bool>> h_sel;
 };
-
-class DrHiggTop: public HandleHist<float> {
-public:
-    DrHiggTop(Context & ctx, const std::string & dir):
-        HandleHist(ctx, dir, "dr_higg_top","#DeltaR(H, t)",50,0,5) {}
-};
-
-class TopLepPt: public HandleHist<float> {
-public:
-    TopLepPt(Context & ctx, const std::string & dir):
-        HandleHist(ctx, dir, "tlep_pt","lept. top p_{T}",50,0,1000) {}
-};
-
-class TopLepEta: public HandleHist<float> {
-public:
-    TopLepEta(Context & ctx, const std::string & dir):
-        HandleHist(ctx, dir, "tlep_eta","lept. top #eta",50,-5.,5.) {}
-};
-
-class TopLepMass: public HandleHist<float> {
-public:
-    TopLepMass(Context & ctx, const std::string & dir):
-        HandleHist(ctx, dir, "tlep_mass","lept. top mass",50,0,1000) {}
-};
-
-class VlqPt: public HandleHist<float> {
-public:
-    VlqPt(Context & ctx, const std::string & dir):
-        HandleHist(ctx, dir, "vlq_pt","VLQ p_{T}",50,0,1000) {}
-};
-
-class VlqEta: public HandleHist<float> {
-public:
-    VlqEta(Context & ctx, const std::string & dir):
-        HandleHist(ctx, dir, "vlq_eta","VLQ #eta",50,-5.,5.) {}
-};
-
-class VlqMass: public HandleHist<float> {
-public:
-    VlqMass(Context & ctx, const std::string & dir):
-        HandleHist(ctx, dir, "vlq_mass","VLQ mass",50,0,2000) {}
-};
-
-class HiggsPt: public HandleHist<float> {
-public:
-    HiggsPt(Context & ctx, const std::string & dir):
-        HandleHist(ctx, dir, "h_pt","Higgs p_{T}",50,0,1000) {}
-};
-
-class HiggsEta: public HandleHist<float> {
-public:
-    HiggsEta(Context & ctx, const std::string & dir):
-        HandleHist(ctx, dir, "h_eta","Higgs #eta",50,-5.,5.) {}
-};
-
-class HiggsMass: public HandleHist<float> {
-public:
-    HiggsMass(Context & ctx, const std::string & dir):
-        HandleHist(ctx, dir, "h_mass","Higgs mass",50,0,1000) {}
-};
-
-
-}
 
 
 class VLQ2HTRecoGenComparison: public Hists {
 public:
-    VLQ2HTRecoGenComparison(Context & ctx, const std::string & dir):
+    VLQ2HTRecoGenComparison(Context & ctx, const string & dir):
         Hists(ctx, dir),
         h_higgs(ctx.get_handle<LorentzVector>("h")),
         h_top_lep(ctx.get_handle<LorentzVector>("tlep")),
 
         tophigggenDR(book<TH1F>(
             "tophigggenDR",
-            ";#DeltaR(t_{gen}, H_{gen}); events",
+            ";#DeltaR(t_{gen}, H_{gen});events",
             100, 0, 5.
         )),
         topDRDPt(book<TH2F>(
             "topDRDPt",
             ";#DeltaR(t_{reco}, t_{gen});#DeltaP_{T, rel}(t_{reco}, t_{gen})",
             100, 0, 5.,
-            100, 0., 2.
+            60, -1.5, 1.5
         )),
         higDRDPt(book<TH2F>(
             "higgDRDPt",
             ";#DeltaR(H_{reco}, H_{gen});#DeltaP_{T, rel}(H_{reco}, H_{gen})",
             100, 0., 5.,
-            100, 0., 2.
+            60, -1.5, 1.5
         ))
     {}
 
@@ -289,7 +200,7 @@ private:
 
 class VLQ2HTGenHists: public Hists {
 public:
-    VLQ2HTGenHists(Context & ctx, const std::string & dir):
+    VLQ2HTGenHists(Context & ctx, const string & dir):
         Hists(ctx, dir),
         tPrimeKinematic(book<TH2F>(
             "tPrimeKinematic",
@@ -423,7 +334,7 @@ public:
         if (higg.daughter(gps, 1)) {
             higgProdKinematic->Fill(higg.daughter(gps, 1)->pt(), higg.daughter(gps, 1)->eta(), w);
             higgProdKinematic->Fill(higg.daughter(gps, 2)->pt(), higg.daughter(gps, 2)->eta(), w);
-            higgProdPdgId->Fill(std::to_string(abs(higg.daughter(gps, 1)->pdgId())).c_str(), w);
+            higgProdPdgId->Fill(to_string(abs(higg.daughter(gps, 1)->pdgId())).c_str(), w);
         }
         if (higg.daughter(gps, 1) && higg.daughter(gps, 2)) {
             higgProdDr->Fill(deltaR(higg.daughter(gps, 1)->v4(),

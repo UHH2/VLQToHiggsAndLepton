@@ -1,9 +1,7 @@
 #pragma once
 
-#include <map>
-#include <string>
 #include <vector>
-#include "UHH2/VLQToHiggsAndLepton/include/SelectionItem.h"
+#include "UHH2/VLQSemiLepPreSel/include/SelectionItem.h"
 
 
 typedef SelectionItemData<int>      SelDatI;
@@ -11,7 +9,7 @@ typedef SelectionItemData<float>    SelDatF;
 typedef SelectionItemData<double>   SelDatD;
 
 
-static const vector<shared_ptr<SelectionItem>> SEL_ITEMS {
+static const vector<shared_ptr<SelectionItem>> SEL_ITEMS_VLQ2HT {
     shared_ptr<SelectionItem>(new SelDatI("trigger_accept",    "ele+Jets OR mu+Jets",      2, -.5, 1.5         ,1      )),
     shared_ptr<SelectionItem>(new SelDatI("n_jets",            "N_{jet}",                  21, -.5, 20.5               )),
     shared_ptr<SelectionItem>(new SelDatI("n_leptons",         "N_{lepton}",               11, -.5, 10.5       ,1      )),

@@ -21,6 +21,7 @@
 #include "UHH2/common/include/TTbarReconstruction.h"
 
 #include "UHH2/VLQSemiLepPreSel/include/VLQCommonModules.h"
+#include "UHH2/VLQSemiLepPreSel/include/SelectionHists.h"
 #include "UHH2/VLQToHiggsAndLepton/include/VLQ2HT_cutProducers.h"
 #include "UHH2/VLQToHiggsAndLepton/include/VLQ2HT_hists.h"
 #include "UHH2/VLQToHiggsAndLepton/include/VLQ2HT_selectionItems.h"
@@ -131,7 +132,7 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     v_pre_modules.emplace_back(new LorentzVectorInfoProducer(ctx, "vlq"));
 
     // Selection Producer
-    SelItemsHelper sel_helper(SEL_ITEMS, ctx);
+    SelItemsHelper sel_helper(SEL_ITEMS_VLQ2HT, ctx);
     sel_module.reset(new SelectionProducer(ctx, sel_helper));
 
     // 3. Set up Hists classes:
@@ -184,13 +185,15 @@ bool VLQToHiggsAndLeptonModule::process(Event & event) {
         return false;
     }
 
-    // 1. run all modules
+    // run all modules
     for (auto & mod : v_pre_modules) {
         mod->process(event);
     }
+
+    // run selection
     bool all_accepted = sel_module->process(event);
 
-    // 2.b fill histograms
+    // fill histograms
     if (all_accepted) {
         for (auto & hist : v_hists_after_sel) {
             hist->fill(event);
@@ -202,7 +205,7 @@ bool VLQToHiggsAndLeptonModule::process(Event & event) {
         hist->fill(event);
     }
 
-    // 3. decide whether or not to keep the current event in the output:
+    // decide whether or not to keep the current event in the output:
     return all_accepted;
 }
 

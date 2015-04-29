@@ -50,7 +50,7 @@ private:
 
 class SelItemsHelper {
 public:
-    SelItemsHelper(const vector<unique_ptr<SelectionItem>> & sel_items,
+    SelItemsHelper(const vector<shared_ptr<SelectionItem>> & sel_items,
                    Context & context,
                    const vector<string> & names = vector<string>()):
         items(sel_items),
@@ -72,11 +72,11 @@ public:
         return v;
     }
 
-    const SelectionItem * get_sel_item(const string & name) const {
-        static map<string, SelectionItem*> m;
+    const shared_ptr<SelectionItem> get_sel_item(const string & name) const {
+        static map<string, shared_ptr<SelectionItem>> m;
         if (!m.size()) {
             for (const auto & it: items) {
-                m[it->name()] = it.get();
+                m[it->name()] = it;
             }
         }
         if (m.count(name)) {
@@ -100,7 +100,7 @@ public:
     }
 
 private:
-    const vector<unique_ptr<SelectionItem>> & items;
+    const vector<shared_ptr<SelectionItem>> & items;
     Context & ctx;
     const vector<string> & item_names;
 };

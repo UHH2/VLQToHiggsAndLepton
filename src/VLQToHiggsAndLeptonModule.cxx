@@ -106,10 +106,11 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     v_pre_modules.emplace_back(new HTCalculator(ctx));
     v_pre_modules.emplace_back(new STCalculator(ctx));
     v_pre_modules.emplace_back(new NBTagProducer(ctx));
-    v_pre_modules.emplace_back(new NHTagProducer(ctx, "patJetsCa15CHSJetsFilteredPacked"));
-    v_pre_modules.emplace_back(new TopTagCalculator(ctx.get_handle<int>("n_toptags")));
+    v_pre_modules.emplace_back(new NTaggedTopJetProducer(ctx, HiggsTag(60.f, 99999., CSVBTag(CSVBTag::WP_LOOSE)),
+                                                         "n_higgs_tags", "patJetsCa15CHSJetsFilteredPacked"));
     v_pre_modules.emplace_back(new NLeadingBTagProducer(ctx));
-    v_pre_modules.emplace_back(new HJetsProducer(ctx, "patJetsCa15CHSJetsFilteredPacked"));
+    v_pre_modules.emplace_back(new TaggedTopJetProducer(ctx, HiggsTag(60.f, 99999., CSVBTag(CSVBTag::WP_LOOSE)),
+                                                        "h_jets", "patJetsCa15CHSJetsFilteredPacked"));
     v_pre_modules.emplace_back(new TopLepHypProducer(ctx, NeutrinoReconstruction));
     v_pre_modules.emplace_back(new HiggsHypProducer(ctx));
     v_pre_modules.emplace_back(new EventHypDiscr(ctx, "LeptTopHyps", "HiggsHyps"));
@@ -130,13 +131,13 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     v_pre_modules.emplace_back(new LorentzVectorInfoProducer(ctx, "vlq"));
 
     // Selection Producer
-    SelItemsHelper sel_helper(sel_items_vec(), ctx);
+    SelItemsHelper sel_helper(SEL_ITEMS, ctx);
     sel_module.reset(new SelectionProducer(ctx, sel_helper));
 
     // 3. Set up Hists classes:
     sel_helper.fill_hists_vector(v_hists, "SelNone");
     v_hists.emplace_back(new Nm1SelHists(ctx, "SelNm1", sel_helper));
-    v_hists.emplace_back(new VLQ2HTCutflow(ctx, "SelNone", sel_helper));
+    v_hists.emplace_back(new VLQ2HTCutflow(ctx, "Cutflow", sel_helper));
 
     v_hists.emplace_back(new SingleLepTrigHists(ctx, "SingleLepTrig", "HLT_Ele95_CaloIdVT_GsfTrkIdT_v", true));
     v_hists.emplace_back(new SingleLepTrigHists(ctx, "SingleLepTrig", "HLT_Mu40_v", false));

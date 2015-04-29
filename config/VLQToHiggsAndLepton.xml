@@ -26,7 +26,7 @@
             <InputTree Name="AnalysisTree" />
         </InputData>
 
-        <InputData Lumi="31568.03" NEventsMax="-1" Type="MC" Version="MC_TTJets_20x25" Cacheable="False">
+        <InputData Lumi="31568.03" NEventsMax="-1" Type="MC" Version="MC_TTJets" Cacheable="False">
             <In FileName="/nfs/dust/cms/user/tholenhe/VLQSemiLepPreSel/PHYS14-ntuple2-v2/uhh2.AnalysisModuleRunner.MC.MC_TTJets_20x25.root" Lumi="0.0"/>
             <InputTree Name="AnalysisTree" />
             <OutputTree Name="AnalysisTree" />

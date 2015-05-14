@@ -10,7 +10,7 @@ import varial.generators as gen
 
 
 # varial.settings.debug_mode = True
-dir_input = './'
+dir_input = './uhh2.'
 
 
 #def loader_hook(wrps):
@@ -48,44 +48,64 @@ def plotter_factory_split_bkg(**kws):
     return varial.tools.Plotter(**kws)
 
 
+def loader_hook_sigx30(wrps):
+    wrps = loader_hook(wrps)
+    for w in wrps:
+        if common.is_signal(w.sample):
+            w.lumi /= 30.
+            w = varial.op.norm_to_lumi(w)
+        yield w
+
+
+def plotter_factory_stack_sigx30(**kws):
+    kws['hook_loaded_histos'] = loader_hook_sigx30
+    kws['save_lin_log_scale'] = True
+    kws['plot_setup'] = gen.mc_stack_n_data_sum
+    return varial.tools.Plotter(**kws)
+
+
 if __name__ == '__main__':
-    p1 = varial.tools.mk_rootfile_plotter(
-        pattern=dir_input + '*.root',
-        name='VLQ2HT_stack',
-        plotter_factory=plotter_factory_stack,
-        combine_files=True,
-    )
+    all_tools = [
+        #varial.tools.mk_rootfile_plotter(
+        #    pattern=dir_input + '*.root',
+        #    name='VLQ2HT_stack',
+        #    plotter_factory=plotter_factory_stack,
+        #    combine_files=True,
+        #).tool_chain[0],
 
-    p2 = varial.tools.mk_rootfile_plotter(
-        pattern=dir_input + '*.root',
-        name='VLQ2HT_norm',
-        plotter_factory=plotter_factory_norm,
-        combine_files=True,
-    )
+        #varial.tools.mk_rootfile_plotter(
+        #    pattern=dir_input + '*.root',
+        #    name='VLQ2HT_norm',
+        #    plotter_factory=plotter_factory_norm,
+        #    combine_files=True,
+        #).tool_chain[0],
 
-    p3 = varial.tools.mk_rootfile_plotter(
-        pattern=dir_input + '*.root',
-        name='VLQ2HT_norm_no_signal',
-        plotter_factory=plotter_factory,
-        combine_files=True,
-        filter_keyfunc=lambda w: common.is_signal(w.file_path)
-    )
+        #varial.tools.mk_rootfile_plotter(
+        #    pattern=dir_input + '*.root',
+        #    name='VLQ2HT_no_signal',
+        #    plotter_factory=plotter_factory,
+        #    combine_files=True,
+        #    filter_keyfunc=lambda w: not common.is_signal(w.file_path)
+        #).tool_chain[0],
 
-    p4 = varial.tools.mk_rootfile_plotter(
-        pattern=dir_input + '*.root',
-        name='VLQ2HT_norm_split_bkg',
-        plotter_factory=plotter_factory_split_bkg,
-        combine_files=True,
-        filter_keyfunc=lambda w: common.is_signal(w.file_path)
-    )
+        #varial.tools.mk_rootfile_plotter(
+        #    pattern=dir_input + '*.root',
+        #    name='VLQ2HT_norm_split_bkg',
+        #    plotter_factory=plotter_factory_split_bkg,
+        #    combine_files=True,
+        #    filter_keyfunc=lambda w: not common.is_signal(w.file_path)
+        #).tool_chain[0],
+
+        varial.tools.mk_rootfile_plotter(
+            pattern=dir_input + '*.root',
+            name='VLQ2HT_stack_signalx10',
+            plotter_factory=plotter_factory_stack_sigx30,
+            combine_files=True,
+        ).tool_chain[0],
+    ]
 
     tc_inner = varial.tools.ToolChainParallel(
-        'VLQ2HT', [
-            p1.tool_chain[0],
-            p2.tool_chain[0],
-            p3.tool_chain[0],
-            p4.tool_chain[0],
-        ]
+        'VLQ2HT', all_tools
     )
     tc = varial.tools.ToolChain(
         'host_toolchain', [tc_inner]

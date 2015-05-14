@@ -6,24 +6,28 @@
     <Library Name="libSUHH2VLQToHiggsAndLepton"/>
     <Package Name="SUHH2VLQToHiggsAndLepton.par" />
 
-   <!-- <Cycle Name="uhh2::AnalysisModuleRunner" OutputDirectory="./" PostFix="" TargetLumi="20000" > -->
-   <Cycle Name="uhh2::AnalysisModuleRunner"  RunMode="PROOF" ProofServer="lite://"  ProofWorkDir="/nfs/dust/cms/user/tholenhe/proof-wd/" ProofNodes="24" OutputDirectory="./" PostFix="" TargetLumi="20000" >
+   <!-- <Cycle Name="uhh2::AnalysisModuleRunner" OutputDirectory="./" PostFix="" TargetLumi="5000" > -->
+   <Cycle Name="uhh2::AnalysisModuleRunner"  RunMode="PROOF" ProofServer="lite://"  ProofWorkDir="/nfs/dust/cms/user/tholenhe/proof-wd/" ProofNodes="24" OutputDirectory="./" PostFix="" TargetLumi="5000" >
 
         <InputData Lumi="99900" NEventsMax="-1" Type="MC" Version="TpJ_TH_M800_Tlep" Cacheable="False">
             <In FileName="/nfs/dust/cms/user/tholenhe/VLQSemiLepPreSel/PHYS14-ntuple2-v2/uhh2.AnalysisModuleRunner.MC.MC_TpJ_TH_M800_20x25.root" Lumi="0.0"/>
             <InputTree Name="AnalysisTree" />
+            <OutputTree Name="AnalysisTree" />
         </InputData>
         <InputData Lumi="99900" NEventsMax="-1" Type="MC" Version="TpJ_TH_M800_NonTlep" Cacheable="False">
             <In FileName="/nfs/dust/cms/user/tholenhe/VLQSemiLepPreSel/PHYS14-ntuple2-v2/uhh2.AnalysisModuleRunner.MC.MC_TpJ_TH_M800_20x25.root" Lumi="0.0"/>
             <InputTree Name="AnalysisTree" />
+            <OutputTree Name="AnalysisTree" />
         </InputData>
         <InputData Lumi="100000" NEventsMax="-1" Type="MC" Version="TpJ_TH_M1200_Tlep" Cacheable="False">
             <In FileName="/nfs/dust/cms/user/tholenhe/VLQSemiLepPreSel/PHYS14-ntuple2-v2/uhh2.AnalysisModuleRunner.MC.MC_TpJ_TH_M1200_20x25.root" Lumi="0.0"/>
             <InputTree Name="AnalysisTree" />
+            <OutputTree Name="AnalysisTree" />
         </InputData>
         <InputData Lumi="100000" NEventsMax="-1" Type="MC" Version="TpJ_TH_M1200_NonTlep" Cacheable="False">
             <In FileName="/nfs/dust/cms/user/tholenhe/VLQSemiLepPreSel/PHYS14-ntuple2-v2/uhh2.AnalysisModuleRunner.MC.MC_TpJ_TH_M1200_20x25.root" Lumi="0.0"/>
             <InputTree Name="AnalysisTree" />
+            <OutputTree Name="AnalysisTree" />
         </InputData>
 
         <InputData Lumi="31568.03" NEventsMax="-1" Type="MC" Version="MC_TTJets" Cacheable="False">
@@ -102,7 +106,7 @@
             <Item Name="AnalysisModule" Value="VLQToHiggsAndLeptonModule" /> 
             
             <!-- set this to the name of an AndSelection to control what is written to the output. If not given, *all* events are written to the output tree. -->
-            <Item Name="TestKey" Value="TestKeyValue" />
+            <Item Name="TestKey" Value="VLQToHiggsAndLeptonModule" />
         </UserConfig>
     </Cycle>
 </JobConfiguration>

@@ -5,8 +5,8 @@
 #include <string>
 
 #include "UHH2/core/include/AnalysisModule.h"
-#include "UHH2/core/include/Utils.h"
 #include "UHH2/core/include/Particle.h"
+#include "UHH2/common/include/Utils.h"
 #include "UHH2/common/include/TTbarReconstruction.h"
 
 #include "UHH2/VLQSemiLepPreSel/include/VLQCommonModules.h"
@@ -87,23 +87,23 @@ public:
                     );
 
                     // second radiated jet
-                    for (unsigned i2 = i1 + 1; i2 < event.jets->size(); i2++) {
-                        const auto &jet2 = event.jets->at(i2);
+                    //for (unsigned i2 = i1 + 1; i2 < event.jets->size(); i2++) {
+                    //    const auto &jet2 = event.jets->at(i2);
 
-                        if (deltaR(jet2, b_jet) < 0.1) {
-                            continue;
-                        }
-                        LorentzVector toplep_j_j_v4 = toplep_j_v4 + jet2.v4();
+                    //    if (deltaR(jet2, b_jet) < 0.1) {
+                    //        continue;
+                    //    }
+                    //    LorentzVector toplep_j_j_v4 = toplep_j_v4 + jet2.v4();
 
-                        // push new hyp
-                        reco_hyps.emplace_back(
-                            toplep_j_j_v4,
-                            b_jet.v4(),
-                            lepton,
-                            neutrino_p4,
-                            vector<Jet>({jet, jet2})
-                        );
-                    }
+                    //    // push new hyp
+                    //    reco_hyps.emplace_back(
+                    //        toplep_j_j_v4,
+                    //        b_jet.v4(),
+                    //        lepton,
+                    //        neutrino_p4,
+                    //        vector<Jet>({jet, jet2})
+                    //    );
+                    //}
                 }
             }
         }
@@ -136,7 +136,7 @@ public:
         const float mass_tlep = 174;
         const float mass_tlep_sigma = 18;
         for(auto & hyp: hyps){
-            float mass_tlep_rec = inv_mass_save(hyp.toplep_v4);
+            float mass_tlep_rec = inv_mass_safe(hyp.toplep_v4);
             float chi2_tlep = pow((mass_tlep_rec - mass_tlep) / mass_tlep_sigma, 2);
             hyp.discriminators["Chi2_tlep"] = chi2_tlep;
         }

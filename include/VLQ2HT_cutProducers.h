@@ -2,7 +2,7 @@
 
 #include "UHH2/core/include/AnalysisModule.h"
 #include "UHH2/core/include/Event.h"
-#include "UHH2/core/include/Utils.h"
+#include "UHH2/common/include/Utils.h"
 
 using namespace uhh2;
 
@@ -106,7 +106,7 @@ public:
     virtual bool process(Event & e) override {
         if (e.is_valid(h_input)) {
             const auto & vec = e.get(h_input);
-            e.set(h_mass, inv_mass_save(vec));
+            e.set(h_mass, inv_mass_safe(vec));
             e.set(h_pt, vec.pt());
             e.set(h_eta, vec.eta());
             return true;

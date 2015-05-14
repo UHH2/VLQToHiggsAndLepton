@@ -42,7 +42,7 @@ static bool isTlepEvent(const vector<GenParticle> * gps) {
                 return false;
             }
             if (abs(d1->pdgId()) == 24 || abs(d2->pdgId()) == 24) {
-                auto w = (abs(d1->pdgId() == 24)) ? d1 : d2;
+                auto w = (abs(d1->pdgId()) == 24) ? d1 : d2;
                 auto w_dau = w->daughter(gps, 1);
                 if (w_dau && abs(w_dau->pdgId()) < 17 && abs(w_dau->pdgId()) > 10) {
                     return true;
@@ -69,13 +69,13 @@ public:
     
     explicit VLQToHiggsAndLeptonModule(Context & ctx);
     virtual bool process(Event & event) override;
-    //virtual ~VLQToHiggsAndLeptonModule();
 
 private:
     string version;
     // modules for setting up collections and cleaning
     vector<unique_ptr<AnalysisModule>> v_pre_modules;
     unique_ptr<AnalysisModule> sel_module;
+    unique_ptr<AnalysisModule> writer_module;
 
     // store the Hists collection
     unique_ptr<Hists> gen_hists;
@@ -99,6 +99,7 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     }
     
     // 1. setup modules to prepare the event.
+    v_pre_modules.emplace_back(new EventWeightOutputHandle(ctx));
     v_pre_modules.emplace_back(new ElectronCleaner(PtEtaCut(105.0, 2.4)));
     v_pre_modules.emplace_back(new MuonCleaner(PtEtaCut(50.0, 2.4)));
     v_pre_modules.emplace_back(new FwdJetSwitch(ctx));
@@ -133,6 +134,7 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
 
     // Selection Producer
     SelItemsHelper sel_helper(SEL_ITEMS_VLQ2HT, ctx);
+    sel_helper.declare_items_for_output();
     sel_module.reset(new SelectionProducer(ctx, sel_helper));
 
     // 3. Set up Hists classes:
@@ -157,17 +159,28 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
         v_hists_after_sel.emplace_back(new VLQ2HTRecoGenComparison(ctx, "GenRecoHists"));
     }
 
-    //cut_ofstream = ofstream(version + "_cuts.txt", ofstream::out);
-    //for (auto & sel : v_sel) {
-    //    const auto & name = ((HandleSelection<int>*)sel.get())->name();
-    //    v_cut_names.push_back(name);
-    //    if cuts_ofstream.is_open() {
-    //        cuts_ofstream << name << "\t";
-    //    }
-    //}
-    //if cuts_ofstream.is_open() {
-    //    cuts_ofstream << endl;
-    //}
+    ctx.undeclare_event_output("GenParticles");
+    ctx.undeclare_event_output("beamspot_x0");
+    ctx.undeclare_event_output("beamspot_y0");
+    ctx.undeclare_event_output("beamspot_z0");
+    ctx.undeclare_event_output("event");
+    ctx.undeclare_event_output("genInfo");
+    ctx.undeclare_event_output("isRealData");
+    ctx.undeclare_event_output("luminosityBlock");
+    ctx.undeclare_event_output("offlineSlimmedPrimaryVertices");
+    ctx.undeclare_event_output("patJetsAk4PFCHS");
+    ctx.undeclare_event_output("patJetsCa15CHSJetsFilteredPacked");
+    ctx.undeclare_event_output("rho");
+    ctx.undeclare_event_output("run");
+    ctx.undeclare_event_output("slimmedElectrons");
+    ctx.undeclare_event_output("slimmedMETs");
+    ctx.undeclare_event_output("slimmedMuons");
+    ctx.undeclare_event_output("slimmedTaus");
+    ctx.undeclare_event_output("triggerNames");
+    ctx.undeclare_event_output("triggerResults");
+    ctx.undeclare_event_output("trigger_accept");
+
+    // writer_module.reset(sel_helper.make_tree_writer(version));
 }
 
 
@@ -197,6 +210,9 @@ bool VLQToHiggsAndLeptonModule::process(Event & event) {
     if (all_accepted) {
         for (auto & hist : v_hists_after_sel) {
             hist->fill(event);
+        }
+        if (writer_module.get()) {
+            writer_module->process(event);
         }
     }
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "UHH2/core/include/Utils.h"
+#include "UHH2/common/include/Utils.h"
 
 #include "UHH2/VLQSemiLepPreSel/include/VLQCommonModules.h"
 #include "UHH2/VLQToHiggsAndLepton/include/VLQ2HT_topReco.h"
@@ -42,14 +42,14 @@ public:
 
         // generate mass chi2: top
         for(auto & hyp: t_hyps) {
-            float mass_rec = inv_mass_save(hyp.toplep_v4);
+            float mass_rec = inv_mass_safe(hyp.toplep_v4);
             float chi2_tlep = pow((mass_rec - mass_tlep) / mass_tlep_sigma, 2);
             hyp.discriminators["Chi2_tlep"] = chi2_tlep;
         }
 
         // generate mass chi2: higgs
         for(auto & hyp: h_hyps) {
-            float mass_rec = inv_mass_save(hyp.higgs_v4);
+            float mass_rec = inv_mass_safe(hyp.higgs_v4);
             float chi2_higgs = pow((mass_rec - mass_higgs) / mass_higgs_sigma, 2);
             hyp.discriminators["Chi2_higgs"] = chi2_higgs;
         }

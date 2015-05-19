@@ -46,6 +46,82 @@ private:
 };  // class SingleLepTrigHists
 
 
+static int find_top_and_higgs(const vector<GenParticle> & genparticles,
+                              LorentzVector & t_gen,
+                              LorentzVector & h_gen) {
+    int found_n = 0;
+    for (const auto &gp : genparticles) {
+        if (abs(gp.pdgId()) == 6) {
+            t_gen = gp.v4();
+            found_n++;
+        }
+        if (abs(gp.pdgId()) == 25) {
+            h_gen = gp.v4();
+            found_n++;
+        }
+        if (found_n == 2) {
+            break;
+        }
+    }
+    return found_n;
+}  // function find_top_and_higgs
+
+
+class VLQ2HTRecoGenMatchHists: public Hists {
+public:
+    VLQ2HTRecoGenMatchHists(Context & ctx, const string & dir):
+        Hists(ctx, dir),
+        h_higgs(ctx.get_handle<LorentzVector>("h")),
+        h_top_lep(ctx.get_handle<LorentzVector>("tlep")),
+
+        top_hig_dr(book<TH1F>(
+            "matching_top_hig_dr",
+            ";#DeltaR(t_{reco}, H_{reco});events",
+            100, 0, 5.
+        )),
+        top_mass_(book<TH1F>(
+            "matching_top_mass",
+            "M_{top cand., reco} / GeV; events",
+            100, 0, 500.
+        )),
+        hig_mass_(book<TH1F>(
+            "matching_hig_mass",
+            "M_{higgs cand., reco} / GeV; events",
+            100, 0, 500.
+        ))
+    {}
+
+    virtual void fill(const uhh2::Event & e) override {
+        float w = e.weight;
+
+        // grab particles
+        LorentzVector t_gen, h_gen;
+        if (find_top_and_higgs(*e.genparticles, t_gen, h_gen) != 2) {
+            return;
+        }
+        const LorentzVector & t_reco = e.get(h_top_lep);
+        const LorentzVector & h_reco = e.get(h_higgs);
+
+        // matching condition
+        if (deltaR(t_gen, t_reco) > 0.2 || deltaR(h_gen, h_reco) > 0.2) {
+            return;
+        }
+
+        top_hig_dr->Fill(deltaR(h_reco, t_reco), w);
+        top_mass_->Fill(inv_mass_safe(t_reco), w);
+        hig_mass_->Fill(inv_mass_safe(h_reco), w);
+    }
+
+private:
+    Event::Handle<LorentzVector> h_higgs;
+    Event::Handle<LorentzVector> h_top_lep;
+
+    TH1F * top_hig_dr;
+    TH1F * top_mass_;
+    TH1F * hig_mass_;
+};  // class VLQ2HTRecoGenMatchHists
+
+
 class VLQ2HTRecoGenComparison: public Hists {
 public:
     VLQ2HTRecoGenComparison(Context & ctx, const string & dir):
@@ -73,26 +149,11 @@ public:
     {}
 
     virtual void fill(const uhh2::Event & e) override {
-        const auto & gps = e.genparticles;
         float w = e.weight;
 
         // grab gen particles
         LorentzVector t_gen, h_gen;
-        int found_n = 0;
-        for (const auto &gp : *gps) {
-            if (abs(gp.pdgId()) == 6) {
-                t_gen = gp.v4();
-                found_n++;
-            }
-            if (abs(gp.pdgId()) == 25) {
-                h_gen = gp.v4();
-                found_n++;
-            }
-            if (found_n == 2) {
-                break;
-            }
-        }
-        if (found_n != 2) {
+        if (find_top_and_higgs(*e.genparticles, t_gen, h_gen) != 2) {
             return;
         }
 
@@ -119,7 +180,7 @@ private:
     TH1F * tophigggenDR;
     TH2F * topDRDPt;
     TH2F * higDRDPt;
-};
+};  // class VLQ2HTRecoGenComparison
 
 
 class VLQ2HTGenHists: public Hists {

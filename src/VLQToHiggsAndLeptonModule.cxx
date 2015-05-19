@@ -8,6 +8,7 @@
 #include "UHH2/core/include/Event.h"
 
 #include "UHH2/common/include/EventVariables.h"
+#include "UHH2/common/include/EventShapeVariables.h"
 #include "UHH2/common/include/CleaningModules.h"
 #include "UHH2/common/include/ElectronIds.h"
 #include "UHH2/common/include/MuonIds.h"
@@ -22,6 +23,8 @@
 
 #include "UHH2/VLQSemiLepPreSel/include/VLQCommonModules.h"
 #include "UHH2/VLQSemiLepPreSel/include/SelectionHists.h"
+#include "UHH2/VLQSemiLepPreSel/include/VLQSLPS_selectionItems.h"
+
 #include "UHH2/VLQToHiggsAndLepton/include/VLQ2HT_cutProducers.h"
 #include "UHH2/VLQToHiggsAndLepton/include/VLQ2HT_hists.h"
 #include "UHH2/VLQToHiggsAndLepton/include/VLQ2HT_selectionItems.h"
@@ -29,6 +32,7 @@
 #include "UHH2/VLQToHiggsAndLepton/include/VLQ2HT_higgsReco.h"
 #include "UHH2/VLQToHiggsAndLepton/include/VLQ2HT_vlqReco.h"
 #include "UHH2/VLQToHiggsAndLepton/include/VLQ2HT_eventHypDiscr.h"
+
 
 using namespace std;
 
@@ -74,8 +78,7 @@ private:
     string version;
     // modules for setting up collections and cleaning
     vector<unique_ptr<AnalysisModule>> v_pre_modules;
-    unique_ptr<AnalysisModule> sel_module;
-    unique_ptr<AnalysisModule> writer_module;
+    unique_ptr<SelectionProducer> sel_module;
 
     // store the Hists collection
     unique_ptr<Hists> gen_hists;
@@ -100,6 +103,8 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     
     // 1. setup modules to prepare the event.
     v_pre_modules.emplace_back(new EventWeightOutputHandle(ctx));
+    v_pre_modules.emplace_back(new EventShapeVariables(ctx, "jets", "", "", "es_", 2., 100));
+    v_pre_modules.emplace_back(new EventShapeVariables(ctx, "jets", "electrons", "muons", "es_plus_lep_", 2., 100));
     v_pre_modules.emplace_back(new ElectronCleaner(PtEtaCut(105.0, 2.4)));
     v_pre_modules.emplace_back(new MuonCleaner(PtEtaCut(50.0, 2.4)));
     v_pre_modules.emplace_back(new FwdJetSwitch(ctx));
@@ -107,6 +112,7 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     v_pre_modules.emplace_back(new PrimaryLepton(ctx));
     v_pre_modules.emplace_back(new HTCalculator(ctx));
     v_pre_modules.emplace_back(new STCalculator(ctx));
+    v_pre_modules.emplace_back(new LargestJetEtaProducer(ctx, "jets", "fwd_jets"));
     v_pre_modules.emplace_back(new NBTagProducer(ctx));
     v_pre_modules.emplace_back(new NTaggedTopJetProducer(ctx, HiggsTag(60.f, 99999., CSVBTag(CSVBTag::WP_LOOSE)),
                                                          "n_higgs_tags", "patJetsCa15CHSJetsFilteredPacked"));
@@ -117,7 +123,6 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     v_pre_modules.emplace_back(new HiggsHypProducer(ctx));
     v_pre_modules.emplace_back(new EventHypDiscr(ctx, "LeptTopHyps", "HiggsHyps"));
     v_pre_modules.emplace_back(new VlqReco(ctx));
-    // TODO : 2d-cut
 
     // Other CutProducers
     v_pre_modules.emplace_back(new TriggerAcceptProcuder(ctx));
@@ -134,29 +139,39 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
 
     // Selection Producer
     SelItemsHelper sel_helper(SEL_ITEMS_VLQ2HT, ctx);
-    sel_helper.declare_items_for_output();
     sel_module.reset(new SelectionProducer(ctx, sel_helper));
+    sel_helper.declare_items_for_output();
 
     // 3. Set up Hists classes:
-    sel_helper.fill_hists_vector(v_hists, "SelNone");
-    v_hists.emplace_back(new Nm1SelHists(ctx, "SelNm1", sel_helper));
-    v_hists.emplace_back(new VLQ2HTCutflow(ctx, "Cutflow", sel_helper));
+    sel_helper.fill_hists_vector(v_hists, "NoSelection");
+    auto nm1_hists = new Nm1SelHists(ctx, "Nm1Selection", sel_helper);
+    auto cf_hists = new VLQ2HTCutflow(ctx, "Cutflow", sel_helper);
+    v_hists.emplace_back(nm1_hists);
+    v_hists.emplace_back(cf_hists);
 
-    v_hists.emplace_back(new SingleLepTrigHists(ctx, "SingleLepTrig", "HLT_Ele95_CaloIdVT_GsfTrkIdT_v", true));
-    v_hists.emplace_back(new SingleLepTrigHists(ctx, "SingleLepTrig", "HLT_Mu40_v", false));
+    // append 2D cut
+    sel_module->add_selection(new TwoDCutSel(ctx, 0.3, 20.));
+    nm1_hists->add_hists(new TwoDCutHist(ctx, "Nm1Selection"));
+    cf_hists->add_step("2D cut");
+    v_hists.emplace_back(new TwoDCutHist(ctx, "NoSelection"));
 
+    //v_hists.emplace_back(new SingleLepTrigHists(ctx, "SingleLepTrig", "HLT_Ele95_CaloIdVT_GsfTrkIdT_v", true));
+    //v_hists.emplace_back(new SingleLepTrigHists(ctx, "SingleLepTrig", "HLT_Mu40_v", false));
+
+    // sanity histograms after selection
     v_hists_after_sel.emplace_back(new ElectronHists(ctx, "SanityCheckEle", true));
     v_hists_after_sel.emplace_back(new MuonHists(ctx, "SanityCheckMu"));
     v_hists_after_sel.emplace_back(new EventHists(ctx, "SanityCheckEvent"));
     v_hists_after_sel.emplace_back(new JetHists(ctx, "SanityCheckJets"));
     v_hists_after_sel.emplace_back(new JetHists(ctx, "SanityCheckFwdJets", 4, "fwd_jets"));
 
+    // signal sample gen hists
     if (version.substr(version.size() - 5, 100) == "_Tlep") {
         gen_hists.reset(new VLQ2HTGenHists(ctx, "GenHists"));
     }
-
     if (version.substr(version.size() - 4, 100) == "Tlep") {
         v_hists_after_sel.emplace_back(new VLQ2HTRecoGenComparison(ctx, "GenRecoHists"));
+        v_hists_after_sel.emplace_back(new VLQ2HTRecoGenMatchHists(ctx, "Chi2SignalMatch"));
     }
 
     ctx.undeclare_event_output("GenParticles");
@@ -179,8 +194,6 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     ctx.undeclare_event_output("triggerNames");
     ctx.undeclare_event_output("triggerResults");
     ctx.undeclare_event_output("trigger_accept");
-
-    // writer_module.reset(sel_helper.make_tree_writer(version));
 }
 
 
@@ -210,9 +223,6 @@ bool VLQToHiggsAndLeptonModule::process(Event & event) {
     if (all_accepted) {
         for (auto & hist : v_hists_after_sel) {
             hist->fill(event);
-        }
-        if (writer_module.get()) {
-            writer_module->process(event);
         }
     }
 

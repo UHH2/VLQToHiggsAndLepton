@@ -2,6 +2,7 @@
 
 import UHH2.VLQSemiLepPreSel.common as common
 import UHH2.VLQSemiLepPreSel.vlq_settings as vlq_settings
+import UHH2.VLQSemiLepPreSel.cutflow_tables as cutflow_tables
 from UHH2.VLQSemiLepPreSel.plot import *
 
 import time
@@ -10,7 +11,7 @@ import varial.generators as gen
 
 
 # varial.settings.debug_mode = True
-dir_input = './uhh2.'
+input_pat = './uhh2.*.root'
 
 
 #def loader_hook(wrps):
@@ -66,22 +67,22 @@ def plotter_factory_stack_sigx30(**kws):
 
 if __name__ == '__main__':
     all_tools = [
-        #varial.tools.mk_rootfile_plotter(
-        #    pattern=dir_input + '*.root',
-        #    name='VLQ2HT_stack',
-        #    plotter_factory=plotter_factory_stack,
-        #    combine_files=True,
-        #).tool_chain[0],
+        varial.tools.mk_rootfile_plotter(
+            pattern=input_pat,
+            name='VLQ2HT_stack',
+            plotter_factory=plotter_factory_stack,
+            combine_files=True,
+        ).tool_chain[0],
+
+        varial.tools.mk_rootfile_plotter(
+            pattern=input_pat,
+            name='VLQ2HT_norm',
+            plotter_factory=plotter_factory_norm,
+            combine_files=True,
+        ).tool_chain[0],
 
         #varial.tools.mk_rootfile_plotter(
-        #    pattern=dir_input + '*.root',
-        #    name='VLQ2HT_norm',
-        #    plotter_factory=plotter_factory_norm,
-        #    combine_files=True,
-        #).tool_chain[0],
-
-        #varial.tools.mk_rootfile_plotter(
-        #    pattern=dir_input + '*.root',
+        #    pattern=input_pat,
         #    name='VLQ2HT_no_signal',
         #    plotter_factory=plotter_factory,
         #    combine_files=True,
@@ -89,7 +90,7 @@ if __name__ == '__main__':
         #).tool_chain[0],
 
         #varial.tools.mk_rootfile_plotter(
-        #    pattern=dir_input + '*.root',
+        #    pattern=input_pat,
         #    name='VLQ2HT_norm_split_bkg',
         #    plotter_factory=plotter_factory_split_bkg,
         #    combine_files=True,
@@ -97,18 +98,20 @@ if __name__ == '__main__':
         #).tool_chain[0],
 
         varial.tools.mk_rootfile_plotter(
-            pattern=dir_input + '*.root',
-            name='VLQ2HT_stack_signalx10',
+            pattern=input_pat,
+            name='VLQ2HT_stack_signalx30',
             plotter_factory=plotter_factory_stack_sigx30,
             combine_files=True,
         ).tool_chain[0],
+        
+        cutflow_tables.mk_cutflow_chain(input_pat, loader_hook),
     ]
 
-    tc_inner = varial.tools.ToolChainParallel(
+    tc = varial.tools.ToolChainParallel(
         'VLQ2HT', all_tools
     )
     tc = varial.tools.ToolChain(
-        'host_toolchain', [tc_inner]
+        'host_toolchain', [tc]
     )
 
     time.sleep(1)

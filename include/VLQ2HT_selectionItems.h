@@ -1,5 +1,6 @@
 #pragma once
 
+#include <string>
 #include <vector>
 #include "UHH2/VLQSemiLepPreSel/include/SelectionItem.h"
 
@@ -18,19 +19,19 @@ static const vector<shared_ptr<SelectionItem>> SEL_ITEMS_VLQ2HT {
     shared_ptr<SelectionItem>(new SelDatF("largest_jet_eta",   "most forward jet #eta",    50, -5., 5.                 )),
     shared_ptr<SelectionItem>(new SelDatF("event_chi2",        "event chi2",               50, 0, 100                  )),
 
-    shared_ptr<SelectionItem>(new SelDatF("es_isotropy",          "isotropy",                 60, -0.1, 1.1               )),
-    shared_ptr<SelectionItem>(new SelDatF("es_circularity",       "circularity",              60, -0.1, 1.1               )),
-    shared_ptr<SelectionItem>(new SelDatF("es_sphericity",        "sphericity",               60, -0.1, 1.1               )),
-    shared_ptr<SelectionItem>(new SelDatF("es_aplanarity",        "aplanarity",               60, -0.1, 1.1               )),
-    shared_ptr<SelectionItem>(new SelDatF("es_C",                 "C",                        60, -0.1, 1.1               )),
-    shared_ptr<SelectionItem>(new SelDatF("es_D",                 "D",                        60, -0.1, 1.1               )),
+    shared_ptr<SelectionItem>(new SelDatF("es_isotropy",          "isotropy",              60, -0.1, 1.1               )),
+    shared_ptr<SelectionItem>(new SelDatF("es_circularity",       "circularity",           60, -0.1, 1.1               )),
+    shared_ptr<SelectionItem>(new SelDatF("es_sphericity",        "sphericity",            60, -0.1, 1.1               )),
+    shared_ptr<SelectionItem>(new SelDatF("es_aplanarity",        "aplanarity",            60, -0.1, 1.1               )),
+    shared_ptr<SelectionItem>(new SelDatF("es_C",                 "C",                     60, -0.1, 1.1               )),
+    shared_ptr<SelectionItem>(new SelDatF("es_D",                 "D",                     60, -0.1, 1.1               )),
 
-    shared_ptr<SelectionItem>(new SelDatF("es_plus_lep_isotropy",    "plus_lep_isotropy",     60, -0.1, 1.1               )),
-    shared_ptr<SelectionItem>(new SelDatF("es_plus_lep_circularity", "plus_lep_circularity",  60, -0.1, 1.1               )),
-    shared_ptr<SelectionItem>(new SelDatF("es_plus_lep_sphericity",  "plus_lep_sphericity",   60, -0.1, 1.1               )),
-    shared_ptr<SelectionItem>(new SelDatF("es_plus_lep_aplanarity",  "plus_lep_aplanarity",   60, -0.1, 1.1               )),
-    shared_ptr<SelectionItem>(new SelDatF("es_plus_lep_C",           "plus_lep_C",            60, -0.1, 1.1               )),
-    shared_ptr<SelectionItem>(new SelDatF("es_plus_lep_D",           "plus_lep_D",            60, -0.1, 1.1               )),
+    shared_ptr<SelectionItem>(new SelDatF("es_plus_lep_isotropy",    "plus_lep_isotropy",     60, -0.1, 1.1            )),
+    shared_ptr<SelectionItem>(new SelDatF("es_plus_lep_circularity", "plus_lep_circularity",  60, -0.1, 1.1            )),
+    shared_ptr<SelectionItem>(new SelDatF("es_plus_lep_sphericity",  "plus_lep_sphericity",   60, -0.1, 1.1            )),
+    shared_ptr<SelectionItem>(new SelDatF("es_plus_lep_aplanarity",  "plus_lep_aplanarity",   60, -0.1, 1.1            )),
+    shared_ptr<SelectionItem>(new SelDatF("es_plus_lep_C",           "plus_lep_C",            60, -0.1, 1.1            )),
+    shared_ptr<SelectionItem>(new SelDatF("es_plus_lep_D",           "plus_lep_D",            60, -0.1, 1.1            )),
 
     shared_ptr<SelectionItem>(new SelDatI("n_jets",            "N_{jet}",                  21, -.5, 20.5               )),
     shared_ptr<SelectionItem>(new SelDatI("n_fwd_jets",        "N_{fwd jet}",              11, -.5, 10.5               )),
@@ -48,4 +49,10 @@ static const vector<shared_ptr<SelectionItem>> SEL_ITEMS_VLQ2HT {
     shared_ptr<SelectionItem>(new SelDatF("vlq_pt",            "T p_{T}",                  50, 0, 1000                 )),
     shared_ptr<SelectionItem>(new SelDatF("vlq_eta",           "T #eta",                   50, -5., 5.                 )),
     shared_ptr<SelectionItem>(new SelDatF("vlq_mass",          "T mass",                   50, 0, 2000                 )),
+};
+
+
+static const vector<std::string> TRIGGER_PATHS {
+    "HLT_Ele95_CaloIdVT_GsfTrkIdT_v*",
+    "HLT_Mu40_v*",
 };

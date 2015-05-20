@@ -36,5 +36,5 @@ if os.system('sframe_main ../config/VLQToHiggsAndLepton.xml'):
 
 # plot
 os.system('./../python/plot.py')
-os.system('./../python/copy_www.py')
+#os.system('./../python/copy_www.py')
 

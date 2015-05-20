@@ -20,6 +20,7 @@
 #include "UHH2/common/include/JetHists.h"
 #include "UHH2/common/include/NSelections.h"
 #include "UHH2/common/include/TTbarReconstruction.h"
+#include "UHH2/common/include/CollectionProducer.h"
 
 #include "UHH2/VLQSemiLepPreSel/include/VLQCommonModules.h"
 #include "UHH2/VLQSemiLepPreSel/include/SelectionHists.h"
@@ -35,6 +36,7 @@
 
 
 using namespace std;
+using namespace uhh2;
 
 
 static bool isTlepEvent(const vector<GenParticle> * gps) {
@@ -61,13 +63,22 @@ static bool isTlepEvent(const vector<GenParticle> * gps) {
 }
 
 
-/** \brief Basic analysis example of an AnalysisModule (formerly 'cycle') in UHH2
- * 
- * This is the central class which calls other AnalysisModules, Hists or Selection classes.
- * This AnalysisModule, in turn, is called (via AnalysisModuleRunner) by SFrame.
+static bool is_fwd_jet(const Jet & j, const Event &) {
+    return fabs(j.eta()) >= 2.4;
+}
+
+static bool is_cntrl_jet(const Jet & j, const Event &) {
+    return fabs(j.eta()) < 2.4;
+}
+
+template <typename TYPE>
+static bool is_true(const TYPE &, const Event &) {
+    return true;
+}
+
+
+/** \brief Basic analysis example of an AnalysisModule in UHH2
  */
-
-
 class VLQToHiggsAndLeptonModule: public AnalysisModule {
 public:
     
@@ -102,40 +113,45 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     }
     
     // 1. setup modules to prepare the event.
-    v_pre_modules.emplace_back(new EventWeightOutputHandle(ctx));
-    v_pre_modules.emplace_back(new EventShapeVariables(ctx, "jets", "", "", "es_", 2., 100));
-    v_pre_modules.emplace_back(new EventShapeVariables(ctx, "jets", "electrons", "muons", "es_plus_lep_", 2., 100));
+    // leptons
     v_pre_modules.emplace_back(new ElectronCleaner(PtEtaCut(105.0, 2.4)));
     v_pre_modules.emplace_back(new MuonCleaner(PtEtaCut(50.0, 2.4)));
-    v_pre_modules.emplace_back(new FwdJetSwitch(ctx));
-    v_pre_modules.emplace_back(new BJetsProducer(ctx));
-    v_pre_modules.emplace_back(new PrimaryLepton(ctx));
-    v_pre_modules.emplace_back(new HTCalculator(ctx));
-    v_pre_modules.emplace_back(new STCalculator(ctx));
-    v_pre_modules.emplace_back(new LargestJetEtaProducer(ctx, "jets", "fwd_jets"));
-    v_pre_modules.emplace_back(new NBTagProducer(ctx));
-    v_pre_modules.emplace_back(new NTaggedTopJetProducer(ctx, HiggsTag(60.f, 99999., CSVBTag(CSVBTag::WP_LOOSE)),
-                                                         "n_higgs_tags", "patJetsCa15CHSJetsFilteredPacked"));
-    v_pre_modules.emplace_back(new NLeadingBTagProducer(ctx));
-    v_pre_modules.emplace_back(new TaggedTopJetProducer(ctx, HiggsTag(60.f, 99999., CSVBTag(CSVBTag::WP_LOOSE)),
-                                                        "h_jets", "patJetsCa15CHSJetsFilteredPacked"));
+    v_pre_modules.emplace_back(new NLeptonsProducer(ctx, "n_leptons"));
+    v_pre_modules.emplace_back(new PrimaryLepton(ctx, "PrimaryLepton"));
+    v_pre_modules.emplace_back(new LeptonPtProducer(ctx, "PrimaryLepton", "primary_lepton_pt"));
+
+    // jets
+    v_pre_modules.emplace_back(new LargestJetEtaProducer(ctx, "largest_jet_eta", "jets"));
+    v_pre_modules.emplace_back(new CollectionProducer<Jet>(ctx, is_fwd_jet, "jets", "fwd_jets"));
+    v_pre_modules.emplace_back(new CollectionSizeProducer<Jet>(ctx, is_true<Jet>, "fwd_jets", "n_fwd_jets"));
+    v_pre_modules.emplace_back(new CollectionProducer<Jet>(ctx, is_cntrl_jet, "jets", "jets"));
+    v_pre_modules.emplace_back(new CollectionSizeProducer<Jet>(ctx, is_true<Jet>, "jets", "n_jets"));
+    v_pre_modules.emplace_back(new CollectionProducer<Jet>(ctx, CSVBTag(CSVBTag::WP_MEDIUM), "jets", "b_jets"));
+    v_pre_modules.emplace_back(new CollectionSizeProducer<Jet>(ctx, is_true<Jet>, "b_jets", "n_btags"));
+    v_pre_modules.emplace_back(new NLeadingBTagProducer(ctx, CSVBTag::WP_MEDIUM, "n_leading_btags"));
+    v_pre_modules.emplace_back(new LeadingJetPtProducer(ctx, "leading_jet_pt"));
+    v_pre_modules.emplace_back(new SubleadingJetPtProducer(ctx, "subleading_jet_pt"));
+    v_pre_modules.emplace_back(new CollectionProducer<TopJet>(ctx, HiggsTag(60.f, 99999., CSVBTag(CSVBTag::WP_MEDIUM)), "patJetsCa15CHSJetsFilteredPacked", "h_jets"));
+    v_pre_modules.emplace_back(new CollectionSizeProducer<TopJet>(ctx, is_true<TopJet>, "h_jets", "n_htags"));
+
+    // event variables
+    v_pre_modules.emplace_back(new HTCalculator(ctx, boost::none, "HT"));
+    v_pre_modules.emplace_back(new STCalculator(ctx, "ST"));
+    v_pre_modules.emplace_back(new EventShapeVariables(ctx, "jets", "", "", "es_", 2., 100));
+    v_pre_modules.emplace_back(new EventShapeVariables(ctx, "jets", "electrons", "muons", "es_plus_lep_", 2., 100));
+
+    // event reconstruction
     v_pre_modules.emplace_back(new TopLepHypProducer(ctx, NeutrinoReconstruction));
     v_pre_modules.emplace_back(new HiggsHypProducer(ctx));
     v_pre_modules.emplace_back(new EventHypDiscr(ctx, "LeptTopHyps", "HiggsHyps"));
     v_pre_modules.emplace_back(new VlqReco(ctx));
-
-    // Other CutProducers
-    v_pre_modules.emplace_back(new TriggerAcceptProcuder(ctx));
-    v_pre_modules.emplace_back(new NJetsProducer(ctx));
-    v_pre_modules.emplace_back(new NLeptonsProducer(ctx));
-    v_pre_modules.emplace_back(new NFwdJetsProducer(ctx));
-    v_pre_modules.emplace_back(new LeadingJetPtProducer(ctx));
-    v_pre_modules.emplace_back(new SubleadingJetPtProducer(ctx));
-    v_pre_modules.emplace_back(new LeptonPtProducer(ctx));
-
     v_pre_modules.emplace_back(new LorentzVectorInfoProducer(ctx, "tlep"));
     v_pre_modules.emplace_back(new LorentzVectorInfoProducer(ctx, "h"));
     v_pre_modules.emplace_back(new LorentzVectorInfoProducer(ctx, "vlq"));
+
+    // Other CutProducers
+    v_pre_modules.emplace_back(new EventWeightOutputHandle(ctx, "weight"));
+    v_pre_modules.emplace_back(new TriggerAcceptProducer(ctx, TRIGGER_PATHS, "trigger_accept"));
 
     // Selection Producer
     SelItemsHelper sel_helper(SEL_ITEMS_VLQ2HT, ctx);

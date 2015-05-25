@@ -132,13 +132,14 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     v_pre_modules.emplace_back(new LeadingJetPtProducer(ctx, "leading_jet_pt"));
     v_pre_modules.emplace_back(new SubleadingJetPtProducer(ctx, "subleading_jet_pt"));
     v_pre_modules.emplace_back(new CollectionProducer<TopJet>(ctx, HiggsTag(60.f, 99999., CSVBTag(CSVBTag::WP_MEDIUM)), "patJetsCa15CHSJetsFilteredPacked", "h_jets"));
+    // v_pre_modules.emplace_back(new CollectionProducer<TopJet>(ctx, HiggsTag(60.f, 99999., CSVBTag(CSVBTag::WP_MEDIUM)), "patJetsCa8CHSJetsPrunedPacked", "h_jets"));
     v_pre_modules.emplace_back(new CollectionSizeProducer<TopJet>(ctx, is_true<TopJet>, "h_jets", "n_htags"));
 
     // event variables
     v_pre_modules.emplace_back(new HTCalculator(ctx, boost::none, "HT"));
     v_pre_modules.emplace_back(new STCalculator(ctx, "ST"));
-    v_pre_modules.emplace_back(new EventShapeVariables(ctx, "jets", "", "", "es_", 2., 100));
-    v_pre_modules.emplace_back(new EventShapeVariables(ctx, "jets", "electrons", "muons", "es_plus_lep_", 2., 100));
+    // v_pre_modules.emplace_back(new EventShapeVariables(ctx, "jets", "", "", "es_", 2., 100));
+    // v_pre_modules.emplace_back(new EventShapeVariables(ctx, "jets", "electrons", "muons", "es_plus_lep_", 2., 100));
 
     // event reconstruction
     v_pre_modules.emplace_back(new TopLepHypProducer(ctx, NeutrinoReconstruction));
@@ -152,6 +153,8 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     // Other CutProducers
     v_pre_modules.emplace_back(new EventWeightOutputHandle(ctx, "weight"));
     v_pre_modules.emplace_back(new TriggerAcceptProducer(ctx, TRIGGER_PATHS, "trigger_accept"));
+    v_pre_modules.emplace_back(new AbsValueProducer<float>(ctx, "largest_jet_eta"));
+    // v_pre_modules.emplace_back(new AbsValueProducer<float>(ctx, "vlq_eta"));
 
     // Selection Producer
     SelItemsHelper sel_helper(SEL_ITEMS_VLQ2HT, ctx);
@@ -165,14 +168,15 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     v_hists.emplace_back(nm1_hists);
     v_hists.emplace_back(cf_hists);
 
-    // append 2D cut
-    sel_module->add_selection(new TwoDCutSel(ctx, 0.3, 20.));
-    nm1_hists->add_hists(new TwoDCutHist(ctx, "Nm1Selection"));
-    cf_hists->add_step("2D cut");
-    v_hists.emplace_back(new TwoDCutHist(ctx, "NoSelection"));
+    // insert 2D cut
+    unsigned pos_2d_cut = 1;
+    sel_module->insert_selection(pos_2d_cut, new TwoDCutSel(ctx, 0.3, 20.));
+    nm1_hists->insert_hists(pos_2d_cut, new TwoDCutHist(ctx, "Nm1Selection"));
+    cf_hists->insert_step(pos_2d_cut, "2D cut");
+    v_hists.insert(v_hists.begin() + pos_2d_cut, move(unique_ptr<Hists>(new TwoDCutHist(ctx, "NoSelection"))));
 
-    //v_hists.emplace_back(new SingleLepTrigHists(ctx, "SingleLepTrig", "HLT_Ele95_CaloIdVT_GsfTrkIdT_v", true));
-    //v_hists.emplace_back(new SingleLepTrigHists(ctx, "SingleLepTrig", "HLT_Mu40_v", false));
+    // v_hists.emplace_back(new SingleLepTrigHists(ctx, "SingleLepTrig", "HLT_Ele95_CaloIdVT_GsfTrkIdT_v", true));
+    // v_hists.emplace_back(new SingleLepTrigHists(ctx, "SingleLepTrig", "HLT_Mu40_v", false));
 
     // sanity histograms after selection
     v_hists_after_sel.emplace_back(new ElectronHists(ctx, "SanityCheckEle", true));
@@ -201,6 +205,7 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     ctx.undeclare_event_output("offlineSlimmedPrimaryVertices");
     ctx.undeclare_event_output("patJetsAk4PFCHS");
     ctx.undeclare_event_output("patJetsCa15CHSJetsFilteredPacked");
+    ctx.undeclare_event_output("patJetsCa8CHSJetsPrunedPacked");
     ctx.undeclare_event_output("rho");
     ctx.undeclare_event_output("run");
     ctx.undeclare_event_output("slimmedElectrons");

@@ -10,6 +10,7 @@ import varial.tools
 import varial.generators as gen
 
 
+# varial.settings.max_num_processes = 1
 # varial.settings.debug_mode = True
 input_pat = './uhh2.*.root'
 
@@ -67,6 +68,8 @@ def plotter_factory_stack_sigx30(**kws):
 
 if __name__ == '__main__':
     all_tools = [
+        cutflow_tables.mk_cutflow_chain(input_pat, loader_hook),
+
         varial.tools.mk_rootfile_plotter(
             pattern=input_pat,
             name='VLQ2HT_stack',
@@ -78,6 +81,13 @@ if __name__ == '__main__':
             pattern=input_pat,
             name='VLQ2HT_norm',
             plotter_factory=plotter_factory_norm,
+            combine_files=True,
+        ).tool_chain[0],
+
+        varial.tools.mk_rootfile_plotter(
+            pattern=input_pat,
+            name='VLQ2HT_stack_signalx30',
+            plotter_factory=plotter_factory_stack_sigx30,
             combine_files=True,
         ).tool_chain[0],
 
@@ -96,15 +106,6 @@ if __name__ == '__main__':
         #    combine_files=True,
         #    filter_keyfunc=lambda w: not common.is_signal(w.file_path)
         #).tool_chain[0],
-
-        varial.tools.mk_rootfile_plotter(
-            pattern=input_pat,
-            name='VLQ2HT_stack_signalx30',
-            plotter_factory=plotter_factory_stack_sigx30,
-            combine_files=True,
-        ).tool_chain[0],
-        
-        cutflow_tables.mk_cutflow_chain(input_pat, loader_hook),
     ]
 
     tc = varial.tools.ToolChainParallel(

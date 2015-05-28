@@ -10,7 +10,7 @@ import varial.tools
 import varial.generators as gen
 
 
-# varial.settings.max_num_processes = 1
+varial.settings.max_num_processes = 1
 # varial.settings.debug_mode = True
 input_pat = './uhh2.*.root'
 

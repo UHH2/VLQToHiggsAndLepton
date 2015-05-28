@@ -22,43 +22,27 @@ typedef SelectionItemData<double>   SelDatD;
 // Cut[ 5]:       0.98 <      n_leading_btags <=       4.04   only lower
 // --------------------------------------------------------
 
-
-
-// --------------------------------------------------------
+// ------------------------------------------------------------
 // Cut values for requested signal efficiency: 0.4
-// Corresponding background efficiency       : 0.0797233
+// Corresponding background efficiency       : 0.0774732
 // Transformation applied to input variables : None
-// --------------------------------------------------------
-// Cut[ 0]:  0.0953172 <          dr_higg_top <=      1e+30
-// Cut[ 1]:     -1e+30 <               h_mass <=    128.802
-// Cut[ 2]:    260.074 <                 h_pt <=      1e+30
-// Cut[ 3]:   0.139691 < abs(largest_jet_eta) <=      1e+30
-// Cut[ 4]:      -0.04 <      n_leading_btags <=      1e+30
-// Cut[ 5]:     -1e+30 <            tlep_mass <=    1437.68
-// --------------------------------------------------------
-// --------------------------------------------------------
-// Cut values for requested signal efficiency: 0.5
-// Corresponding background efficiency       : 0.0919124
-// Transformation applied to input variables : None
-// --------------------------------------------------------
-// Cut[ 0]:    1.63803 <          dr_higg_top <=      1e+30
-// Cut[ 1]:     -1e+30 <               h_mass <=    146.006
-// Cut[ 2]:    91.8287 <                 h_pt <=      1e+30
-// Cut[ 3]:   0.135658 < abs(largest_jet_eta) <=      1e+30
-// Cut[ 4]:       0.98 <      n_leading_btags <=      1e+30
-// Cut[ 5]:     -1e+30 <            tlep_mass <=    1400.83
-// --------------------------------------------------------
+// ------------------------------------------------------------
+// Cut[ 0]:    1.44821 <              dr_higg_top <=      1e+30
+// Cut[ 1]:    61.1548 <                   h_mass <=    174.707
+// Cut[ 2]:    225.171 <                     h_pt <=      1e+30
+// Cut[ 3]:     2.4325 < abs(abs_largest_jet_eta) <=      1e+30
+// ------------------------------------------------------------
 
 
 static const vector<shared_ptr<SelectionItem>> SEL_ITEMS_VLQ2HT {
     shared_ptr<SelectionItem>(new SelDatI("trigger_accept",    "ele+Jets OR mu+Jets",      2, -.5, 1.5         ,1      )),
     shared_ptr<SelectionItem>(new SelDatI("n_leptons",         "N_{lepton}",               11, -.5, 10.5       ,1      )),
-    shared_ptr<SelectionItem>(new SelDatF("event_chi2",        "event chi2",               50, 0, 100                  )),
-    shared_ptr<SelectionItem>(new SelDatF("dr_higg_top",       "#DeltaR(H, t)",            50, 0, 5          /*  ,2.25   */)),
-    shared_ptr<SelectionItem>(new SelDatF("h_mass",            "Higgs mass",               50, 0, 1000       /*  ,60 ,160*/)),
-    shared_ptr<SelectionItem>(new SelDatF("h_pt",              "Higgs p_{T}",              50, 0, 1000       /*  ,160    */)),
-    shared_ptr<SelectionItem>(new SelDatF("abs_largest_jet_eta", "most forward jet #eta",  50, 0., 5.        /*  ,0.96   */)),
-    shared_ptr<SelectionItem>(new SelDatI("n_leading_btags",   "N_{b-tag leading}",        11, -.5, 10.5     /*  ,1      */)),
+    shared_ptr<SelectionItem>(new SelDatF("event_chi2",        "event chi2",               100, 0, 200         ,100    )),
+    shared_ptr<SelectionItem>(new SelDatI("n_leading_btags",   "N_{b-tag leading}",        11, -.5, 10.5       ,1      )),
+    shared_ptr<SelectionItem>(new SelDatF("dr_higg_top",       "#DeltaR(H, t)",            50, 0, 5            ,2      )),
+    shared_ptr<SelectionItem>(new SelDatF("h_mass",            "Higgs mass",               50, 0, 1000         ,60 ,160)),
+    shared_ptr<SelectionItem>(new SelDatF("h_pt",              "Higgs p_{T}",              50, 0, 1000         ,200    )),
+    shared_ptr<SelectionItem>(new SelDatF("abs_largest_jet_eta", "most forward jet #eta",  50, 0., 5.          ,2.4    )),
 
     // shared_ptr<SelectionItem>(new SelDatF("abs_vlq_eta",       "T #eta",                   50, 0., 5.                  )),
     shared_ptr<SelectionItem>(new SelDatI("n_btags",           "N_{b-tag}",                11, -.5, 10.5               )),

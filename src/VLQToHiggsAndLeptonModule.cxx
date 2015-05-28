@@ -170,7 +170,7 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
 
     // insert 2D cut
     unsigned pos_2d_cut = 1;
-    sel_module->insert_selection(pos_2d_cut, new TwoDCutSel(ctx, 0.3, 20.));
+    sel_module->insert_selection(pos_2d_cut, new TwoDCutSel(ctx, 0.4, 20.));
     nm1_hists->insert_hists(pos_2d_cut, new TwoDCutHist(ctx, "Nm1Selection"));
     cf_hists->insert_step(pos_2d_cut, "2D cut");
     v_hists.insert(v_hists.begin() + pos_2d_cut, move(unique_ptr<Hists>(new TwoDCutHist(ctx, "NoSelection"))));

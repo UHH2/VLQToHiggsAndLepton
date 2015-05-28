@@ -16,9 +16,9 @@ variables = [
     'dr_higg_top',
     'h_mass',
     'h_pt',
-    'largest_jet_eta',
-    'n_leading_btags',
-    'tlep_mass',
+    'abs_largest_jet_eta',
+    #'n_leading_btags',
+    #'n_fwd_jets',
 ]
 
 print variables
@@ -44,7 +44,12 @@ factory.PrepareTrainingAndTestTree(ROOT.TCut(''), 'SplitMode=random:!V')
 factory.BookMethod(
     ROOT.TMVA.Types.kCuts,
     'Cuts',
-    '!H:!V:FitMethod=GA:EffSel:VarProp=FSmart'
+    '!H:!V:FitMethod=GA:EffSel'
+    ':VarProp[0]=FSmart'
+    ':VarProp[2]=FSmart'
+    ':VarProp[3]=FSmart'
+    #':VarProp[4]=FSmart'
+    #':VarProp[5]=FSmart'
     #':CutRangeMin[0]=0:CutRangeMax[0]=50:VarProp[0]=FMin'
     #':CutRangeMin[1]=0:CutRangeMax[1]=50'
     #':CutRangeMin[2]=0:CutRangeMax[2]=50000:VarProp[2]=FMin'

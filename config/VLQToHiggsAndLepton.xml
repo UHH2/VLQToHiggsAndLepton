@@ -14,13 +14,14 @@
             <InputTree Name="AnalysisTree" />
             <OutputTree Name="AnalysisTree" />
         </InputData>
-        <InputData Lumi="99900" NEventsMax="-1" Type="MC" Version="TpJ_TH_M800_NonTlep" Cacheable="False">
-            <In FileName="/nfs/dust/cms/user/tholenhe/VLQSemiLepPreSel/PHYS14-ntuple2-v2/uhh2.AnalysisModuleRunner.MC.MC_TpJ_TH_M800_20x25.root" Lumi="0.0"/>
+        <InputData Lumi="100000" NEventsMax="-1" Type="MC" Version="TpJ_TH_M1200_Tlep" Cacheable="False">
+            <In FileName="/nfs/dust/cms/user/tholenhe/VLQSemiLepPreSel/PHYS14-ntuple2-v2/uhh2.AnalysisModuleRunner.MC.MC_TpJ_TH_M1200_20x25.root" Lumi="0.0"/>
             <InputTree Name="AnalysisTree" />
             <OutputTree Name="AnalysisTree" />
         </InputData>
-        <InputData Lumi="100000" NEventsMax="-1" Type="MC" Version="TpJ_TH_M1200_Tlep" Cacheable="False">
-            <In FileName="/nfs/dust/cms/user/tholenhe/VLQSemiLepPreSel/PHYS14-ntuple2-v2/uhh2.AnalysisModuleRunner.MC.MC_TpJ_TH_M1200_20x25.root" Lumi="0.0"/>
+<!--
+        <InputData Lumi="99900" NEventsMax="-1" Type="MC" Version="TpJ_TH_M800_NonTlep" Cacheable="False">
+            <In FileName="/nfs/dust/cms/user/tholenhe/VLQSemiLepPreSel/PHYS14-ntuple2-v2/uhh2.AnalysisModuleRunner.MC.MC_TpJ_TH_M800_20x25.root" Lumi="0.0"/>
             <InputTree Name="AnalysisTree" />
             <OutputTree Name="AnalysisTree" />
         </InputData>
@@ -29,7 +30,7 @@
             <InputTree Name="AnalysisTree" />
             <OutputTree Name="AnalysisTree" />
         </InputData>
-
+-->
         <InputData Lumi="31568.03" NEventsMax="-1" Type="MC" Version="MC_TTJets" Cacheable="False">
             <In FileName="/nfs/dust/cms/user/tholenhe/VLQSemiLepPreSel/PHYS14-ntuple2-v2/uhh2.AnalysisModuleRunner.MC.MC_TTJets_20x25.root" Lumi="0.0"/>
             <InputTree Name="AnalysisTree" />
@@ -107,6 +108,11 @@
             
             <!-- set this to the name of an AndSelection to control what is written to the output. If not given, *all* events are written to the output tree. -->
             <Item Name="TestKey" Value="VLQToHiggsAndLeptonModule" />
+
+            <!-- define the event category -->
+            <Item Name="category" Value="1htag" />
+            <!-- <Item Name="category" Value="0htag_2+btag" /> -->
+            <!-- <Item Name="category" Value="0htag_1btag" /> -->
         </UserConfig>
     </Cycle>
 </JobConfiguration>

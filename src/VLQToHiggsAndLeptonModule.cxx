@@ -39,28 +39,28 @@ using namespace std;
 using namespace uhh2;
 
 
-static bool isTlepEvent(const vector<GenParticle> * gps) {
-    for (const auto & gp : *gps) {
-        if (abs(gp.pdgId()) == 6) {
-            auto d1 = gp.daughter(gps, 1);
-            auto d2 = gp.daughter(gps, 2);
-            if (!(d1 && d2)) {
-                return false;
-            }
-            if (abs(d1->pdgId()) == 24 || abs(d2->pdgId()) == 24) {
-                auto w = (abs(d1->pdgId()) == 24) ? d1 : d2;
-                auto w_dau = w->daughter(gps, 1);
-                if (w_dau && abs(w_dau->pdgId()) < 17 && abs(w_dau->pdgId()) > 10) {
-                    return true;
-                } 
-            } else {
-                return (abs(d1->pdgId()) < 17 && abs(d1->pdgId()) > 10)
-                    || (abs(d2->pdgId()) < 17 && abs(d2->pdgId()) > 10);
-            }
-        }
-    }
-    return false;
-}
+// static bool isTlepEvent(const vector<GenParticle> * gps) {
+//     for (const auto & gp : *gps) {
+//         if (abs(gp.pdgId()) == 6) {
+//             auto d1 = gp.daughter(gps, 1);
+//             auto d2 = gp.daughter(gps, 2);
+//             if (!(d1 && d2)) {
+//                 return false;
+//             }
+//             if (abs(d1->pdgId()) == 24 || abs(d2->pdgId()) == 24) {
+//                 auto w = (abs(d1->pdgId()) == 24) ? d1 : d2;
+//                 auto w_dau = w->daughter(gps, 1);
+//                 if (w_dau && abs(w_dau->pdgId()) < 17 && abs(w_dau->pdgId()) > 10) {
+//                     return true;
+//                 }
+//             } else {
+//                 return (abs(d1->pdgId()) < 17 && abs(d1->pdgId()) > 10)
+//                     || (abs(d2->pdgId()) < 17 && abs(d2->pdgId()) > 10);
+//             }
+//         }
+//     }
+//     return false;
+// }
 
 
 static bool is_fwd_jet(const Jet & j, const Event &) {
@@ -89,6 +89,9 @@ private:
     string version;
     // modules for setting up collections and cleaning
     vector<unique_ptr<AnalysisModule>> v_pre_modules;
+    vector<unique_ptr<AnalysisModule>> v_cat_modules;
+
+    unique_ptr<Selection> cat_check_module;
     unique_ptr<SelectionProducer> sel_module;
 
     // store the Hists collection
@@ -111,49 +114,52 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     for(auto & kv : ctx.get_all()){
         cout << " " << kv.first << " = " << kv.second << endl;
     }
-    
-    // 1. setup modules to prepare the event.
-    // leptons
-    v_pre_modules.emplace_back(new ElectronCleaner(PtEtaCut(105.0, 2.4)));
-    v_pre_modules.emplace_back(new MuonCleaner(PtEtaCut(50.0, 2.4)));
-    v_pre_modules.emplace_back(new NLeptonsProducer(ctx, "n_leptons"));
-    v_pre_modules.emplace_back(new PrimaryLepton(ctx, "PrimaryLepton"));
-    v_pre_modules.emplace_back(new LeptonPtProducer(ctx, "PrimaryLepton", "primary_lepton_pt"));
 
-    // jets
-    v_pre_modules.emplace_back(new LargestJetEtaProducer(ctx, "largest_jet_eta", "jets"));
-    v_pre_modules.emplace_back(new CollectionProducer<Jet>(ctx, is_fwd_jet, "jets", "fwd_jets"));
-    v_pre_modules.emplace_back(new CollectionSizeProducer<Jet>(ctx, is_true<Jet>, "fwd_jets", "n_fwd_jets"));
-    v_pre_modules.emplace_back(new CollectionProducer<Jet>(ctx, is_cntrl_jet, "jets", "jets"));
-    v_pre_modules.emplace_back(new CollectionSizeProducer<Jet>(ctx, is_true<Jet>, "jets", "n_jets"));
-    v_pre_modules.emplace_back(new CollectionProducer<Jet>(ctx, CSVBTag(CSVBTag::WP_MEDIUM), "jets", "b_jets"));
-    v_pre_modules.emplace_back(new CollectionSizeProducer<Jet>(ctx, is_true<Jet>, "b_jets", "n_btags"));
-    v_pre_modules.emplace_back(new NLeadingBTagProducer(ctx, CSVBTag::WP_MEDIUM, "n_leading_btags"));
-    v_pre_modules.emplace_back(new LeadingJetPtProducer(ctx, "leading_jet_pt"));
-    v_pre_modules.emplace_back(new SubleadingJetPtProducer(ctx, "subleading_jet_pt"));
+    // setup modules to check if this event belongs into this category
     v_pre_modules.emplace_back(new CollectionProducer<TopJet>(ctx, HiggsTag(60.f, 99999., CSVBTag(CSVBTag::WP_MEDIUM)), "patJetsCa15CHSJetsFilteredPacked", "h_jets"));
     // v_pre_modules.emplace_back(new CollectionProducer<TopJet>(ctx, HiggsTag(60.f, 99999., CSVBTag(CSVBTag::WP_MEDIUM)), "patJetsCa8CHSJetsPrunedPacked", "h_jets"));
     v_pre_modules.emplace_back(new CollectionSizeProducer<TopJet>(ctx, is_true<TopJet>, "h_jets", "n_htags"));
+    cat_check_module.reset(new HandleSelection<int>(ctx, "n_htags", 1));
+
+    // setup modules to prepare the event.
+    // leptons
+    v_cat_modules.emplace_back(new ElectronCleaner(PtEtaCut(105.0, 2.4)));
+    v_cat_modules.emplace_back(new MuonCleaner(PtEtaCut(50.0, 2.4)));
+    v_cat_modules.emplace_back(new NLeptonsProducer(ctx, "n_leptons"));
+    v_cat_modules.emplace_back(new PrimaryLepton(ctx, "PrimaryLepton"));
+    v_cat_modules.emplace_back(new LeptonPtProducer(ctx, "PrimaryLepton", "primary_lepton_pt"));
+
+    // jets
+    v_cat_modules.emplace_back(new LargestJetEtaProducer(ctx, "largest_jet_eta", "jets"));
+    v_cat_modules.emplace_back(new CollectionProducer<Jet>(ctx, is_fwd_jet, "jets", "fwd_jets"));
+    v_cat_modules.emplace_back(new CollectionSizeProducer<Jet>(ctx, is_true<Jet>, "fwd_jets", "n_fwd_jets"));
+    v_cat_modules.emplace_back(new CollectionProducer<Jet>(ctx, is_cntrl_jet, "jets", "jets"));
+    v_cat_modules.emplace_back(new CollectionSizeProducer<Jet>(ctx, is_true<Jet>, "jets", "n_jets"));
+    v_cat_modules.emplace_back(new CollectionProducer<Jet>(ctx, CSVBTag(CSVBTag::WP_MEDIUM), "jets", "b_jets"));
+    v_cat_modules.emplace_back(new CollectionSizeProducer<Jet>(ctx, is_true<Jet>, "b_jets", "n_btags"));
+    v_cat_modules.emplace_back(new NLeadingBTagProducer(ctx, CSVBTag::WP_MEDIUM, "n_leading_btags"));
+    v_cat_modules.emplace_back(new LeadingJetPtProducer(ctx, "leading_jet_pt"));
+    v_cat_modules.emplace_back(new SubleadingJetPtProducer(ctx, "subleading_jet_pt"));
 
     // event variables
-    v_pre_modules.emplace_back(new HTCalculator(ctx, boost::none, "HT"));
-    v_pre_modules.emplace_back(new STCalculator(ctx, "ST"));
+    v_cat_modules.emplace_back(new HTCalculator(ctx, boost::none, "HT"));
+    v_cat_modules.emplace_back(new STCalculator(ctx, "ST"));
     // v_pre_modules.emplace_back(new EventShapeVariables(ctx, "jets", "", "", "es_", 2., 100));
     // v_pre_modules.emplace_back(new EventShapeVariables(ctx, "jets", "electrons", "muons", "es_plus_lep_", 2., 100));
 
     // event reconstruction
-    v_pre_modules.emplace_back(new TopLepHypProducer(ctx, NeutrinoReconstruction));
-    v_pre_modules.emplace_back(new HiggsHypProducer(ctx));
-    v_pre_modules.emplace_back(new EventHypDiscr(ctx, "LeptTopHyps", "HiggsHyps"));
-    v_pre_modules.emplace_back(new VlqReco(ctx));
-    v_pre_modules.emplace_back(new LorentzVectorInfoProducer(ctx, "tlep"));
-    v_pre_modules.emplace_back(new LorentzVectorInfoProducer(ctx, "h"));
-    v_pre_modules.emplace_back(new LorentzVectorInfoProducer(ctx, "vlq"));
+    v_cat_modules.emplace_back(new TopLepHypProducer(ctx, NeutrinoReconstruction));
+    v_cat_modules.emplace_back(new HiggsHypProducer(ctx));
+    v_cat_modules.emplace_back(new EventHypDiscr(ctx, "LeptTopHyps", "HiggsHyps"));
+    v_cat_modules.emplace_back(new VlqReco(ctx));
+    v_cat_modules.emplace_back(new LorentzVectorInfoProducer(ctx, "tlep"));
+    v_cat_modules.emplace_back(new LorentzVectorInfoProducer(ctx, "h"));
+    v_cat_modules.emplace_back(new LorentzVectorInfoProducer(ctx, "vlq"));
 
     // Other CutProducers
-    v_pre_modules.emplace_back(new EventWeightOutputHandle(ctx, "weight"));
-    v_pre_modules.emplace_back(new TriggerAcceptProducer(ctx, TRIGGER_PATHS, "trigger_accept"));
-    v_pre_modules.emplace_back(new AbsValueProducer<float>(ctx, "largest_jet_eta"));
+    v_cat_modules.emplace_back(new EventWeightOutputHandle(ctx, "weight"));
+    v_cat_modules.emplace_back(new TriggerAcceptProducer(ctx, TRIGGER_PATHS, "trigger_accept"));
+    v_cat_modules.emplace_back(new AbsValueProducer<float>(ctx, "largest_jet_eta"));
     // v_pre_modules.emplace_back(new AbsValueProducer<float>(ctx, "vlq_eta"));
 
     // Selection Producer
@@ -224,16 +230,24 @@ bool VLQToHiggsAndLeptonModule::process(Event & event) {
         gen_hists->fill(event);
     }
  
-    bool tlepEvt = isTlepEvent(event.genparticles);
-    if (version.substr(version.size() - 5, 100) == "_Tlep" && !tlepEvt) {
-        return false;
+    // bool tlepEvt = isTlepEvent(event.genparticles);
+    // if (version.substr(version.size() - 5, 100) == "_Tlep" && !tlepEvt) {
+    //     return false;
+    // }
+    // if (version.substr(version.size() - 8, 100) == "_NonTlep" && tlepEvt) {
+    //     return false;
+    // }
+
+    // run category decision
+    for (auto & mod : v_pre_modules) {
+        mod->process(event);
     }
-    if (version.substr(version.size() - 8, 100) == "_NonTlep" && tlepEvt) {
+    if (!cat_check_module->passes(event)) {
         return false;
     }
 
     // run all modules
-    for (auto & mod : v_pre_modules) {
+    for (auto & mod : v_cat_modules) {
         mod->process(event);
     }
 

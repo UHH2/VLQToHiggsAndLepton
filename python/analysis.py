@@ -1,19 +1,38 @@
 #!/usr/bin/env python
 
-import common
-import vlq_settings
-import plot_stks
-import sensitivity
+
+import UHH2.VLQSemiLepPreSel.vlq_settings as vlq_settings
+import UHH2.VLQSemiLepPreSel.common as common
+#import sensitivity
+import sframe_tools
+import plot
 
 import varial.main
 import varial.tools
 
-tc = varial.tools.ToolChain('Main', [
-    #plot_stks.p,
-    sensitivity.tc,
-    varial.tools.WebCreator(),
-    varial.tools.CopyTool('~/www/test'),
-])
 
-varial.analysis.fs_aliases = varial.diskio.generate_aliases()
-varial.main.main(toolchain=tc)
+def mk_plot_tools():
+    sframe_pat = map(lambda p: 'Main/%s/*.root' % p,
+                     sframe_tools.sframe_tools.tool_paths())
+    return list(
+        varial.tools.ToolChainParallel(pat.split('/')[-2], plot.mk_tools(pat))
+        for pat in sframe_pat
+    )
+
+
+tc = varial.tools.ToolChain(
+    'Main',
+    [
+        sframe_tools.sframe_tools,
+        varial.tools.ToolChainParallel(
+            'Plots', lazy_eval_tools_func=mk_plot_tools),
+        #sensitivity.tc,
+        varial.tools.WebCreator(),
+        #varial.tools.CopyTool('~/www/test'),
+    ]
+)
+
+
+varial.settings.try_reuse_results = True
+#varial.main.main(toolchain=tc)
+varial.tools.Runner(tc, True)

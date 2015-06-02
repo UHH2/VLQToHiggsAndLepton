@@ -1,4 +1,4 @@
-import common
+import UHH2.VLQSemiLepPreSel.common as common
 import varial.tools
 from varial.extensions.limits import ThetaLimits
 

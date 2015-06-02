@@ -5,12 +5,13 @@ import UHH2.VLQSemiLepPreSel.vlq_settings as vlq_settings
 import UHH2.VLQSemiLepPreSel.cutflow_tables as cutflow_tables
 from UHH2.VLQSemiLepPreSel.plot import *
 
-import time
-import varial.tools
 import varial.generators as gen
+import varial.tools
+import time
+import os
 
 
-varial.settings.max_num_processes = 1
+# varial.settings.max_num_processes = 1
 # varial.settings.debug_mode = True
 input_pat = './uhh2.*.root'
 
@@ -66,30 +67,33 @@ def plotter_factory_stack_sigx30(**kws):
     return varial.tools.Plotter(**kws)
 
 
-if __name__ == '__main__':
-    all_tools = [
-        cutflow_tables.mk_cutflow_chain(input_pat, loader_hook),
+def mk_tools(input_pattern=None):
+    if not input_pattern:
+        input_pattern = input_pat
+
+    return [
+        cutflow_tables.mk_cutflow_chain(input_pattern, loader_hook),
 
         varial.tools.mk_rootfile_plotter(
-            pattern=input_pat,
+            pattern=input_pattern,
             name='VLQ2HT_stack',
             plotter_factory=plotter_factory_stack,
             combine_files=True,
-        ).tool_chain[0],
+        ),
 
         varial.tools.mk_rootfile_plotter(
-            pattern=input_pat,
+            pattern=input_pattern,
             name='VLQ2HT_norm',
             plotter_factory=plotter_factory_norm,
             combine_files=True,
-        ).tool_chain[0],
+        ),
 
         varial.tools.mk_rootfile_plotter(
-            pattern=input_pat,
+            pattern=input_pattern,
             name='VLQ2HT_stack_signalx30',
             plotter_factory=plotter_factory_stack_sigx30,
             combine_files=True,
-        ).tool_chain[0],
+        ),
 
         #varial.tools.mk_rootfile_plotter(
         #    pattern=input_pat,
@@ -97,7 +101,7 @@ if __name__ == '__main__':
         #    plotter_factory=plotter_factory,
         #    combine_files=True,
         #    filter_keyfunc=lambda w: not common.is_signal(w.file_path)
-        #).tool_chain[0],
+        #),
 
         #varial.tools.mk_rootfile_plotter(
         #    pattern=input_pat,
@@ -105,17 +109,17 @@ if __name__ == '__main__':
         #    plotter_factory=plotter_factory_split_bkg,
         #    combine_files=True,
         #    filter_keyfunc=lambda w: not common.is_signal(w.file_path)
-        #).tool_chain[0],
+        #),
     ]
 
+
+if __name__ == '__main__':
+    all_tools = mk_tools()
     tc = varial.tools.ToolChainParallel(
         'VLQ2HT', all_tools
     )
-    tc = varial.tools.ToolChain(
-        'host_toolchain', [tc]
-    )
 
     time.sleep(1)
-    tc.run()
+    varial.tools.Runner(tc)
     varial.tools.WebCreator().run()
     print 'done.'

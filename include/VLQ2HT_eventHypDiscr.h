@@ -38,7 +38,7 @@ public:
         const float mass_higgs = 125;
         const float mass_higgs_sigma = 14.5;  // copied from tlep
         const float dr_higg_top = 3.15;
-        const float dr_higg_top_sigma = 0.098 ;
+        const float dr_higg_top_sigma = 0.098 * 2; // factor of 2 less importance
 
         // generate mass chi2: top
         for(auto & hyp: t_hyps) {

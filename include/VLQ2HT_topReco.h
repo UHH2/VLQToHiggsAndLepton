@@ -18,11 +18,11 @@ using namespace std;
 
 class TopLeptRecoHyp {
 public:
-    TopLeptRecoHyp(const LorentzVector &t, const LorentzVector &b, const Particle &l,
+    TopLeptRecoHyp(const LorentzVector &t, /*const LorentzVector &b,*/ const Particle &l,
                    const LorentzVector &n, const vector<Jet> &tjs = vector<Jet>()):
-        toplep_v4(t), blep_v4(b), lepton(l), neutrino_v4(n), toplep_jets(tjs) {}
+        toplep_v4(t), /*blep_v4(b),*/ lepton(l), neutrino_v4(n), toplep_jets(tjs) {}
     LorentzVector       toplep_v4;
-    LorentzVector       blep_v4;
+    // LorentzVector       blep_v4;
     Particle            lepton;
     LorentzVector       neutrino_v4;
     vector<Jet>         toplep_jets;
@@ -37,7 +37,7 @@ public:
                        const string & label="LeptTopHyps"):
        neutrinofunc_(neutrinofunc),
        h_recohyps(ctx.get_handle<vector<TopLeptRecoHyp>>(label)),
-       h_b_jets(ctx.get_handle<vector<Jet>>("b_jets")),
+       // h_b_jets(ctx.get_handle<vector<Jet>>("b_jets")),
        h_primlep(ctx.get_handle<FlavorParticle>("PrimaryLepton")) {}
 
     virtual bool process(Event & event) override {
@@ -45,10 +45,10 @@ public:
         // boilerplate (checks and objects)
         assert(event.jets);
         assert(event.met);
-        const auto & b_jets = event.get(h_b_jets);
-        if (!b_jets.size()) {
-            return false;
-        }
+        // const auto & b_jets = event.get(h_b_jets);
+        // if (!b_jets.size()) {
+        //     return false;
+        // }
         if (!event.is_valid(h_primlep)) {
             return false;
         }
@@ -59,53 +59,54 @@ public:
         vector<TopLeptRecoHyp> reco_hyps;
         for(const auto & neutrino_p4 : neutrino_hyps) {
             const LorentzVector wlep_v4 = lepton.v4() + neutrino_p4;
-            for (const auto & b_jet : b_jets) {
-                LorentzVector toplep_v4 = wlep_v4 + b_jet.v4();
+            // for (const auto & b_jet : b_jets) {
+            //     LorentzVector toplep_v4 = wlep_v4 + b_jet.v4();
 
-                reco_hyps.emplace_back(
-                    toplep_v4,
-                    b_jet.v4(),
-                    lepton,
-                    neutrino_p4
-                );
+            //     reco_hyps.emplace_back(
+            //         toplep_v4,
+            //         b_jet.v4(),
+            //         lepton,
+            //         neutrino_p4
+            //     );
 
                 // first radiated jet
                 for (unsigned i1 = 0; i1 < event.jets->size(); i1++) {
                     const auto &jet = event.jets->at(i1);
 
-                    if (deltaR(jet, b_jet) < 0.1) {
-                        continue;
-                    }
-                    LorentzVector toplep_j_v4 = toplep_v4 + jet.v4();
+                    // if (deltaR(jet, b_jet) < 0.1) {
+                    //     continue;
+                    // }
+                    // LorentzVector toplep_j_v4 = toplep_v4 + jet.v4();
+                    LorentzVector toplep_j_v4 = wlep_v4 + jet.v4();
 
                     reco_hyps.emplace_back(
                         toplep_j_v4,
-                        b_jet.v4(),
+                        // b_jet.v4(),
                         lepton,
                         neutrino_p4,
                         vector<Jet>({jet})
                     );
 
                     // second radiated jet
-                    //for (unsigned i2 = i1 + 1; i2 < event.jets->size(); i2++) {
-                    //    const auto &jet2 = event.jets->at(i2);
+                    for (unsigned i2 = i1 + 1; i2 < event.jets->size(); i2++) {
+                        const auto &jet2 = event.jets->at(i2);
 
-                    //    if (deltaR(jet2, b_jet) < 0.1) {
-                    //        continue;
-                    //    }
-                    //    LorentzVector toplep_j_j_v4 = toplep_j_v4 + jet2.v4();
+                        // if (deltaR(jet2, b_jet) < 0.1) {
+                        //     continue;
+                        // }
+                        LorentzVector toplep_j_j_v4 = toplep_j_v4 + jet2.v4();
 
-                    //    // push new hyp
-                    //    reco_hyps.emplace_back(
-                    //        toplep_j_j_v4,
-                    //        b_jet.v4(),
-                    //        lepton,
-                    //        neutrino_p4,
-                    //        vector<Jet>({jet, jet2})
-                    //    );
-                    //}
+                        // push new hyp
+                        reco_hyps.emplace_back(
+                            toplep_j_j_v4,
+                            // b_jet.v4(),
+                            lepton,
+                            neutrino_p4,
+                            vector<Jet>({jet, jet2})
+                        );
+                    }
                 }
-            }
+            // }
         }
         event.set(h_recohyps, reco_hyps);
         return true;

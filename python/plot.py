@@ -88,12 +88,12 @@ def mk_tools(input_pattern=None):
             combine_files=True,
         ),
 
-        varial.tools.mk_rootfile_plotter(
-            pattern=input_pattern,
-            name='VLQ2HT_stack_signalx30',
-            plotter_factory=plotter_factory_stack_sigx30,
-            combine_files=True,
-        ),
+        #varial.tools.mk_rootfile_plotter(
+        #    pattern=input_pattern,
+        #    name='VLQ2HT_stack_signalx30',
+        #    plotter_factory=plotter_factory_stack_sigx30,
+        #    combine_files=True,
+        #),
 
         #varial.tools.mk_rootfile_plotter(
         #    pattern=input_pat,

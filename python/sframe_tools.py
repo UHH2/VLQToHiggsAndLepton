@@ -1,6 +1,7 @@
 
-from varial.extensions.sframeproxy import SFrameProcess
+from varial.extensions.sframeproxy import SFrame
 import varial.tools
+import plot
 
 
 sframe_cfg = '/afs/desy.de/user/t/tholenhe/xxl-af-cms/' \
@@ -18,13 +19,32 @@ def set_category_func(catname):
     return do_set_cat
 
 
-sframe_tools = varial.tools.ToolChain(
-    'SFrame',
+def mk_sframe_and_plot_tools(catname):
+    """Makes a toolchain for one category with sframe and plots."""
+    sframe = SFrame(
+        cfg_filename=sframe_cfg,
+        xml_tree_callback=set_category_func(catname),
+    )
+    plots = varial.tools.ToolChainParallel(
+        'Plots',
+        lazy_eval_tools_func=lambda: plot.mk_tools(
+            '%s/../SFrame/*.root' % varial.analysis.cwd)
+    )
+    tc = varial.tools.ToolChain(
+        catname,
+        [sframe, plots]
+    )
+    return tc
+
+
+sframe_tools = varial.tools.ToolChainParallel(
+    'EventLoopAndPlots',
     [
-        SFrameProcess(
-            cfg_filename=sframe_cfg,
-            xml_tree_callback=set_category_func('1htag'),
-            name='Cat1htag',
-        )
+        mk_sframe_and_plot_tools('FilteredCat1htag'),
+        mk_sframe_and_plot_tools('FilteredCat0h2btag'),
+        mk_sframe_and_plot_tools('FilteredCat0h1btag'),
+        mk_sframe_and_plot_tools('PrunedCat1htag'),
+        mk_sframe_and_plot_tools('PrunedCat0h2btag'),
+        mk_sframe_and_plot_tools('PrunedCat0h1btag'),
     ]
 )

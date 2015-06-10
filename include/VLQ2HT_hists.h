@@ -2,7 +2,7 @@
 
 #include "UHH2/core/include/Hists.h"
 #include "UHH2/core/include/Event.h"
-#include "UHH2/core/include/Utils.h"
+#include "UHH2/common/include/Utils.h"
 #include "TH1F.h"
 #include "TH2F.h"
 
@@ -99,6 +99,10 @@ public:
         if (find_top_and_higgs(*e.genparticles, t_gen, h_gen) != 2) {
             return;
         }
+        if (!(e.is_valid(h_top_lep) && e.is_valid(h_higgs))) {
+            return;
+        }
+
         const LorentzVector & t_reco = e.get(h_top_lep);
         const LorentzVector & h_reco = e.get(h_higgs);
 
@@ -134,15 +138,26 @@ public:
             ";#DeltaR(t_{gen}, H_{gen});events",
             100, 0, 5.
         )),
+        foundGenParticles(book<TH1F>(
+            "foundGenParticles",
+            ";top and higgs generator particles found;events",
+            2, -.5, 1.5
+        )),
+        foundRecoTopAndHiggs(book<TH2F>(
+            "foundRecoTopAndHiggs",
+            ";top reconstruction successful;Higgs reconstruction successful",
+            2, -.5, 1.5,
+            2, -.5, 1.5
+        )),
         topDRDPt(book<TH2F>(
             "topDRDPt",
-            ";#DeltaR(t_{reco}, t_{gen});#DeltaP_{T, rel}(t_{reco}, t_{gen})",
+            ";#DeltaR(t_{reco}, t_{gen});top: (P_{T, gen} - P_{T, reco}) / P_{T, gen}",
             100, 0, 5.,
             60, -1.5, 1.5
         )),
         higDRDPt(book<TH2F>(
             "higgDRDPt",
-            ";#DeltaR(H_{reco}, H_{gen});#DeltaP_{T, rel}(H_{reco}, H_{gen})",
+            ";#DeltaR(H_{reco}, H_{gen});Higgs: (P_{T, gen} - P_{T, reco}) / P_{T, gen}",
             100, 0., 5.,
             60, -1.5, 1.5
         ))
@@ -151,25 +166,30 @@ public:
     virtual void fill(const uhh2::Event & e) override {
         float w = e.weight;
 
-        // grab gen particles
         LorentzVector t_gen, h_gen;
-        if (find_top_and_higgs(*e.genparticles, t_gen, h_gen) != 2) {
-            return;
-        }
+        bool gen_available = (find_top_and_higgs(*e.genparticles, t_gen, h_gen) == 2);
+        bool top_available = e.is_valid(h_top_lep);
+        bool higgs_available = e.is_valid(h_higgs);
+
+        // availability
+        foundGenParticles->Fill((int) gen_available, w);
+        foundRecoTopAndHiggs->Fill((int) top_available, (int) higgs_available, w);
 
         // gen
-        tophigggenDR->Fill(deltaR(t_gen, h_gen), w);
+        if (gen_available) {
+            tophigggenDR->Fill(deltaR(t_gen, h_gen), w);
+        }
 
         // top
-        if (e.is_valid(h_top_lep)) {
+        if (gen_available && top_available) {
             const auto & t_reco = e.get(h_top_lep);
-            topDRDPt->Fill(deltaR(t_gen, t_reco), (t_reco.pt() - t_gen.pt())/t_gen.pt(), w);
+            topDRDPt->Fill(deltaR(t_gen, t_reco), (t_gen.pt() - t_reco.pt())/t_gen.pt(), w);
         }
 
         // higgs
-        if (e.is_valid(h_higgs)) {
+        if (gen_available && higgs_available) {
             const auto & h_reco = e.get(h_higgs);
-            higDRDPt->Fill(deltaR(h_gen, h_reco), (h_reco.pt() - h_gen.pt())/h_gen.pt(), w);
+            higDRDPt->Fill(deltaR(h_gen, h_reco), (h_gen.pt() - h_reco.pt())/h_gen.pt(), w);
         }
     }
 
@@ -178,6 +198,8 @@ private:
     Event::Handle<LorentzVector> h_top_lep;
 
     TH1F * tophigggenDR;
+    TH1F * foundGenParticles;
+    TH2F * foundRecoTopAndHiggs;
     TH2F * topDRDPt;
     TH2F * higDRDPt;
 };  // class VLQ2HTRecoGenComparison
@@ -187,6 +209,16 @@ class VLQ2HTGenHists: public Hists {
 public:
     VLQ2HTGenHists(Context & ctx, const string & dir):
         Hists(ctx, dir),
+        higgTopDr(book<TH1F>(
+            "higgTopDr",
+            ";#DeltaR(H, top);events",
+            50, 0., 5.
+        )),
+        higgTopDPhi(book<TH1F>(
+            "higgTopDPhi",
+            ";#Delta#Phi(H, top);events",
+            50, 0., 5.
+        )),
         tPrimeKinematic(book<TH2F>(
             "tPrimeKinematic",
             ";T' p_{T};T' #eta",
@@ -221,6 +253,11 @@ public:
             ";#DeltaR(H decay prods);events",
             50, 0., 5.
         )),
+        higgProdDPhi(book<TH1F>(
+            "higgProdDPhi",
+            ";#Delta#Phi(H decay prods);events",
+            50, 0., 5.
+        )),
         topKinematic(book<TH2F>(
             "topKinematic",
             ";top quark p_{T};top quark #eta",
@@ -244,7 +281,77 @@ public:
             ";W decay prods. p_{T};W decay prods. #eta",
             100, 0, 1000,
             100, -6., 6.
-        ))
+        )),
+        topProdMaxDr(book<TH1F>(
+            "topProdMaxDr",
+            ";max #DeltaR(top decay prods);events",
+            50, 0., 5.
+        )),
+        topProdMaxDPhi(book<TH1F>(
+            "topProdMaxDPhi",
+            ";max #Delta#Phi(top decay prods);events",
+            50, 0., 5.
+        )),
+        topProdDrBToLepton(book<TH1F>(
+            "topProdDrBToLepton",
+            ";top products: #DeltaR(b to l);events",
+            50, 0., 5.
+        )),
+        topProdDrBToNeutrino(book<TH1F>(
+            "topProdDrBToNeutrino",
+            ";top products: #DeltaR(b to #nu);events",
+            50, 0., 5.
+        )),
+        topProdDrLeptonToNeutrino(book<TH1F>(
+            "topProdDrLeptonToNeutrino",
+            ";top products: #DeltaR(l to #nu);events",
+            50, 0., 5.
+        )),
+        topProdDPhiBToLepton(book<TH1F>(
+            "topProdDPhiBToLepton",
+            ";top products: #Delta#Phi(b to l);events",
+            50, 0., 5.
+        )),
+        topProdDPhiBToNeutrino(book<TH1F>(
+            "topProdDPhiBToNeutrino",
+            ";top products: #Delta#Phi(b to #nu);events",
+            50, 0., 5.
+        )),
+        topProdDPhiLeptonToNeutrino(book<TH1F>(
+            "topProdDPhiLeptonToNeutrino",
+            ";top products: #Delta#Phi(l to #nu);events",
+            50, 0., 5.
+        )) // ,
+        // topDrToLepton(book<TH1F>(
+        //     "topProdDrBToLepton",
+        //     ";top products: #DeltaR(b to l);events",
+        //     50, 0., 5.
+        // )),
+        // topDrToNeutrino(book<TH1F>(
+        //     "topProdDrBToNeutrino",
+        //     ";top products: #DeltaR(b to #nu);events",
+        //     50, 0., 5.
+        // )),
+        // topDrToB(book<TH1F>(
+        //     "topProdDrLeptonToNeutrino",
+        //     ";top products: #DeltaR(l to #nu);events",
+        //     50, 0., 5.
+        // )),
+        // topDPhiToLepton(book<TH1F>(
+        //     "topProdDPhiBToLepton",
+        //     ";top products: #Delta#Phi(b to l);events",
+        //     50, 0., 5.
+        // )),
+        // topDPhiToNeutrino(book<TH1F>(
+        //     "topProdDPhiBToNeutrino",
+        //     ";top products: #Delta#Phi(b to #nu);events",
+        //     50, 0., 5.
+        // )),
+        // topDPhiToB(book<TH1F>(
+        //     "topProdDPhiLeptonToNeutrino",
+        //     ";top products: #Delta#Phi(l to #nu);events",
+        //     50, 0., 5.
+        // ))
     {
         higgProdPdgId->SetBit(TH1::kCanRebin);
     }
@@ -304,6 +411,8 @@ public:
             }
         }
         // fill hists
+        higgTopDr->Fill(deltaR(top.v4(), higg.v4()), w);
+        higgTopDPhi->Fill(deltaPhi(top.v4(), higg.v4()), w);
         tPrimeKinematic->Fill(tprime.pt(), tprime.eta(), w);
         fwJetKinematic->Fill(fwd_parton.pt(), fwd_parton.eta(), w);
         topKinematic->Fill(top.pt(), top.eta(), w);
@@ -311,8 +420,41 @@ public:
             topWKinematic->Fill(top_w.pt(), top_w.eta(), w);
             topBKinematic->Fill(top_b.pt(), top_b.eta(), w);
             if (top_w.daughter(gps, 1)) {
-                topWProdKinematic->Fill(top_w.daughter(gps, 1)->pt(), top_w.daughter(gps, 1)->eta(), w);
-                topWProdKinematic->Fill(top_w.daughter(gps, 2)->pt(), top_w.daughter(gps, 2)->eta(), w);
+                auto tw_d1 = top_w.daughter(gps, 1);
+                auto tw_d2 = top_w.daughter(gps, 2);
+                topWProdKinematic->Fill(tw_d1->pt(), tw_d1->eta(), w);
+                topWProdKinematic->Fill(tw_d2->pt(), tw_d2->eta(), w);
+
+                auto tw_nu_v4 = (tw_d1->pdgId() % 2 == 0) ? tw_d1->v4() : tw_d2->v4();
+                auto tw_le_v4 = (tw_d1->pdgId() % 2 == 0) ? tw_d2->v4() : tw_d1->v4();
+
+                float dr1 = deltaR(top_b.v4(), tw_nu_v4);
+                float dr2 = deltaR(top_b.v4(), tw_le_v4);
+                float dr3 = deltaR(tw_le_v4, tw_nu_v4);
+                if (dr1 > dr2 && dr1 > dr3) {
+                    topProdMaxDr->Fill(dr1, w);
+                } else if (dr2 > dr3) {
+                    topProdMaxDr->Fill(dr2, w);
+                } else {
+                    topProdMaxDr->Fill(dr3, w);
+                }
+                topProdDrBToNeutrino->Fill(dr1, w);
+                topProdDrBToLepton->Fill(dr2, w);
+                topProdDrLeptonToNeutrino->Fill(dr3, w);
+
+                float dphi1 = deltaPhi(top_b.v4(), tw_nu_v4);
+                float dphi2 = deltaPhi(top_b.v4(), tw_le_v4);
+                float dphi3 = deltaPhi(tw_le_v4, tw_nu_v4);
+                if (dphi1 > dphi2 && dphi1 > dphi3) {
+                    topProdMaxDPhi->Fill(dphi1, w);
+                } else if (dphi2 > dphi3) {
+                    topProdMaxDPhi->Fill(dphi2, w);
+                } else {
+                    topProdMaxDPhi->Fill(dphi3, w);
+                }
+                topProdDPhiBToNeutrino->Fill(dphi1, w);
+                topProdDPhiBToLepton->Fill(dphi2, w);
+                topProdDPhiLeptonToNeutrino->Fill(dphi3, w);
             }
         }
         higgKinematic->Fill(higg.pt(), higg.eta(), w);
@@ -324,18 +466,31 @@ public:
         if (higg.daughter(gps, 1) && higg.daughter(gps, 2)) {
             higgProdDr->Fill(deltaR(higg.daughter(gps, 1)->v4(),
                                     higg.daughter(gps, 2)->v4()), w);
+            higgProdDPhi->Fill(deltaPhi(higg.daughter(gps, 1)->v4(),
+                                        higg.daughter(gps, 2)->v4()), w);
         }
     }
 
 private:
+    TH1F * higgTopDr;
+    TH1F * higgTopDPhi;
     TH2F * tPrimeKinematic;
     TH2F * fwJetKinematic;
     TH2F * higgKinematic;
     TH2F * higgProdKinematic;
     TH1F * higgProdPdgId;
     TH1F * higgProdDr;
+    TH1F * higgProdDPhi;
     TH2F * topKinematic;
     TH2F * topWKinematic;
     TH2F * topBKinematic;
     TH2F * topWProdKinematic;
+    TH1F * topProdMaxDr;
+    TH1F * topProdMaxDPhi;
+    TH1F * topProdDrBToLepton;
+    TH1F * topProdDrBToNeutrino;
+    TH1F * topProdDrLeptonToNeutrino;
+    TH1F * topProdDPhiBToLepton;
+    TH1F * topProdDPhiBToNeutrino;
+    TH1F * topProdDPhiLeptonToNeutrino;
 };  // class VLQ2HTGenHists

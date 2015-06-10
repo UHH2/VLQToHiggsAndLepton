@@ -40,8 +40,8 @@ public:
         // boilerplate (checks and objects)
         assert(event.jets);
         const auto & b_jets = event.get(h_b_jets);
-        const auto & h_jets = event.get(h_h_jets);
-        if (b_jets.size() < 3 && !h_jets.size()) {
+        const auto & h_jets = event.is_valid(h_h_jets) ? event.get(h_h_jets) : vector<TopJet>();
+        if (b_jets.size() < 2 && !h_jets.size()) {
             return false;
         }
         vector<HiggsRecoHyp> reco_hyps;
@@ -71,17 +71,6 @@ public:
                         vector<TopJet>(),
                         vector<Jet>({bj1, bj2})
                     );
-                    for (const auto & j : *event.jets) {
-                        if (deltaR(j, bj1) < 0.1 || deltaR(j, bj2) < 0.1 ) {
-                            continue;
-                        }
-                        LorentzVector higgs_j_v4 = higgs_v4 + j.v4();
-                        reco_hyps.emplace_back(
-                            higgs_j_v4,
-                            vector<TopJet>(),
-                            vector<Jet>({bj1, bj2, j})
-                        );
-                    }
                 }
             }
         }

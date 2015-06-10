@@ -4,6 +4,8 @@
 #include <vector>
 #include <memory>
 
+#include "UHH2/VLQToHiggsAndLepton/include/VLQ2HT_hists.h"
+
 #include "UHH2/core/include/AnalysisModule.h"
 #include "UHH2/core/include/Event.h"
 
@@ -63,18 +65,32 @@ using namespace uhh2;
 // }
 
 
-static bool is_fwd_jet(const Jet & j, const Event &) {
-    return fabs(j.eta()) >= 2.4;
-}
-
-static bool is_cntrl_jet(const Jet & j, const Event &) {
-    return fabs(j.eta()) < 2.4;
-}
-
 template <typename TYPE>
 static bool is_true(const TYPE &, const Event &) {
     return true;
 }
+
+
+class MyAndSelection: public Selection {
+public:
+    explicit MyAndSelection(const vector<Selection*> &sel_vec) {
+        for (const auto & sel : sel_vec) {
+            sel_vec_.emplace_back(sel);
+        }
+    }
+
+    bool passes(const Event & e) override {
+        for (const auto & sel : sel_vec_) {
+            if (!sel->passes(e)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+private:
+    vector<unique_ptr<Selection>> sel_vec_;
+};
 
 
 /** \brief Basic analysis example of an AnalysisModule in UHH2
@@ -116,27 +132,73 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     }
 
     // setup modules to check if this event belongs into this category
-    v_pre_modules.emplace_back(new CollectionProducer<TopJet>(ctx, HiggsTag(60.f, 99999., CSVBTag(CSVBTag::WP_MEDIUM)), "patJetsCa15CHSJetsFilteredPacked", "h_jets"));
-    // v_pre_modules.emplace_back(new CollectionProducer<TopJet>(ctx, HiggsTag(60.f, 99999., CSVBTag(CSVBTag::WP_MEDIUM)), "patJetsCa8CHSJetsPrunedPacked", "h_jets"));
-    v_pre_modules.emplace_back(new CollectionSizeProducer<TopJet>(ctx, is_true<TopJet>, "h_jets", "n_htags"));
-    cat_check_module.reset(new HandleSelection<int>(ctx, "n_htags", 1));
+    v_pre_modules.emplace_back(new CollectionSizeProducer<TopJet>(ctx, HiggsTag(60.f, 99999., CSVBTag(CSVBTag::WP_MEDIUM)), "patJetsCa15CHSJetsFilteredPacked", "n_htags_filtered"));
+    v_pre_modules.emplace_back(new CollectionSizeProducer<TopJet>(ctx, HiggsTag(60.f, 99999., CSVBTag(CSVBTag::WP_MEDIUM)), "patJetsCa8CHSJetsPrunedPacked", "n_htags"));
+    v_pre_modules.emplace_back(new CollectionSizeProducer<Jet>(ctx, AndId<Jet>(PtEtaCut(30., 2.4), CSVBTag(CSVBTag::WP_MEDIUM)), "jets", "n_btags"));
+
+    const string & category = ctx.get("category", "");
+
+    // higgs tag with filtered jets
+    if (category == "FilteredCat1htag") {
+        cat_check_module.reset(new HandleSelection<int>(ctx, "n_htags_filtered", 1));
+        v_cat_modules.emplace_back(new CollectionProducer<Jet>(ctx, AndId<Jet>(PtEtaCut(30., 2.4), CSVBTag(CSVBTag::WP_MEDIUM)), "jets", "b_jets"));
+        v_cat_modules.emplace_back(new CollectionSizeProducer<TopJet>(ctx, HiggsTag(60.f, 99999., CSVBTag(CSVBTag::WP_MEDIUM)), "patJetsCa15CHSJetsFilteredPacked", "n_htags"));
+        v_cat_modules.emplace_back(new CollectionProducer<TopJet>(ctx, HiggsTag(60.f, 99999., CSVBTag(CSVBTag::WP_MEDIUM)), "patJetsCa15CHSJetsFilteredPacked", "h_jets"));
+        if (version.substr(version.size() - 5, 100) == "_Tlep") {
+            gen_hists.reset(new VLQ2HTGenHists(ctx, "GenHists"));
+        }
+    } else if (category == "FilteredCat0h2btag") {
+        cat_check_module.reset(new MyAndSelection({
+            new HandleSelection<int>(ctx, "n_htags", 0, 0),
+            new HandleSelection<int>(ctx, "n_btags", 2)
+        }));
+        v_cat_modules.emplace_back(new CollectionProducer<Jet>(ctx, AndId<Jet>(PtEtaCut(30., 2.4), CSVBTag(CSVBTag::WP_MEDIUM)), "jets", "b_jets"));
+        v_cat_modules.emplace_back(new CollectionSizeProducer<TopJet>(ctx, HiggsTag(60.f, 99999., CSVBTag(CSVBTag::WP_MEDIUM)), "patJetsCa15CHSJetsFilteredPacked", "n_htags"));
+        v_cat_modules.emplace_back(new CollectionProducer<TopJet>(ctx, HiggsTag(60.f, 99999., CSVBTag(CSVBTag::WP_MEDIUM)), "patJetsCa15CHSJetsFilteredPacked", "h_jets"));
+    } else if (category == "FilteredCat0h1btag") {
+        cat_check_module.reset(new MyAndSelection({
+            new HandleSelection<int>(ctx, "n_htags", 0, 0),
+            new HandleSelection<int>(ctx, "n_btags", 0, 1)
+        }));
+        v_cat_modules.emplace_back(new CollectionProducer<Jet>(ctx, AndId<Jet>(PtEtaCut(30., 2.4), CSVBTag(CSVBTag::WP_LOOSE)), "jets", "b_jets"));
+        v_cat_modules.emplace_back(new CollectionSizeProducer<TopJet>(ctx, HiggsTag(60.f, 99999., CSVBTag(CSVBTag::WP_MEDIUM)), "patJetsCa15CHSJetsFilteredPacked", "n_htags"));
+        v_cat_modules.emplace_back(new CollectionProducer<TopJet>(ctx, HiggsTag(60.f, 99999., CSVBTag(CSVBTag::WP_MEDIUM)), "patJetsCa15CHSJetsFilteredPacked", "h_jets"));
+
+    // higgs tag with pruned jets
+    } else if (category == "PrunedCat1htag") {
+        cat_check_module.reset(new HandleSelection<int>(ctx, "n_htags", 1));
+        v_cat_modules.emplace_back(new CollectionProducer<Jet>(ctx, AndId<Jet>(PtEtaCut(30., 2.4), CSVBTag(CSVBTag::WP_MEDIUM)), "jets", "b_jets"));
+        v_cat_modules.emplace_back(new CollectionProducer<TopJet>(ctx, HiggsTag(60.f, 99999., CSVBTag(CSVBTag::WP_MEDIUM)), "patJetsCa8CHSJetsPrunedPacked", "h_jets"));
+    } else if (category == "PrunedCat0h2btag") {
+        cat_check_module.reset(new MyAndSelection({
+            new HandleSelection<int>(ctx, "n_htags", 0, 0),
+            new HandleSelection<int>(ctx, "n_btags", 2)
+        }));
+        v_cat_modules.emplace_back(new CollectionProducer<Jet>(ctx, AndId<Jet>(PtEtaCut(30., 2.4), CSVBTag(CSVBTag::WP_MEDIUM)), "jets", "b_jets"));
+    } else if (category == "PrunedCat0h1btag") {
+        cat_check_module.reset(new MyAndSelection({
+            new HandleSelection<int>(ctx, "n_htags", 0, 0),
+            new HandleSelection<int>(ctx, "n_btags", 0, 1)
+        }));
+        v_cat_modules.emplace_back(new CollectionProducer<Jet>(ctx, AndId<Jet>(PtEtaCut(30., 2.4), CSVBTag(CSVBTag::WP_LOOSE)), "jets", "b_jets"));
+    } else {
+        assert(false);  // a category must be given
+    }
 
     // setup modules to prepare the event.
     // leptons
     v_cat_modules.emplace_back(new ElectronCleaner(PtEtaCut(105.0, 2.4)));
     v_cat_modules.emplace_back(new MuonCleaner(PtEtaCut(50.0, 2.4)));
     v_cat_modules.emplace_back(new NLeptonsProducer(ctx, "n_leptons"));
-    v_cat_modules.emplace_back(new PrimaryLepton(ctx, "PrimaryLepton"));
+    v_cat_modules.emplace_back(new PrimaryLepton(ctx));  // , "PrimaryLepton"));
     v_cat_modules.emplace_back(new LeptonPtProducer(ctx, "PrimaryLepton", "primary_lepton_pt"));
 
     // jets
     v_cat_modules.emplace_back(new LargestJetEtaProducer(ctx, "largest_jet_eta", "jets"));
-    v_cat_modules.emplace_back(new CollectionProducer<Jet>(ctx, is_fwd_jet, "jets", "fwd_jets"));
+    v_cat_modules.emplace_back(new CollectionProducer<Jet>(ctx, VetoId<Jet>(PtEtaCut(0.0, 2.4)), "jets", "fwd_jets"));
     v_cat_modules.emplace_back(new CollectionSizeProducer<Jet>(ctx, is_true<Jet>, "fwd_jets", "n_fwd_jets"));
-    v_cat_modules.emplace_back(new CollectionProducer<Jet>(ctx, is_cntrl_jet, "jets", "jets"));
+    v_cat_modules.emplace_back(new CollectionProducer<Jet>(ctx, PtEtaCut(0.0, 2.4), "jets", "jets"));
     v_cat_modules.emplace_back(new CollectionSizeProducer<Jet>(ctx, is_true<Jet>, "jets", "n_jets"));
-    v_cat_modules.emplace_back(new CollectionProducer<Jet>(ctx, CSVBTag(CSVBTag::WP_MEDIUM), "jets", "b_jets"));
-    v_cat_modules.emplace_back(new CollectionSizeProducer<Jet>(ctx, is_true<Jet>, "b_jets", "n_btags"));
     v_cat_modules.emplace_back(new NLeadingBTagProducer(ctx, CSVBTag::WP_MEDIUM, "n_leading_btags"));
     v_cat_modules.emplace_back(new LeadingJetPtProducer(ctx, "leading_jet_pt"));
     v_cat_modules.emplace_back(new SubleadingJetPtProducer(ctx, "subleading_jet_pt"));
@@ -160,6 +222,7 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     v_cat_modules.emplace_back(new EventWeightOutputHandle(ctx, "weight"));
     v_cat_modules.emplace_back(new TriggerAcceptProducer(ctx, TRIGGER_PATHS, "trigger_accept"));
     v_cat_modules.emplace_back(new AbsValueProducer<float>(ctx, "largest_jet_eta"));
+    v_cat_modules.emplace_back(new TwoDCutProducer(ctx));
     // v_pre_modules.emplace_back(new AbsValueProducer<float>(ctx, "vlq_eta"));
 
     // Selection Producer
@@ -175,8 +238,8 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     v_hists.emplace_back(cf_hists);
 
     // insert 2D cut
-    unsigned pos_2d_cut = 1;
-    sel_module->insert_selection(pos_2d_cut, new TwoDCutSel(ctx, 0.4, 20.));
+    unsigned pos_2d_cut = 9;
+    sel_module->insert_selection(pos_2d_cut, new TwoDCutSel(ctx, 0., 0.));
     nm1_hists->insert_hists(pos_2d_cut, new TwoDCutHist(ctx, "Nm1Selection"));
     cf_hists->insert_step(pos_2d_cut, "2D cut");
     v_hists.insert(v_hists.begin() + pos_2d_cut, move(unique_ptr<Hists>(new TwoDCutHist(ctx, "NoSelection"))));
@@ -192,12 +255,11 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     v_hists_after_sel.emplace_back(new JetHists(ctx, "SanityCheckFwdJets", 4, "fwd_jets"));
 
     // signal sample gen hists
-    if (version.substr(version.size() - 5, 100) == "_Tlep") {
-        gen_hists.reset(new VLQ2HTGenHists(ctx, "GenHists"));
-    }
     if (version.substr(version.size() - 4, 100) == "Tlep") {
-        v_hists_after_sel.emplace_back(new VLQ2HTRecoGenComparison(ctx, "GenRecoHists"));
-        v_hists_after_sel.emplace_back(new VLQ2HTRecoGenMatchHists(ctx, "Chi2SignalMatch"));
+        v_hists.emplace_back(new VLQ2HTRecoGenComparison(ctx, "GenRecoHists"));
+        v_hists.emplace_back(new VLQ2HTRecoGenMatchHists(ctx, "Chi2SignalMatch"));
+        v_hists_after_sel.emplace_back(new VLQ2HTRecoGenComparison(ctx, "GenRecoHistsAfterSel"));
+        v_hists_after_sel.emplace_back(new VLQ2HTRecoGenMatchHists(ctx, "Chi2SignalMatchAfterSel"));
     }
 
     ctx.undeclare_event_output("GenParticles");

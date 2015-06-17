@@ -23,6 +23,7 @@ tc = varial.tools.ToolChain(
             uhh_base + 'VLQSemiLepPreSel',
             uhh_base + 'VLQToHiggsAndLepton',
         ]),
+        varial.tools.UserInteraction('Really run sframe? (Kill me otherwise.)'),
         sframe_tools.sframe_tools,
         sensitivity.tc,
         # varial.tools.PrintToolTree(),

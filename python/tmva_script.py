@@ -1,8 +1,11 @@
 import ROOT
+ROOT.gROOT.SetBatch(True)
 ROOT.TMVA.Tools.Instance()
+
 # prepare inputs
-f_sig = ROOT.TFile('uhh2.AnalysisModuleRunner.MC.TpJ_TH_M800_Tlep.root')
-f_bkg = ROOT.TFile('uhh2.AnalysisModuleRunner.MC.MC_TTJets.root')
+p = 'VLQ2HT/EventLoopAndPlots/FilteredCat1htag/SFrame/'
+f_sig = ROOT.TFile(p + 'uhh2.AnalysisModuleRunner.MC.TpJ_TH_M800_Tlep.root')
+f_bkg = ROOT.TFile(p + 'uhh2.AnalysisModuleRunner.MC.MC_TTJets.root')
 t_sig = f_sig.Get('AnalysisTree')
 t_bkg = f_bkg.Get('AnalysisTree')
 
@@ -16,7 +19,10 @@ variables = [
     'dr_higg_top',
     'h_mass',
     'h_pt',
+    'tlep_pt',
     'abs_largest_jet_eta',
+    'event_chi2',
+    'vlq_mass',
     #'n_leading_btags',
     #'n_fwd_jets',
 ]
@@ -48,8 +54,8 @@ factory.BookMethod(
     ':VarProp[0]=FSmart'
     ':VarProp[2]=FSmart'
     ':VarProp[3]=FSmart'
-    #':VarProp[4]=FSmart'
-    #':VarProp[5]=FSmart'
+    ':VarProp[4]=FSmart'
+    ':VarProp[5]=FSmart'
     #':CutRangeMin[0]=0:CutRangeMax[0]=50:VarProp[0]=FMin'
     #':CutRangeMin[1]=0:CutRangeMax[1]=50'
     #':CutRangeMin[2]=0:CutRangeMax[2]=50000:VarProp[2]=FMin'

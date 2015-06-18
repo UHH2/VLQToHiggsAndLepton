@@ -149,7 +149,7 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
         }
     } else if (category == "FilteredCat0h2btag") {
         cat_check_module.reset(new MyAndSelection({
-            new HandleSelection<int>(ctx, "n_htags", 0, 0),
+            new HandleSelection<int>(ctx, "n_htags_filtered", 0, 0),
             new HandleSelection<int>(ctx, "n_btags", 2)
         }));
         v_cat_modules.emplace_back(new CollectionProducer<Jet>(ctx, AndId<Jet>(PtEtaCut(30., 2.4), CSVBTag(CSVBTag::WP_MEDIUM)), "jets", "b_jets"));
@@ -157,7 +157,7 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
         v_cat_modules.emplace_back(new CollectionProducer<TopJet>(ctx, HiggsTag(60.f, 99999., CSVBTag(CSVBTag::WP_MEDIUM)), "patJetsCa15CHSJetsFilteredPacked", "h_jets"));
     } else if (category == "FilteredCat0h1btag") {
         cat_check_module.reset(new MyAndSelection({
-            new HandleSelection<int>(ctx, "n_htags", 0, 0),
+            new HandleSelection<int>(ctx, "n_htags_filtered", 0, 0),
             new HandleSelection<int>(ctx, "n_btags", 0, 1)
         }));
         v_cat_modules.emplace_back(new CollectionProducer<Jet>(ctx, AndId<Jet>(PtEtaCut(30., 2.4), CSVBTag(CSVBTag::WP_LOOSE)), "jets", "b_jets"));
@@ -236,10 +236,12 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     auto cf_hists = new VLQ2HTCutflow(ctx, "Cutflow", sel_helper);
     v_hists.emplace_back(nm1_hists);
     v_hists.emplace_back(cf_hists);
+    v_hists.emplace_back(new HandleHistChi2Weight<float, float>(
+        ctx, "NoSelection", "vlq_mass", "event_chi2", "#Chi^{2} weighted T mass", 50, 0, 2000));
 
     // insert 2D cut
     unsigned pos_2d_cut = 9;
-    sel_module->insert_selection(pos_2d_cut, new TwoDCutSel(ctx, 0., 0.));
+    sel_module->insert_selection(pos_2d_cut, new TwoDCutSel(ctx, DR_2D_CUT, DPT_2D_CUT));
     nm1_hists->insert_hists(pos_2d_cut, new TwoDCutHist(ctx, "Nm1Selection"));
     cf_hists->insert_step(pos_2d_cut, "2D cut");
     v_hists.insert(v_hists.begin() + pos_2d_cut, move(unique_ptr<Hists>(new TwoDCutHist(ctx, "NoSelection"))));
@@ -253,6 +255,8 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     v_hists_after_sel.emplace_back(new EventHists(ctx, "SanityCheckEvent"));
     v_hists_after_sel.emplace_back(new JetHists(ctx, "SanityCheckJets"));
     v_hists_after_sel.emplace_back(new JetHists(ctx, "SanityCheckFwdJets", 4, "fwd_jets"));
+    v_hists_after_sel.emplace_back(new HandleHistChi2Weight<float, float>(
+        ctx, "Nm1Selection", "vlq_mass", "event_chi2", "#Chi^{2} weighted T mass", 50, 0, 2000));
 
     // signal sample gen hists
     if (version.substr(version.size() - 4, 100) == "Tlep") {

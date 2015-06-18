@@ -33,18 +33,21 @@ typedef SelectionItemData<double>   SelDatD;
 // Cut[ 3]:     2.4325 < abs(abs_largest_jet_eta) <=      1e+30
 // ------------------------------------------------------------
 
+static const float DR_2D_CUT = 2.5;
+static const float DPT_2D_CUT = 40.0;
+
 
 static const vector<shared_ptr<SelectionItem>> SEL_ITEMS_VLQ2HT {
-    shared_ptr<SelectionItem>(new SelDatI("trigger_accept",    "ele+Jets OR mu+Jets",      2, -.5, 1.5         ,1      )),
+    shared_ptr<SelectionItem>(new SelDatI("trigger_accept",    "trigger accept",           2, -.5, 1.5         ,1      )),
     shared_ptr<SelectionItem>(new SelDatI("n_jets",            "N_{jet}",                  21, -.5, 20.5       ,2      )),
     shared_ptr<SelectionItem>(new SelDatI("n_leptons",         "N_{lepton}",               11, -.5, 10.5       ,1      )),
-    shared_ptr<SelectionItem>(new SelDatF("event_chi2",        "event chi2",               100, 0, 200         ,150    )),
+    shared_ptr<SelectionItem>(new SelDatF("event_chi2",        "event chi2",               100, 0, 200         ,0., 150)),
     shared_ptr<SelectionItem>(new SelDatI("n_leading_btags",   "N_{b-tag leading}",        11, -.5, 10.5       ,1      )),
     shared_ptr<SelectionItem>(new SelDatF("dr_higg_top",       "#DeltaR(H, t)",            50, 0, 5            ,2      )),
-    shared_ptr<SelectionItem>(new SelDatF("h_mass",            "Higgs mass",               50, 0, 1000         ,60 ,160)),
-    shared_ptr<SelectionItem>(new SelDatF("h_pt",              "Higgs p_{T}",              50, 0, 1000         ,200    )),
+    shared_ptr<SelectionItem>(new SelDatF("h_mass",            "Higgs mass",               50, 0, 1000         ,60, 160)),
+    shared_ptr<SelectionItem>(new SelDatF("h_pt",              "Higgs p_{T}",              50, 0, 1000         ,250    )),
+    shared_ptr<SelectionItem>(new SelDatF("tlep_pt",           "lept. top p_{T}",          50, 0, 1000         ,250    )),
     shared_ptr<SelectionItem>(new SelDatF("abs_largest_jet_eta", "most forward jet #eta",  50, 0., 5.          ,1      )),
-
 
     // shared_ptr<SelectionItem>(new SelDatF("abs_vlq_eta",       "T #eta",                   50, 0., 5.                  )),
     shared_ptr<SelectionItem>(new SelDatI("n_btags",           "N_{b-tag}",                11, -.5, 10.5               )),
@@ -56,7 +59,6 @@ static const vector<shared_ptr<SelectionItem>> SEL_ITEMS_VLQ2HT {
     shared_ptr<SelectionItem>(new SelDatI("n_fwd_jets",        "N_{fwd jet}",              11, -.5, 10.5               )),
     shared_ptr<SelectionItem>(new SelDatI("n_htags",           "N_{H jet}",                11, -.5, 10.5               )),
     shared_ptr<SelectionItem>(new SelDatD("ST",                "ST",                       100, 0, 5000                )),
-    shared_ptr<SelectionItem>(new SelDatF("tlep_pt",           "lept. top p_{T}",          50, 0, 1000                 )),
     shared_ptr<SelectionItem>(new SelDatF("tlep_eta",          "lept. top #eta",           50, -5., 5.                 )),
     shared_ptr<SelectionItem>(new SelDatF("tlep_mass",         "lept. top mass",           50, 0, 1000                 )),
     shared_ptr<SelectionItem>(new SelDatF("h_eta",             "Higgs #eta",               50, -5., 5.                 )),
@@ -81,8 +83,9 @@ static const vector<shared_ptr<SelectionItem>> SEL_ITEMS_VLQ2HT {
 
 
 static const vector<std::string> TRIGGER_PATHS {
-    "HLT_Ele95_CaloIdVT_GsfTrkIdT_v*",
+    "HLT_Ele45_CaloIdVT_GsfTrkIdT_PFJet200_PFJet50_v*",
     "HLT_Mu40_v*",
+    "HLT_PFHT900_v*",
 };
 
 

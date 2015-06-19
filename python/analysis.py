@@ -5,6 +5,7 @@ import UHH2.VLQSemiLepPreSel.vlq_settings as vlq_settings
 import UHH2.VLQSemiLepPreSel.common as common
 import sframe_tools
 import sensitivity
+import tex_content
 
 import varial.tools
 import os
@@ -28,6 +29,7 @@ tc = varial.tools.ToolChain(
         sensitivity.tc,
         # varial.tools.PrintToolTree(),
         varial.tools.WebCreator(),
+        tex_content.tex_content,
         # varial.tools.CopyTool('~/www/test'),
     ]
 )

@@ -67,6 +67,25 @@ def plotter_factory_stack_sigx30(**kws):
     return varial.tools.Plotter(**kws)
 
 
+def loader_hook_cat_merging(wrps):
+    wrps = common.add_wrp_info(wrps)
+    group_key = lambda w: w.in_file_path + '__' + w.sample
+    wrps = sorted(wrps, key=group_key)
+    wrps = gen.group(wrps, key_func=group_key)
+    wrps = gen.gen_merge(wrps)
+    wrps = merge_samples(wrps)
+    wrps = common.label_axes(wrps)
+    wrps = gen.gen_make_th2_projections(wrps)
+    return wrps
+
+
+def plotter_factory_stack_cat_merging(**kws):
+    kws['hook_loaded_histos'] = loader_hook_cat_merging
+    kws['save_lin_log_scale'] = True
+    kws['plot_setup'] = gen.mc_stack_n_data_sum
+    return varial.tools.Plotter(**kws)
+
+
 def mk_tools(input_pattern=None):
     if not input_pattern:
         input_pattern = input_pat

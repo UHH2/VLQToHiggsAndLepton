@@ -5,6 +5,7 @@
 #include "UHH2/common/include/Utils.h"
 #include "TH1F.h"
 #include "TH2F.h"
+#include "TProfile.h"
 
 using namespace std;
 using namespace uhh2;
@@ -160,6 +161,18 @@ public:
             ";#DeltaR(H_{reco}, H_{gen});Higgs: (P_{T, gen} - P_{T, reco}) / P_{T, gen}",
             100, 0., 5.,
             60, -1.5, 1.5
+        )),
+        topPtResponse(book<TProfile>(
+            "topPtResponse",
+            ";top quark P_{T, gen} / GeV;top quark (P_{T, gen} - P_{T, reco}) / P_{T, gen}",
+            70, 0., 700,
+            -1., 1.
+        )),
+        higPtResponse(book<TProfile>(
+            "higPtResponse",
+            ";Higgs cand. P_{T, gen} / GeV;Higgs cand. (P_{T, gen} - P_{T, reco}) / P_{T, gen}",
+            70, 0., 700,
+            -1., 1.
         ))
     {}
 
@@ -183,13 +196,17 @@ public:
         // top
         if (gen_available && top_available) {
             const auto & t_reco = e.get(h_top_lep);
-            topDRDPt->Fill(deltaR(t_gen, t_reco), (t_gen.pt() - t_reco.pt())/t_gen.pt(), w);
+            float top_rel_pt = (t_gen.pt() - t_reco.pt())/t_gen.pt();
+            topDRDPt->Fill(deltaR(t_gen, t_reco), top_rel_pt, w);
+            topPtResponse->Fill(t_gen.pt(), top_rel_pt, w);
         }
 
         // higgs
         if (gen_available && higgs_available) {
             const auto & h_reco = e.get(h_higgs);
-            higDRDPt->Fill(deltaR(h_gen, h_reco), (h_gen.pt() - h_reco.pt())/h_gen.pt(), w);
+            float hig_rel_pt = (h_gen.pt() - h_reco.pt())/h_gen.pt();
+            higDRDPt->Fill(deltaR(h_gen, h_reco), hig_rel_pt, w);
+            higPtResponse->Fill(h_gen.pt(), hig_rel_pt, w);
         }
     }
 
@@ -202,7 +219,45 @@ private:
     TH2F * foundRecoTopAndHiggs;
     TH2F * topDRDPt;
     TH2F * higDRDPt;
+    TProfile * topPtResponse;
+    TProfile * higPtResponse;
 };  // class VLQ2HTRecoGenComparison
+
+
+class VLQ2HTEventReco: public Hists {
+public:
+    VLQ2HTEventReco(Context & ctx, const string & dir):
+        Hists(ctx, dir),
+        h_higgs(ctx.get_handle<LorentzVector>("h")),
+        h_top_lep(ctx.get_handle<LorentzVector>("tlep")),
+
+        higgPtVsTopPt(book<TH2F>(
+            "higgPtVsTopPt",
+            ";H^{rec} p_{T};top^{rec} p_{T}",
+            70, 0, 700,
+            70, 0, 700
+        ))
+    {}
+
+    virtual void fill(const uhh2::Event & e) override {
+        float w = e.weight;
+
+        bool top_available = e.is_valid(h_top_lep);
+        bool higgs_available = e.is_valid(h_higgs);
+
+        if (top_available && higgs_available) {
+            const auto & t_reco = e.get(h_top_lep);
+            const auto & h_reco = e.get(h_higgs);
+            higgPtVsTopPt->Fill(h_reco.pt(), t_reco.pt(), w);
+        }
+    }
+
+private:
+    Event::Handle<LorentzVector> h_higgs;
+    Event::Handle<LorentzVector> h_top_lep;
+
+    TH2F * higgPtVsTopPt;
+};  // class VLQ2HTEventReco
 
 
 class VLQ2HTGenHists: public Hists {
@@ -226,10 +281,15 @@ public:
             100, -6., 6.
         )),
         fwJetKinematic(book<TH2F>(
-            "assJetKinematic",
+            "fwJetKinematic",
             ";ass. parton p_{T};ass. parton #eta",
             100, 0, 1000,
             100, -6., 6.
+        )),
+        fwPartonPdgId(book<TH1F>(
+            "fwPartonPdgId",
+            ";ass. parton pdgId;events",
+            1, 0, -1
         )),
         higgKinematic(book<TH2F>(
             "higgKinematic",
@@ -354,6 +414,7 @@ public:
         // ))
     {
         higgProdPdgId->SetBit(TH1::kCanRebin);
+        fwPartonPdgId->SetBit(TH1::kCanRebin);
     }
 
     virtual void fill(const uhh2::Event & e) override {
@@ -415,6 +476,7 @@ public:
         higgTopDPhi->Fill(deltaPhi(top.v4(), higg.v4()), w);
         tPrimeKinematic->Fill(tprime.pt(), tprime.eta(), w);
         fwJetKinematic->Fill(fwd_parton.pt(), fwd_parton.eta(), w);
+        fwPartonPdgId->Fill(to_string(abs(fwd_parton.pdgId())).c_str(), w);
         topKinematic->Fill(top.pt(), top.eta(), w);
         if (top_w.pdgId()) {
             topWKinematic->Fill(top_w.pt(), top_w.eta(), w);
@@ -476,6 +538,7 @@ private:
     TH1F * higgTopDPhi;
     TH2F * tPrimeKinematic;
     TH2F * fwJetKinematic;
+    TH1F * fwPartonPdgId;
     TH2F * higgKinematic;
     TH2F * higgProdKinematic;
     TH1F * higgProdPdgId;

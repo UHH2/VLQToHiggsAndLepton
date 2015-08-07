@@ -2,14 +2,13 @@
 import time
 import os
 
-from varial.extensions.sframeproxy import SFrame
+from varial.extensions.sframe import SFrame
 import varial.tools
 import plot
 
 
-sframe_cfg = '/afs/desy.de/user/t/tholenhe/xxl-af-cms/' \
-             'CMSSW_7_2_1_patch1/src/UHH2/VLQToHiggsAndLepton/' \
-             'config/VLQToHiggsAndLepton.xml'
+sframe_cfg = os.getenv('CMSSW_BASE') + \
+             '/src/UHH2/VLQToHiggsAndLepton/config/VLQToHiggsAndLepton.xml'
 
 
 def set_category_func(catname):
@@ -82,19 +81,23 @@ def mk_merged_cat_plots(toolname, input_categories):
 sframe_tools = varial.tools.ToolChainParallel(
     'EventLoopAndPlots',
     [
-        mk_sframe_and_plot_tools('FilteredCat1htag'),
-        mk_sframe_and_plot_tools('FilteredCat0h2btag'),
-        mk_sframe_and_plot_tools('FilteredCat0h1btag'),
-        mk_sframe_and_plot_tools('PrunedCat1htag'),
-        mk_sframe_and_plot_tools('PrunedCat0h2btag'),
-        mk_sframe_and_plot_tools('PrunedCat0h1btag'),
+        mk_sframe_and_plot_tools('CA15FilteredCat1htag'),
+        mk_sframe_and_plot_tools('CA15FilteredCat0h3btag'),
+        mk_sframe_and_plot_tools('CA15FilteredCat0h2btag'),
+        mk_sframe_and_plot_tools('AK8SoftDropCat1htag'),
+        mk_sframe_and_plot_tools('AK8SoftDropCat0h3btag'),
+        mk_sframe_and_plot_tools('AK8SoftDropCat0h2btag'),
         mk_merged_cat_plots(
-            'FilteredAll',
-            ['FilteredCat1htag', 'FilteredCat0h2btag', 'FilteredCat0h1btag']
+            'CA15FilteredAll',
+            ['CA15FilteredCat1htag',
+             'CA15FilteredCat0h3btag',
+             'CA15FilteredCat0h2btag']
         ),
         mk_merged_cat_plots(
-            'PrunedAll',
-            ['PrunedCat1htag', 'PrunedCat0h2btag', 'PrunedCat0h1btag']
+            'AK8SoftDropAll',
+            ['AK8SoftDropCat1htag',
+             'AK8SoftDropCat0h3btag',
+             'AK8SoftDropCat0h2btag']
         ),
     ]
 )

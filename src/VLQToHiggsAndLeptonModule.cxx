@@ -79,6 +79,8 @@ public:
 
 private:
     string version;
+    string type;
+
     // modules for setting up collections and cleaning
     vector<unique_ptr<AnalysisModule>> v_pre_modules;
     vector<unique_ptr<AnalysisModule>> v_cat_modules;
@@ -99,7 +101,8 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     // string testvalue = ctx.get("TestKey", "<not set>");
     // cout << "TestKey in the configuration was: " << testvalue << endl;
     version = ctx.get("dataset_version", "");
-    
+    type = ctx.get("dataset_type", "");
+
     // If running in SFrame, the keys "dataset_version", "dataset_type" and "dataset_lumi"
     // are set to the according values in the xml file. For CMSSW, these are
     // not set automatically, but can be set in the python config file.
@@ -243,27 +246,29 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
         v_hists_after_sel.emplace_back(new VLQ2HTRecoGenMatchHists(ctx, "Chi2SignalMatchAfterSel"));
     }
 
-    ctx.undeclare_event_output("GenParticles");
-    ctx.undeclare_event_output("beamspot_x0");
-    ctx.undeclare_event_output("beamspot_y0");
-    ctx.undeclare_event_output("beamspot_z0");
-    ctx.undeclare_event_output("event");
-    ctx.undeclare_event_output("genInfo");
-    ctx.undeclare_event_output("isRealData");
-    ctx.undeclare_event_output("luminosityBlock");
-    ctx.undeclare_event_output("offlineSlimmedPrimaryVertices");
-    // ctx.undeclare_event_output("patJetsAk4PFCHS");
-    ctx.undeclare_event_output("patJetsCa15CHSJetsFilteredPacked_daughters");
-    ctx.undeclare_event_output("patJetsAk8CHSJetsSoftDropPacked_daughters");
-    ctx.undeclare_event_output("rho");
-    ctx.undeclare_event_output("run");
-    ctx.undeclare_event_output("slimmedElectronsUSER");
-    ctx.undeclare_event_output("slimmedMETs");
-    ctx.undeclare_event_output("slimmedMuonsUSER");
-    ctx.undeclare_event_output("slimmedTaus");
-    ctx.undeclare_event_output("triggerNames");
-    ctx.undeclare_event_output("triggerResults");
-    // ctx.undeclare_event_output("trigger_accept");
+    // if (type == "MC") {
+    if (false) {
+        ctx.undeclare_event_output("GenParticles");
+        ctx.undeclare_event_output("beamspot_x0");
+        ctx.undeclare_event_output("beamspot_y0");
+        ctx.undeclare_event_output("beamspot_z0");
+        ctx.undeclare_event_output("event");
+        ctx.undeclare_event_output("genInfo");
+        ctx.undeclare_event_output("isRealData");
+        ctx.undeclare_event_output("luminosityBlock");
+        ctx.undeclare_event_output("offlineSlimmedPrimaryVertices");
+        ctx.undeclare_event_output("patJetsCa15CHSJetsFilteredPacked_daughters");
+        ctx.undeclare_event_output("patJetsAk8CHSJetsSoftDropPacked_daughters");
+        ctx.undeclare_event_output("rho");
+        ctx.undeclare_event_output("run");
+        ctx.undeclare_event_output("slimmedElectronsUSER");
+        ctx.undeclare_event_output("slimmedMETs");
+        ctx.undeclare_event_output("slimmedMuonsUSER");
+        ctx.undeclare_event_output("slimmedTaus");
+        ctx.undeclare_event_output("triggerNames");
+        ctx.undeclare_event_output("triggerResults");
+        // ctx.undeclare_event_output("trigger_accept");
+    }
 
     // TODO - adjust lepton pt cut to lowest trigger (should go into every trigger leg and test??)
 }

@@ -81,6 +81,7 @@ def mk_merged_cat_plots(toolname, input_categories):
 sframe_tools = varial.tools.ToolChain(  # Parallel(
     'EventLoopAndPlots',
     [
+        mk_sframe_and_plot_tools('CA15FilteredCat1htagWith1b'),
         mk_sframe_and_plot_tools('CA15FilteredCat1htag'),
         mk_sframe_and_plot_tools('CA15FilteredCat0h3btag'),
         mk_sframe_and_plot_tools('CA15FilteredCat0h2btag'),

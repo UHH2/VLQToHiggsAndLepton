@@ -35,6 +35,7 @@
 #include "UHH2/VLQToHiggsAndLepton/include/VLQ2HT_higgsReco.h"
 #include "UHH2/VLQToHiggsAndLepton/include/VLQ2HT_vlqReco.h"
 #include "UHH2/VLQToHiggsAndLepton/include/VLQ2HT_eventHypDiscr.h"
+#include "UHH2/VLQToHiggsAndLepton/include/OneBTagHiggsTag.h"
 
 
 using namespace std;
@@ -111,6 +112,7 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     }
 
     // setup modules to check if this event belongs into this category
+    v_pre_modules.emplace_back(new CollectionSizeProducer<TopJet>(ctx, "patJetsCa15CHSJetsFilteredPacked_daughters", "n_htags_onebtag", TopJetId(OneBTagHiggsTag(60.f, 99999., CSVBTag(CSVBTag::WP_LOOSE)))));
     v_pre_modules.emplace_back(new CollectionSizeProducer<TopJet>(ctx, "patJetsCa15CHSJetsFilteredPacked_daughters", "n_htags_filtered", TopJetId(HiggsTag(60.f, 99999., CSVBTag(CSVBTag::WP_LOOSE)))));
     v_pre_modules.emplace_back(new CollectionSizeProducer<TopJet>(ctx, "patJetsAk8CHSJetsSoftDropPacked_daughters", "n_htags", TopJetId(HiggsTag(60.f, 99999., CSVBTag(CSVBTag::WP_LOOSE)))));
     v_pre_modules.emplace_back(new CollectionSizeProducer<Jet>(ctx, "jets", "n_btags", JetId(AndId<Jet>(PtEtaCut(30., 2.4), CSVBTag(CSVBTag::WP_LOOSE)))));
@@ -154,8 +156,15 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
             new HandleSelection<int>(ctx, "n_htags", 0, 0),
             new HandleSelection<int>(ctx, "n_btags", 0, 2)
         }));
+
+    // one b-tag higgs tag 
+    } else if (category == "CA15FilteredCat1htagWith1b") {
+        cat_check_module.reset(new HandleSelection<int>(ctx, "n_htags_onebtag", 1));
+        v_cat_modules.emplace_back(new CollectionProducer<TopJet>(ctx, "patJetsCa15CHSJetsFilteredPacked_daughters", "h_jets", TopJetId(OneBTagHiggsTag(60.f, 99999., CSVBTag(CSVBTag::WP_LOOSE)))));
+
+    // a category must be givenf
     } else {
-        assert(false);  // a category must be given
+        assert(false);  
     }
 
     // setup modules to prepare the event.
@@ -180,6 +189,7 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     v_cat_modules.emplace_back(new NLeadingBTagProducer(ctx, CSVBTag::WP_LOOSE, "n_leading_btags"));
     v_cat_modules.emplace_back(new LeadingJetPtProducer(ctx, "leading_jet_pt"));
     v_cat_modules.emplace_back(new SubleadingJetPtProducer(ctx, "subleading_jet_pt"));
+    v_cat_modules.emplace_back(new LeadingTopjetMassProducer(ctx, "h_jets", "h_topjet_mass"));
 
     // event variables
     v_cat_modules.emplace_back(new HTCalculator(ctx, boost::none, "HT"));
@@ -224,10 +234,11 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     cf_hists->insert_step(pos_2d_cut, "2D cut");
     v_hists.insert(v_hists.begin() + pos_2d_cut, move(unique_ptr<Hists>(new TwoDCutHist(ctx, "NoSelection"))));
 
+    v_hists.emplace_back(new TopJetHists(ctx, "HiggsJetsNoSel", 2, "h_jets"));
+    v_hists_after_sel.emplace_back(new TopJetHists(ctx, "HiggsJetsAfterSel", 2, "h_jets"));
     // v_hists.emplace_back(new SingleLepTrigHists(ctx, "SingleLepTrig", "HLT_Ele95_CaloIdVT_GsfTrkIdT_v", true));
     // v_hists.emplace_back(new SingleLepTrigHists(ctx, "SingleLepTrig", "HLT_Mu40_v", false));
 
-    // sanity histograms after selection
     v_hists_after_sel.emplace_back(new ElectronHists(ctx, "SanityCheckEle", true));
     v_hists_after_sel.emplace_back(new MuonHists(ctx, "SanityCheckMu"));
     v_hists_after_sel.emplace_back(new EventHists(ctx, "SanityCheckEvent"));

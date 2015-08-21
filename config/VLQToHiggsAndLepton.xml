@@ -6,9 +6,9 @@
     <Library Name="libSUHH2VLQToHiggsAndLepton"/>
     <Package Name="SUHH2VLQToHiggsAndLepton.par" />
 
-   <!-- <Cycle Name="uhh2::AnalysisModuleRunner" OutputDirectory="./" PostFix="" TargetLumi="20" > -->
-   <Cycle Name="uhh2::AnalysisModuleRunner"  RunMode="PROOF" ProofServer="lite://"  ProofWorkDir="/nfs/dust/cms/user/tholenhe/proof-wd/" ProofNodes="22" OutputDirectory="./" PostFix="" TargetLumi="20" >
-   <!-- <Cycle Name="uhh2::AnalysisModuleRunner"  RunMode="PROOF" ProofServer="tholenhe@naf-uhhcms04.desy.de:21001"  ProofWorkDir="/nfs/dust/cms/user/tholenhe/proof-wd/" ProofNodes="20" OutputDirectory="./" PostFix="" TargetLumi="5000" > -->
+   <!-- <Cycle Name="uhh2::AnalysisModuleRunner" OutputDirectory="./" PostFix="" TargetLumi="41.856" > -->
+   <Cycle Name="uhh2::AnalysisModuleRunner"  RunMode="PROOF" ProofServer="lite://"  ProofWorkDir="/nfs/dust/cms/user/tholenhe/proof-wd/" ProofNodes="22" OutputDirectory="./" PostFix="" TargetLumi="41.856" >
+   <!-- <Cycle Name="uhh2::AnalysisModuleRunner"  RunMode="PROOF" ProofServer="tholenhe@naf-uhhcms04.desy.de:21001"  ProofWorkDir="/nfs/dust/cms/user/tholenhe/proof-wd/" ProofNodes="20" OutputDirectory="./" PostFix="" TargetLumi="41.856" > -->
 
 <!--
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -16,18 +16,23 @@ data
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 -->
 
-<InputData Lumi="1" NEventsMax="-1" Type="DATA" Version="Run2015B_Ele" Cacheable="True">
-    <In FileName="/nfs/dust/cms/user/tholenhe/VLQSemiLepPreSel/Run2-ntuple/uhh2.AnalysisModuleRunner.DATA.Run2015B_Ele.root" Lumi="0.0"/>
-    <InputTree Name="AnalysisTree" />
-    <!-- <OutputTree Name="AnalysisTree" /> -->
-</InputData>
-
 <InputData Lumi="1" NEventsMax="-1" Type="DATA" Version="Run2015B_Mu" Cacheable="True">
     <In FileName="/nfs/dust/cms/user/tholenhe/VLQSemiLepPreSel/Run2-ntuple/uhh2.AnalysisModuleRunner.DATA.Run2015B_Mu.root" Lumi="0.0"/>
     <InputTree Name="AnalysisTree" />
     <!-- <OutputTree Name="AnalysisTree" /> -->
 </InputData>
 
+<InputData Lumi="1" NEventsMax="-1" Type="DATA" Version="Run2015B_Ele" Cacheable="True">
+    <In FileName="/nfs/dust/cms/user/tholenhe/VLQSemiLepPreSel/Run2-ntuple/uhh2.AnalysisModuleRunner.DATA.Run2015B_Ele.root" Lumi="0.0"/>
+    <InputTree Name="AnalysisTree" />
+    <!-- <OutputTree Name="AnalysisTree" /> -->
+</InputData>
+
+<InputData Lumi="1" NEventsMax="-1" Type="DATA" Version="Run2015B_Had" Cacheable="True">
+    <In FileName="/nfs/dust/cms/user/tholenhe/VLQSemiLepPreSel/Run2-ntuple/uhh2.AnalysisModuleRunner.DATA.Run2015B_Had.root" Lumi="0.0"/>
+    <InputTree Name="AnalysisTree" />
+    <!-- <OutputTree Name="AnalysisTree" /> -->
+</InputData>
 
 <!--
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -35,19 +40,25 @@ signal samples for plotting
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 -->
 
-<InputData Lumi="98572" NEventsMax="-1" Type="MC" Version="TpB_TH_LH_M700" Cacheable="True">
-    <In FileName="/nfs/dust/cms/user/tholenhe/VLQSemiLepPreSel/Run2-ntuple/uhh2.AnalysisModuleRunner.MC.TpB_TH_LH_M700.root" Lumi="0.0"/>
+<InputData Lumi="100000" NEventsMax="-1" Type="MC" Version="TpB_TH_LH_M0700" Cacheable="True">
+    <In FileName="/nfs/dust/cms/user/tholenhe/VLQSemiLepPreSel/Run2-ntuple/uhh2.AnalysisModuleRunner.MC.TpB_TH_LH_M0700.root" Lumi="0.0"/>
     <InputTree Name="AnalysisTree" />
     <!-- <OutputTree Name="AnalysisTree" /> -->
 </InputData>
 
-<InputData Lumi="100000" NEventsMax="-1" Type="MC" Version="TpB_TH_LH_M1300" Cacheable="True">
-    <In FileName="/nfs/dust/cms/user/tholenhe/VLQSemiLepPreSel/Run2-ntuple/uhh2.AnalysisModuleRunner.MC.TpB_TH_LH_M1300.root" Lumi="0.0"/>
+<InputData Lumi="100000" NEventsMax="-1" Type="MC" Version="TpB_TH_LH_M1700" Cacheable="True">
+    <In FileName="/nfs/dust/cms/user/tholenhe/VLQSemiLepPreSel/Run2-ntuple/uhh2.AnalysisModuleRunner.MC.TpB_TH_LH_M1700.root" Lumi="0.0"/>
     <InputTree Name="AnalysisTree" />
     <!-- <OutputTree Name="AnalysisTree" /> -->
 </InputData>
 
-<InputData Lumi="95400" NEventsMax="-1" Type="MC" Version="TpB_TH_LH_M1700" Cacheable="True">
+<InputData Lumi="100000" NEventsMax="-1" Type="MC" Version="TpB_TH_RH_M0700" Cacheable="True">
+    <In FileName="/nfs/dust/cms/user/tholenhe/VLQSemiLepPreSel/Run2-ntuple/uhh2.AnalysisModuleRunner.MC.TpB_TH_LH_M0700.root" Lumi="0.0"/>
+    <InputTree Name="AnalysisTree" />
+    <!-- <OutputTree Name="AnalysisTree" /> -->
+</InputData>
+
+<InputData Lumi="100000" NEventsMax="-1" Type="MC" Version="TpB_TH_RH_M1700" Cacheable="True">
     <In FileName="/nfs/dust/cms/user/tholenhe/VLQSemiLepPreSel/Run2-ntuple/uhh2.AnalysisModuleRunner.MC.TpB_TH_LH_M1700.root" Lumi="0.0"/>
     <InputTree Name="AnalysisTree" />
     <!-- <OutputTree Name="AnalysisTree" /> -->

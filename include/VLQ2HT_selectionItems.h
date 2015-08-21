@@ -22,9 +22,11 @@ static const vector<shared_ptr<SelectionItem>> SEL_ITEMS_VLQ2HT {
     shared_ptr<SelectionItem>(new SelDatI("n_leading_btags",   "N_{b-tag leading}",                 11, -.5, 10.5       ,1      )),
     shared_ptr<SelectionItem>(new SelDatF("abs_largest_jet_eta", "most forward jet #eta",           50, 0., 5.          ,1      )),
     shared_ptr<SelectionItem>(new SelDatF("dr_higg_top",       "#DeltaR(H, t)",                     50, 0, 5            ,2      )),
-    shared_ptr<SelectionItem>(new SelDatF("h_mass",            "Higgs mass / 10 GeV",               50, 0, 500          ,60, 160)),
+    shared_ptr<SelectionItem>(new SelDatF("h_mass",            "Higgs mass / 5 GeV",                50, 50, 300         ,60, 160)),
     shared_ptr<SelectionItem>(new SelDatF("h_pt",              "Higgs p_{T} / 20 GeV",              50, 0, 1000         ,250    )),
     shared_ptr<SelectionItem>(new SelDatF("tlep_pt",           "lept. top p_{T} / 20 GeV",          50, 0, 1000         ,250    )),
+
+    shared_ptr<SelectionItem>(new SelDatF("h_topjet_mass",     "Higgs mass from subjets / 5 GeV",   50, 50, 300                 )),
 
     // shared_ptr<SelectionItem>(new SelDatF("abs_vlq_eta",       "T #eta",                            50, 0., 5.                  )),
     shared_ptr<SelectionItem>(new SelDatI("n_btags",           "N_{b-tag}",                         11, -.5, 10.5               )),
@@ -38,7 +40,7 @@ static const vector<shared_ptr<SelectionItem>> SEL_ITEMS_VLQ2HT {
     shared_ptr<SelectionItem>(new SelDatD("ST",                "ST / 50 GeV",                       100, 0, 5000                )),
     shared_ptr<SelectionItem>(new SelDatD("STgt40",            "STgt40 / 50 GeV",                   100, 0, 5000                )),
     shared_ptr<SelectionItem>(new SelDatF("tlep_eta",          "lept. top #eta",                    50, -5., 5.                 )),
-    shared_ptr<SelectionItem>(new SelDatF("tlep_mass",         "lept. top mass / 10 GeV",           50, 100, 600                 )),
+    shared_ptr<SelectionItem>(new SelDatF("tlep_mass",         "lept. top mass / 5 GeV",            50, 100, 350                 )),
     shared_ptr<SelectionItem>(new SelDatF("h_eta",             "Higgs #eta",                        50, -5., 5.                 )),
     shared_ptr<SelectionItem>(new SelDatF("vlq_pt",            "T p_{T} / 20 GeV",                  50, 0, 1000                 )),
     shared_ptr<SelectionItem>(new SelDatF("vlq_eta",           "T #eta",                            50, -5., 5.                 )),

@@ -4,7 +4,7 @@
 import UHH2.VLQSemiLepPreSel.vlq_settings as vlq_settings
 import UHH2.VLQSemiLepPreSel.common as common
 import sframe_tools
-import sensitivity
+# import sensitivity
 import tex_content
 
 import varial.tools
@@ -24,7 +24,7 @@ tc = varial.tools.ToolChain(
             uhh_base + 'VLQSemiLepPreSel',
             uhh_base + 'VLQToHiggsAndLepton',
         ]),
-        varial.tools.UserInteraction('Really run sframe? (Kill me otherwise.)'),
+        # varial.tools.UserInteraction('Really run sframe? (Kill me otherwise.)'),
         sframe_tools.sframe_tools,
         # sensitivity.tc,
         # varial.tools.PrintToolTree(),

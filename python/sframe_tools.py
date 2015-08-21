@@ -8,8 +8,8 @@ import plot
 
 
 sframe_cfg = os.getenv('CMSSW_BASE') + \
-             '/src/UHH2/VLQToHiggsAndLepton/config/VLQToHiggsAndLepton.xml'
-
+             '/src/UHH2/VLQToHiggsAndLepton/config/VLQToHiggsAndLeptonHiggsJetCheck.xml'
+# '/src/UHH2/VLQToHiggsAndLepton/config/VLQToHiggsAndLepton.xml'
 
 def set_category_func(catname):
     def do_set_cat(element_tree):
@@ -65,6 +65,7 @@ def mk_merged_cat_plots(toolname, input_categories):
                 name='VLQ2HT_stack',
                 plotter_factory=plot.plotter_factory_stack_cat_merging,
                 combine_files=True,
+                auto_legend=False,
             )
         ]
     plots = varial.tools.ToolChainParallel(
@@ -81,24 +82,26 @@ def mk_merged_cat_plots(toolname, input_categories):
 sframe_tools = varial.tools.ToolChain(  # Parallel(
     'EventLoopAndPlots',
     [
-        mk_sframe_and_plot_tools('CA15FilteredCat1htagWith1b'),
-        mk_sframe_and_plot_tools('CA15FilteredCat1htag'),
-        mk_sframe_and_plot_tools('CA15FilteredCat0h3btag'),
-        mk_sframe_and_plot_tools('CA15FilteredCat0h2btag'),
+        mk_sframe_and_plot_tools('AK8SoftDropCat1toptagTau32'),
+        mk_sframe_and_plot_tools('AK8SoftDropCat1toptag'),
+        mk_sframe_and_plot_tools('AK8SoftDropCat1htagWith1b'),
         mk_sframe_and_plot_tools('AK8SoftDropCat1htag'),
-        mk_sframe_and_plot_tools('AK8SoftDropCat0h3btag'),
-        mk_sframe_and_plot_tools('AK8SoftDropCat0h2btag'),
-        mk_merged_cat_plots(
-            'CA15FilteredCatAll',
-            ['CA15FilteredCat1htag',
-             'CA15FilteredCat0h3btag',
-             'CA15FilteredCat0h2btag']
-        ),
-        mk_merged_cat_plots(
-            'AK8SoftDropCatAll',
-            ['AK8SoftDropCat1htag',
-             'AK8SoftDropCat0h3btag',
-             'AK8SoftDropCat0h2btag']
-        ),
+        #mk_sframe_and_plot_tools('CA15FilteredCat1htag'),
+        #mk_sframe_and_plot_tools('AK8SoftDropCat0h3btag'),
+        #mk_sframe_and_plot_tools('AK8SoftDropCat0h2btag'),
+        #mk_sframe_and_plot_tools('CA15FilteredCat0h3btag'),
+        #mk_sframe_and_plot_tools('CA15FilteredCat0h2btag'),
+        #mk_merged_cat_plots(
+        #    'CA15FilteredCatAll',
+        #    ['CA15FilteredCat1htag',
+        #     'CA15FilteredCat0h3btag',
+        #     'CA15FilteredCat0h2btag']
+        #),
+        #mk_merged_cat_plots(
+        #    'AK8SoftDropCatAll',
+        #    ['AK8SoftDropCat1htag',
+        #     'AK8SoftDropCat0h3btag',
+        #     'AK8SoftDropCat0h2btag']
+        #),
     ]
 )

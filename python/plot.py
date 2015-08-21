@@ -98,6 +98,7 @@ def mk_tools(input_pattern=None):
             name='VLQ2HT_stack',
             plotter_factory=plotter_factory_stack,
             combine_files=True,
+            auto_legend=False,
         ),
 
         varial.tools.mk_rootfile_plotter(
@@ -105,6 +106,7 @@ def mk_tools(input_pattern=None):
             name='VLQ2HT_norm',
             plotter_factory=plotter_factory_norm,
             combine_files=True,
+            auto_legend=False,
         ),
 
         #varial.tools.mk_rootfile_plotter(
@@ -112,6 +114,7 @@ def mk_tools(input_pattern=None):
         #    name='VLQ2HT_stack_signalx30',
         #    plotter_factory=plotter_factory_stack_sigx30,
         #    combine_files=True,
+        #    auto_legend=False,
         #),
 
         #varial.tools.mk_rootfile_plotter(
@@ -119,6 +122,7 @@ def mk_tools(input_pattern=None):
         #    name='VLQ2HT_no_signal',
         #    plotter_factory=plotter_factory,
         #    combine_files=True,
+        #    auto_legend=False,
         #    filter_keyfunc=lambda w: not common.is_signal(w.file_path)
         #),
 
@@ -127,6 +131,7 @@ def mk_tools(input_pattern=None):
         #    name='VLQ2HT_norm_split_bkg',
         #    plotter_factory=plotter_factory_split_bkg,
         #    combine_files=True,
+        #    auto_legend=False,
         #    filter_keyfunc=lambda w: not common.is_signal(w.file_path)
         #),
     ]

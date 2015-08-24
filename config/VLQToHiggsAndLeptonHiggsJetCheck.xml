@@ -216,10 +216,10 @@ backgrounds
             <Item Name="additionalBranches" Value="patJetsAk8CHSJetsSoftDropPacked_daughters patJetsCa15CHSJetsFilteredPacked_daughters" />
 
             <!-- the class name of the AnalysisModule subclasses to run: -->
-            <Item Name="AnalysisModule" Value="VLQToHiggsAndLeptonModule" /> 
+            <Item Name="AnalysisModule" Value="VLQToHiggsAndLeptonHiggsJetCheck" /> 
             
             <!-- set this to the name of an AndSelection to control what is written to the output. If not given, *all* events are written to the output tree. -->
-            <Item Name="TestKey" Value="VLQToHiggsAndLeptonModule" />
+            <Item Name="TestKey" Value="VLQToHiggsAndLeptonHiggsJetCheck" />
 
             <Item Name="use_sframe_weight" Value="false" />
 

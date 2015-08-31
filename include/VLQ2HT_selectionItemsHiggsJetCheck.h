@@ -28,7 +28,7 @@ static const vector<shared_ptr<SelectionItem>> SEL_ITEMS_VLQ2HT {
     shared_ptr<SelectionItem>(new SelDatF("leading_jet_pt",    "leading jet p_{T} / 20 GeV",        75, 0., 1500                )),
     shared_ptr<SelectionItem>(new SelDatF("subleading_jet_pt", "sub-leading jet p_{T} / 20 GeV",    75, 0., 1500                )),
     shared_ptr<SelectionItem>(new SelDatF("largest_jet_eta",   "most forward jet #eta",             50, -5., 5.                 )),
-    shared_ptr<SelectionItem>(new SelDatF("primary_lepton_pt", "primary lepton p_{T} / 20 GeV",     75, 0., 1500                )),
+    shared_ptr<SelectionItem>(new SelDatF("primary_lepton_pt", "primary lepton p_{T} / 10 GeV",     50, 0., 500                )),
 
     shared_ptr<SelectionItem>(new SelDatI("n_fwd_jets",        "N_{fwd jet}",                       11, -.5, 10.5               )),
     shared_ptr<SelectionItem>(new SelDatI("n_htags",           "N_{H jet}",                         11, -.5, 10.5               )),

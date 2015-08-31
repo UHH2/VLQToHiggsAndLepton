@@ -101,13 +101,15 @@ def mk_tools(input_pattern=None):
             auto_legend=False,
         ),
 
-        varial.tools.mk_rootfile_plotter(
-            pattern=input_pattern,
-            name='VLQ2HT_norm',
-            plotter_factory=plotter_factory_norm,
-            combine_files=True,
-            auto_legend=False,
-        ),
+        # TODO for norm: set backgrounds line width to 2
+        # TODO for norm: make data black!
+        #varial.tools.mk_rootfile_plotter(
+        #    pattern=input_pattern,
+        #    name='VLQ2HT_norm',
+        #    plotter_factory=plotter_factory_norm,
+        #    combine_files=True,
+        #    auto_legend=False,
+        #),
 
         #varial.tools.mk_rootfile_plotter(
         #    pattern=input_pattern,

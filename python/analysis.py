@@ -31,6 +31,7 @@ tc = varial.tools.ToolChain(
         varial.tools.WebCreator(),
         # tex_content.tex_content,
         # varial.tools.CopyTool('~/www/test'),
+        varial.tools.GitTagger(),
     ]
 )
 

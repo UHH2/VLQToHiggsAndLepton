@@ -207,8 +207,8 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
 
     // event variables
     v_cat_modules.emplace_back(new HTCalculator(ctx, boost::none, "HT"));
-    v_cat_modules.emplace_back(new STCalculator(ctx, "ST"));
-    v_cat_modules.emplace_back(new STCalculator(ctx, "STgt40", 40.));
+    v_cat_modules.emplace_back(new STCalculator(ctx, "ST", JetId(PtEtaCut(0., 2.4))));
+    v_cat_modules.emplace_back(new STCalculator(ctx, "STgt40", JetId(PtEtaCut(40., 2.4))));
     // v_pre_modules.emplace_back(new EventShapeVariables(ctx, "jets", "", "", "es_", 2., 100));
     // v_pre_modules.emplace_back(new EventShapeVariables(ctx, "jets", "electrons", "muons", "es_plus_lep_", 2., 100));
 

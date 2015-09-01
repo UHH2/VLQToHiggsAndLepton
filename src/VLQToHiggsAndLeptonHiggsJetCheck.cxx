@@ -146,25 +146,43 @@ VLQToHiggsAndLeptonHiggsJetCheck::VLQToHiggsAndLeptonHiggsJetCheck(Context & ctx
     v_pre_modules.emplace_back(new LeptonPtProducer(ctx, "PrimaryLepton", "primary_lepton_pt"));
     prim_lep_check_module.reset(new HandleSelection<float>(ctx, "primary_lepton_pt", 1.));
 
-    v_pre_modules.emplace_back(new CollectionSizeProducer<TopJet>(ctx, "patJetsHepTopTagCHSPacked_daughters", "n_htags_heptoptag", TopJetId(HEPTopTag())));
-    v_pre_modules.emplace_back(new CollectionSizeProducer<TopJet>(ctx, ak8_topjets, "n_htags_toptag", TopJetId(CMSTopTag(CMSTopTag::MassType::groomed))));
-    v_pre_modules.emplace_back(new CollectionSizeProducer<TopJet>(ctx, ak8_topjets, "n_htags_toptag_tau32", TopJetId(AndId<TopJet>(CMSTopTag(CMSTopTag::MassType::groomed), Tau32()))));
-    v_pre_modules.emplace_back(new CollectionSizeProducer<TopJet>(ctx, ak8_topjets, "n_htags_onebtag", TopJetId(OneBTagHiggsTag(60.f, 99999., CSVBTag(CSVBTag::WP_LOOSE)))));
-    v_pre_modules.emplace_back(new CollectionSizeProducer<TopJet>(ctx, "patJetsCa15CHSJetsFilteredPacked_daughters", "n_htags_filtered", TopJetId(HiggsTag(60.f, 99999., CSVBTag(CSVBTag::WP_LOOSE)))));
-    v_pre_modules.emplace_back(new CollectionSizeProducer<TopJet>(ctx, ak8_topjets, "n_htags", TopJetId(HiggsTag(60.f, 99999., CSVBTag(CSVBTag::WP_LOOSE)))));
-    v_pre_modules.emplace_back(new CollectionSizeProducer<Jet>(ctx, "jets", "n_btags", JetId(AndId<Jet>(PtEtaCut(30., 2.4), CSVBTag(CSVBTag::WP_LOOSE)))));
+    v_pre_modules.emplace_back(new CollectionSizeProducer<TopJet>(
+        ctx, "patJetsHepTopTagCHSPacked_daughters", "n_htags_heptoptag", 
+        TopJetId(HEPTopTag())));
+    v_pre_modules.emplace_back(new CollectionSizeProducer<TopJet>(
+        ctx, ak8_topjets, "n_htags_toptag", 
+        TopJetId(CMSTopTag(CMSTopTag::MassType::groomed))));
+    v_pre_modules.emplace_back(new CollectionSizeProducer<TopJet>(
+        ctx, ak8_topjets, "n_htags_toptag_tau32", 
+        TopJetId(AndId<TopJet>(CMSTopTag(CMSTopTag::MassType::groomed), Tau32()))));
+    v_pre_modules.emplace_back(new CollectionSizeProducer<TopJet>(
+        ctx, ak8_topjets, "n_htags_onebtag", 
+        TopJetId(OneBTagHiggsTag(60.f, 99999., CSVBTag(CSVBTag::WP_LOOSE)))));
+    v_pre_modules.emplace_back(new CollectionSizeProducer<TopJet>(
+        ctx, "patJetsCa15CHSJetsFilteredPacked_daughters", "n_htags_filtered", 
+        TopJetId(HiggsTag(60.f, 99999., CSVBTag(CSVBTag::WP_LOOSE)))));
+    v_pre_modules.emplace_back(new CollectionSizeProducer<TopJet>(
+        ctx, ak8_topjets, "n_htags", 
+        TopJetId(HiggsTag(60.f, 99999., CSVBTag(CSVBTag::WP_LOOSE)))));
+    v_pre_modules.emplace_back(new CollectionSizeProducer<Jet>(
+        ctx, "jets", "n_btags", 
+        JetId(AndId<Jet>(PtEtaCut(30., 2.4), CSVBTag(CSVBTag::WP_LOOSE)))));
 
     const string & category = ctx.get("category", "");
 
     // higgs tag with filtered jets
     if (category.substr(0, 4) == "CA15") {
-        v_cat_modules.emplace_back(new CollectionSizeProducer<TopJet>(ctx, "patJetsCa15CHSJetsFilteredPacked_daughters", "n_htags", TopJetId(HiggsTag(60.f, 99999., CSVBTag(CSVBTag::WP_LOOSE)))));
+        v_cat_modules.emplace_back(new CollectionSizeProducer<TopJet>(
+            ctx, "patJetsCa15CHSJetsFilteredPacked_daughters", "n_htags", 
+            TopJetId(HiggsTag(60.f, 99999., CSVBTag(CSVBTag::WP_LOOSE)))));
     }
 
     // higgs tag with filtered jets
     if (category == "CA15FilteredCat1htag") {
         cat_check_module.reset(new HandleSelection<int>(ctx, "n_htags_filtered", 1));
-        v_cat_modules.emplace_back(new CollectionProducer<TopJet>(ctx, "patJetsCa15CHSJetsFilteredPacked_daughters", "h_jets", TopJetId(HiggsTag(60.f, 99999., CSVBTag(CSVBTag::WP_LOOSE)))));
+        v_cat_modules.emplace_back(new CollectionProducer<TopJet>(
+            ctx, "patJetsCa15CHSJetsFilteredPacked_daughters", "h_jets", 
+            TopJetId(HiggsTag(60.f, 99999., CSVBTag(CSVBTag::WP_LOOSE)))));
 
     } else if (category == "CA15FilteredCat0h3btag") {
         cat_check_module.reset(new MyAndSelection({
@@ -181,7 +199,8 @@ VLQToHiggsAndLeptonHiggsJetCheck::VLQToHiggsAndLeptonHiggsJetCheck(Context & ctx
     // higgs tag with softdrop jets
     } else if (category == "AK8Cat1htag") {
         cat_check_module.reset(new HandleSelection<int>(ctx, "n_htags", 1));
-        v_cat_modules.emplace_back(new CollectionProducer<TopJet>(ctx, ak8_topjets, "h_jets", TopJetId(HiggsTag(60.f, 99999., CSVBTag(CSVBTag::WP_LOOSE)))));
+        v_cat_modules.emplace_back(new CollectionProducer<TopJet>(
+            ctx, ak8_topjets, "h_jets", TopJetId(HiggsTag(60.f, 99999., CSVBTag(CSVBTag::WP_LOOSE)))));
         if (version.substr(version.size() - 5, 100) == "_Tlep") {
             gen_hists.reset(new VLQ2HTGenHists(ctx, "GenHists"));
         }
@@ -201,23 +220,28 @@ VLQToHiggsAndLeptonHiggsJetCheck::VLQToHiggsAndLeptonHiggsJetCheck(Context & ctx
     // other categories
     } else if (category == "CA15CatHEPtoptag") {
         cat_check_module.reset(new HandleSelection<int>(ctx, "n_htags_heptoptag", 1));
-        v_cat_modules.emplace_back(new CollectionProducer<TopJet>(ctx, "patJetsHepTopTagCHSPacked_daughters", "h_jets", TopJetId(HEPTopTag())));
+        v_cat_modules.emplace_back(new CollectionProducer<TopJet>(
+            ctx, "patJetsHepTopTagCHSPacked_daughters", "h_jets", TopJetId(HEPTopTag())));
 
     } else if (category == "AK8Cat1htagWith1b") {
         cat_check_module.reset(new HandleSelection<int>(ctx, "n_htags_onebtag", 1));
-        v_cat_modules.emplace_back(new CollectionProducer<TopJet>(ctx, ak8_topjets, "h_jets", TopJetId(OneBTagHiggsTag(60.f, 99999., CSVBTag(CSVBTag::WP_LOOSE)))));
+        v_cat_modules.emplace_back(new CollectionProducer<TopJet>(
+            ctx, ak8_topjets, "h_jets", TopJetId(OneBTagHiggsTag(60.f, 99999., CSVBTag(CSVBTag::WP_LOOSE)))));
 
     } else if (category == "AK8Cat1CMStoptag") {
         cat_check_module.reset(new HandleSelection<int>(ctx, "n_htags_toptag", 1));
-        v_cat_modules.emplace_back(new CollectionProducer<TopJet>(ctx, ak8_topjets, "h_jets", TopJetId(CMSTopTag(CMSTopTag::MassType::groomed))));
+        v_cat_modules.emplace_back(new CollectionProducer<TopJet>(
+            ctx, ak8_topjets, "h_jets", TopJetId(CMSTopTag(CMSTopTag::MassType::groomed))));
 
     } else if (category == "AK8Cat1CMStoptagTau32") {
         cat_check_module.reset(new HandleSelection<int>(ctx, "n_htags_toptag_tau32", 1));
-        v_cat_modules.emplace_back(new CollectionProducer<TopJet>(ctx, ak8_topjets, "h_jets", TopJetId(AndId<TopJet>(CMSTopTag(CMSTopTag::MassType::groomed), Tau32()))));
+        v_cat_modules.emplace_back(new CollectionProducer<TopJet>(
+            ctx, ak8_topjets, "h_jets", TopJetId(AndId<TopJet>(CMSTopTag(CMSTopTag::MassType::groomed), Tau32()))));
 
     } else if (category == "NoCat") {
         cat_check_module.reset(new HandleSelection<int>(ctx, "n_htags_onebtag", 0));
-        v_cat_modules.emplace_back(new CollectionProducer<TopJet>(ctx, ak8_topjets, "h_jets", TopJetId(is_true<TopJet>)));
+        v_cat_modules.emplace_back(new CollectionProducer<TopJet>(
+            ctx, ak8_topjets, "h_jets", TopJetId(is_true<TopJet>)));
 
     // a category must be givenf
     } else {
@@ -236,16 +260,26 @@ VLQToHiggsAndLeptonHiggsJetCheck::VLQToHiggsAndLeptonHiggsJetCheck(Context & ctx
     v_cat_modules.emplace_back(new NLeptonsProducer(ctx, "n_leptons"));
 
     // jets
-    v_cat_modules.emplace_back(new LargestJetEtaProducer(ctx, "largest_jet_eta", "jets"));
-    v_cat_modules.emplace_back(new CollectionProducer<Jet>(ctx, "jets", "b_jets", JetId(AndId<Jet>(PtEtaCut(30., 2.4), CSVBTag(CSVBTag::WP_LOOSE)))));
-    v_cat_modules.emplace_back(new CollectionProducer<Jet>(ctx, "jets", "fwd_jets", JetId(VetoId<Jet>(PtEtaCut(0.0, 2.4)))));
-    v_cat_modules.emplace_back(new CollectionSizeProducer<Jet>(ctx, "fwd_jets", "n_fwd_jets", JetId(is_true<Jet>)));
-    v_cat_modules.emplace_back(new CollectionProducer<Jet>(ctx, "jets", "jets", JetId(PtEtaCut(0.0, 2.4))));
-    v_cat_modules.emplace_back(new CollectionSizeProducer<Jet>(ctx, "jets", "n_jets", JetId(is_true<Jet>)));
-    v_cat_modules.emplace_back(new NLeadingBTagProducer(ctx, CSVBTag::WP_LOOSE, "n_leading_btags"));
-    v_cat_modules.emplace_back(new LeadingJetPtProducer(ctx, "leading_jet_pt"));
-    v_cat_modules.emplace_back(new SubleadingJetPtProducer(ctx, "subleading_jet_pt"));
-    v_cat_modules.emplace_back(new LeadingTopjetMassProducer(ctx, "h_jets", "h_mass_topjet"));
+    v_cat_modules.emplace_back(new LargestJetEtaProducer(
+        ctx, "largest_jet_eta", "jets"));
+    v_cat_modules.emplace_back(new CollectionProducer<Jet>(
+        ctx, "jets", "b_jets", JetId(AndId<Jet>(PtEtaCut(30., 2.4), CSVBTag(CSVBTag::WP_LOOSE)))));
+    v_cat_modules.emplace_back(new CollectionProducer<Jet>(
+        ctx, "jets", "fwd_jets", JetId(VetoId<Jet>(PtEtaCut(0.0, 2.4)))));
+    v_cat_modules.emplace_back(new CollectionSizeProducer<Jet>(
+        ctx, "fwd_jets", "n_fwd_jets", JetId(is_true<Jet>)));
+    v_cat_modules.emplace_back(new CollectionProducer<Jet>(
+        ctx, "jets", "jets", JetId(PtEtaCut(0.0, 2.4))));
+    v_cat_modules.emplace_back(new CollectionSizeProducer<Jet>(
+        ctx, "jets", "n_jets", JetId(is_true<Jet>)));
+    v_cat_modules.emplace_back(new NLeadingBTagProducer(
+        ctx, CSVBTag::WP_LOOSE, "n_leading_btags"));
+    v_cat_modules.emplace_back(new LeadingJetPtProducer(
+        ctx, "leading_jet_pt"));
+    v_cat_modules.emplace_back(new SubleadingJetPtProducer(
+        ctx, "subleading_jet_pt"));
+    v_cat_modules.emplace_back(new LeadingTopjetMassProducer(
+        ctx, "h_jets", "h_mass_topjet"));
 
     // event variables
     v_cat_modules.emplace_back(new HTCalculator(ctx, boost::none, "HT"));
@@ -286,50 +320,52 @@ VLQToHiggsAndLeptonHiggsJetCheck::VLQToHiggsAndLeptonHiggsJetCheck(Context & ctx
     // v_hists.insert(v_hists.begin() + pos_2d_cut, move(unique_ptr<Hists>(new TwoDCutHist(ctx, "NoSelection"))));
 
     // fat jet hists
-    v_hists.emplace_back(new TopJetHists(ctx, "TopJetsPreSel", 2, "topjets"));
-    v_hists.emplace_back(new TopJetHists(ctx, "Ak8SoftDropPreSel", 2, "patJetsAk8CHSJetsSoftDropPacked_daughters"));
-    v_hists.emplace_back(new TopJetHists(ctx, "Ca15FilteredPreSel", 2, "patJetsCa15CHSJetsFilteredPacked_daughters"));
-    v_hists.emplace_back(new TopJetHists(ctx, "Ca15HEPTTPreSel", 2, "patJetsHepTopTagCHSPacked_daughters"));
+    if (category == "NoCat") {
+        v_hists.emplace_back(new TopJetHists(ctx, "TopJetsPreSel", 2, "topjets"));
+        v_hists.emplace_back(new TopJetHists(ctx, "Ak8SoftDropPreSel", 2, "patJetsAk8CHSJetsSoftDropPacked_daughters"));
+        v_hists.emplace_back(new TopJetHists(ctx, "Ca15FilteredPreSel", 2, "patJetsCa15CHSJetsFilteredPacked_daughters"));
+        v_hists.emplace_back(new TopJetHists(ctx, "Ca15HEPTTPreSel", 2, "patJetsHepTopTagCHSPacked_daughters"));
 
-    v_hists.emplace_back(new TopJetHists(ctx, "TopJetsPreSelTau32", 2, "topjets"));
-    ((TopJetHists*)v_hists.back().get())->set_TopJetId(TopJetId(Tau32()));
-    v_hists.emplace_back(new TopJetHists(ctx, "Ak8SoftDropPreSelTau32", 2, "patJetsAk8CHSJetsSoftDropPacked_daughters"));
-    ((TopJetHists*)v_hists.back().get())->set_TopJetId(TopJetId(Tau32()));
-    v_hists.emplace_back(new TopJetHists(ctx, "Ca15FilteredPreSelTau32", 2, "patJetsCa15CHSJetsFilteredPacked_daughters"));
-    ((TopJetHists*)v_hists.back().get())->set_TopJetId(TopJetId(Tau32()));
-    v_hists.emplace_back(new TopJetHists(ctx, "Ca15HEPTTPreSelTau32", 2, "patJetsHepTopTagCHSPacked_daughters"));
-    ((TopJetHists*)v_hists.back().get())->set_TopJetId(TopJetId(Tau32()));
+        v_hists.emplace_back(new TopJetHists(ctx, "TopJetsPreSelTau32", 2, "topjets"));
+        ((TopJetHists*)v_hists.back().get())->set_TopJetId(TopJetId(Tau32()));
+        v_hists.emplace_back(new TopJetHists(ctx, "Ak8SoftDropPreSelTau32", 2, "patJetsAk8CHSJetsSoftDropPacked_daughters"));
+        ((TopJetHists*)v_hists.back().get())->set_TopJetId(TopJetId(Tau32()));
+        v_hists.emplace_back(new TopJetHists(ctx, "Ca15FilteredPreSelTau32", 2, "patJetsCa15CHSJetsFilteredPacked_daughters"));
+        ((TopJetHists*)v_hists.back().get())->set_TopJetId(TopJetId(Tau32()));
+        v_hists.emplace_back(new TopJetHists(ctx, "Ca15HEPTTPreSelTau32", 2, "patJetsHepTopTagCHSPacked_daughters"));
+        ((TopJetHists*)v_hists.back().get())->set_TopJetId(TopJetId(Tau32()));
 
-    v_hists.emplace_back(new TopJetHists(ctx, "TopJetsPreSelPt400", 2, "topjets"));
-    ((TopJetHists*)v_hists.back().get())->set_TopJetId(TopJetId(PtEtaCut(400., 2.4)));
-    v_hists.emplace_back(new TopJetHists(ctx, "Ak8SoftDropPreSelPt400", 2, "patJetsAk8CHSJetsSoftDropPacked_daughters"));
-    ((TopJetHists*)v_hists.back().get())->set_TopJetId(TopJetId(PtEtaCut(400., 2.4)));
-    v_hists.emplace_back(new TopJetHists(ctx, "Ca15FilteredPreSelPt400", 2, "patJetsCa15CHSJetsFilteredPacked_daughters"));
-    ((TopJetHists*)v_hists.back().get())->set_TopJetId(TopJetId(PtEtaCut(400., 2.4)));
-    v_hists.emplace_back(new TopJetHists(ctx, "Ca15HEPTTPreSelPt200", 2, "patJetsHepTopTagCHSPacked_daughters"));
-    ((TopJetHists*)v_hists.back().get())->set_TopJetId(TopJetId(PtEtaCut(200., 2.4)));
+        v_hists.emplace_back(new TopJetHists(ctx, "TopJetsPreSelPt400", 2, "topjets"));
+        ((TopJetHists*)v_hists.back().get())->set_TopJetId(TopJetId(PtEtaCut(400., 2.4)));
+        v_hists.emplace_back(new TopJetHists(ctx, "Ak8SoftDropPreSelPt400", 2, "patJetsAk8CHSJetsSoftDropPacked_daughters"));
+        ((TopJetHists*)v_hists.back().get())->set_TopJetId(TopJetId(PtEtaCut(400., 2.4)));
+        v_hists.emplace_back(new TopJetHists(ctx, "Ca15FilteredPreSelPt400", 2, "patJetsCa15CHSJetsFilteredPacked_daughters"));
+        ((TopJetHists*)v_hists.back().get())->set_TopJetId(TopJetId(PtEtaCut(400., 2.4)));
+        v_hists.emplace_back(new TopJetHists(ctx, "Ca15HEPTTPreSelPt200", 2, "patJetsHepTopTagCHSPacked_daughters"));
+        ((TopJetHists*)v_hists.back().get())->set_TopJetId(TopJetId(PtEtaCut(200., 2.4)));
 
-    v_hists.emplace_back(new TopJetHists(ctx, "TopJetsPreSelPt400Tau32", 2, "topjets"));
-    ((TopJetHists*)v_hists.back().get())->set_TopJetId(TopJetId(AndId<TopJet>(Tau32(), PtEtaCut(400., 2.4))));
-    v_hists.emplace_back(new TopJetHists(ctx, "Ak8SoftDropPreSelPt400Tau32", 2, "patJetsAk8CHSJetsSoftDropPacked_daughters"));
-    ((TopJetHists*)v_hists.back().get())->set_TopJetId(TopJetId(AndId<TopJet>(Tau32(), PtEtaCut(400., 2.4))));
-    v_hists.emplace_back(new TopJetHists(ctx, "Ca15FilteredPreSelPt400Tau32", 2, "patJetsCa15CHSJetsFilteredPacked_daughters"));
-    ((TopJetHists*)v_hists.back().get())->set_TopJetId(TopJetId(AndId<TopJet>(Tau32(), PtEtaCut(400., 2.4))));
-    v_hists.emplace_back(new TopJetHists(ctx, "Ca15HEPTTPreSelPt200Tau32", 2, "patJetsHepTopTagCHSPacked_daughters"));
-    ((TopJetHists*)v_hists.back().get())->set_TopJetId(TopJetId(AndId<TopJet>(Tau32(), PtEtaCut(200., 2.4))));
+        v_hists.emplace_back(new TopJetHists(ctx, "TopJetsPreSelPt400Tau32", 2, "topjets"));
+        ((TopJetHists*)v_hists.back().get())->set_TopJetId(TopJetId(AndId<TopJet>(Tau32(), PtEtaCut(400., 2.4))));
+        v_hists.emplace_back(new TopJetHists(ctx, "Ak8SoftDropPreSelPt400Tau32", 2, "patJetsAk8CHSJetsSoftDropPacked_daughters"));
+        ((TopJetHists*)v_hists.back().get())->set_TopJetId(TopJetId(AndId<TopJet>(Tau32(), PtEtaCut(400., 2.4))));
+        v_hists.emplace_back(new TopJetHists(ctx, "Ca15FilteredPreSelPt400Tau32", 2, "patJetsCa15CHSJetsFilteredPacked_daughters"));
+        ((TopJetHists*)v_hists.back().get())->set_TopJetId(TopJetId(AndId<TopJet>(Tau32(), PtEtaCut(400., 2.4))));
+        v_hists.emplace_back(new TopJetHists(ctx, "Ca15HEPTTPreSelPt200Tau32", 2, "patJetsHepTopTagCHSPacked_daughters"));
+        ((TopJetHists*)v_hists.back().get())->set_TopJetId(TopJetId(AndId<TopJet>(Tau32(), PtEtaCut(200., 2.4))));
 
-    v_hists.emplace_back(new TopJetHists(ctx, "TopJetsPreSelPt400NHEgt30", 2, "topjets"));
-    ((TopJetHists*)v_hists.back().get())->set_TopJetId(AndId<TopJet>(PtEtaCut(400., 2.4), NHEgt30()));
-    v_hists.emplace_back(new TopJetHists(ctx, "TopJetsPreSelPt400NHElt30", 2, "topjets"));
-    ((TopJetHists*)v_hists.back().get())->set_TopJetId(AndId<TopJet>(PtEtaCut(400., 2.4), NHElt30()));
-    v_hists.emplace_back(new TopJetHists(ctx, "TopJetsPreSelTau32NHEgt30", 2, "topjets"));
-    ((TopJetHists*)v_hists.back().get())->set_TopJetId(AndId<TopJet>(NHEgt30(), Tau32()));
-    v_hists.emplace_back(new TopJetHists(ctx, "TopJetsPreSelTau32NHElt30", 2, "topjets"));
-    ((TopJetHists*)v_hists.back().get())->set_TopJetId(AndId<TopJet>(NHElt30(), Tau32()));
-    v_hists.emplace_back(new TopJetHists(ctx, "TopJetsPreSelPt400Tau32NHEgt30", 2, "topjets"));
-    ((TopJetHists*)v_hists.back().get())->set_TopJetId(AndId<TopJet>(PtEtaCut(400., 2.4), NHEgt30(), Tau32()));
-    v_hists.emplace_back(new TopJetHists(ctx, "TopJetsPreSelPt400Tau32NHElt30", 2, "topjets"));
-    ((TopJetHists*)v_hists.back().get())->set_TopJetId(AndId<TopJet>(PtEtaCut(400., 2.4), NHElt30(), Tau32()));
+        v_hists.emplace_back(new TopJetHists(ctx, "TopJetsPreSelPt400NHEgt30", 2, "topjets"));
+        ((TopJetHists*)v_hists.back().get())->set_TopJetId(AndId<TopJet>(PtEtaCut(400., 2.4), NHEgt30()));
+        v_hists.emplace_back(new TopJetHists(ctx, "TopJetsPreSelPt400NHElt30", 2, "topjets"));
+        ((TopJetHists*)v_hists.back().get())->set_TopJetId(AndId<TopJet>(PtEtaCut(400., 2.4), NHElt30()));
+        v_hists.emplace_back(new TopJetHists(ctx, "TopJetsPreSelTau32NHEgt30", 2, "topjets"));
+        ((TopJetHists*)v_hists.back().get())->set_TopJetId(AndId<TopJet>(NHEgt30(), Tau32()));
+        v_hists.emplace_back(new TopJetHists(ctx, "TopJetsPreSelTau32NHElt30", 2, "topjets"));
+        ((TopJetHists*)v_hists.back().get())->set_TopJetId(AndId<TopJet>(NHElt30(), Tau32()));
+        v_hists.emplace_back(new TopJetHists(ctx, "TopJetsPreSelPt400Tau32NHEgt30", 2, "topjets"));
+        ((TopJetHists*)v_hists.back().get())->set_TopJetId(AndId<TopJet>(PtEtaCut(400., 2.4), NHEgt30(), Tau32()));
+        v_hists.emplace_back(new TopJetHists(ctx, "TopJetsPreSelPt400Tau32NHElt30", 2, "topjets"));
+        ((TopJetHists*)v_hists.back().get())->set_TopJetId(AndId<TopJet>(PtEtaCut(400., 2.4), NHElt30(), Tau32()));
+    }
 
     v_hists.emplace_back(new TopJetHists(ctx, "HiggsJetsPreSel", 2, "h_jets"));
     v_hists.emplace_back(new TopJetHists(ctx, "HiggsJetsPreSelPt400", 2, "h_jets"));

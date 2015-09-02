@@ -8,12 +8,7 @@ import plot
 
 
 sframe_cfg = os.getenv('CMSSW_BASE') + \
-             '/src/UHH2/VLQToHiggsAndLepton/config/VLQToHiggsAndLeptonHiggsJetCheck.xml'
-sframe_cfg_btag = os.getenv('CMSSW_BASE') + \
-             '/src/UHH2/VLQToHiggsAndLepton/config/VLQToHiggsAndLeptonHiggsJetCheck.xml'
-sframe_cfg_nobtag = os.getenv('CMSSW_BASE') + \
-             '/src/UHH2/VLQToHiggsAndLepton/config/VLQToHiggsAndLeptonHiggsJetCheckNoBtag.xml'
-# '/src/UHH2/VLQToHiggsAndLepton/config/VLQToHiggsAndLepton.xml'
+             '/src/UHH2/VLQToHiggsAndLepton/config/VLQToHiggsAndLepton.xml'
 
 def set_category_func(catname):
     def do_set_cat(element_tree):
@@ -25,16 +20,10 @@ def set_category_func(catname):
     return do_set_cat
 
 
-def mk_sframe_and_plot_tools(catname, config=''):
+def mk_sframe_and_plot_tools(catname):
     """Makes a toolchain for one category with sframe and plots."""
-
-    if config == 'NoBTag':
-        cfg = sframe_cfg_nobtag
-    else:
-        cfg = sframe_cfg_btag
-
     sframe = SFrame(
-        cfg_filename=cfg,
+        cfg_filename=sframe_cfg,
         xml_tree_callback=set_category_func(catname),
     )
     plots = varial.tools.ToolChainParallel(
@@ -43,7 +32,7 @@ def mk_sframe_and_plot_tools(catname, config=''):
             '%s/../SFrame/*.root' % varial.analysis.cwd)
     )
     tc = varial.tools.ToolChain(
-        catname + config,
+        catname,
         [sframe, plots]
     )
     return tc
@@ -92,32 +81,28 @@ def mk_merged_cat_plots(toolname, input_categories):
 sframe_tools = varial.tools.ToolChain(  # Parallel(
     'EventLoopAndPlots',
     [
-        mk_sframe_and_plot_tools('NoCat', 'BTag'),
-        mk_sframe_and_plot_tools('NoCat', 'NoBTag'),
-
-        #mk_sframe_and_plot_tools('CA15CatHEPtoptag'),
-        #mk_sframe_and_plot_tools('AK8Cat1CMStoptag'),
-        #mk_sframe_and_plot_tools('AK8Cat1CMStoptagTau32'),
-        #mk_sframe_and_plot_tools('AK8Cat1htag'),
-        #mk_sframe_and_plot_tools('AK8Cat1htagWith1b'),
-
-        #mk_sframe_and_plot_tools('AKSoftDrop8Cat1htag'),
-        #mk_sframe_and_plot_tools('CA15FilteredCat1htag'),
-        #mk_sframe_and_plot_tools('AK8SoftDropCat0h3btag'),
-        #mk_sframe_and_plot_tools('AK8SoftDropCat0h2btag'),
-        #mk_sframe_and_plot_tools('CA15FilteredCat0h3btag'),
-        #mk_sframe_and_plot_tools('CA15FilteredCat0h2btag'),
-        #mk_merged_cat_plots(
-        #    'CA15FilteredCatAll',
-        #    ['CA15FilteredCat1htag',
-        #     'CA15FilteredCat0h3btag',
-        #     'CA15FilteredCat0h2btag']
-        #),
-        #mk_merged_cat_plots(
-        #    'AK8SoftDropCatAll',
-        #    ['AK8SoftDropCat1htag',
-        #     'AK8SoftDropCat0h3btag',
-        #     'AK8SoftDropCat0h2btag']
-        #),
+        
+        mk_sframe_and_plot_tools('AK8SoftDropCat1htag'),
+        mk_sframe_and_plot_tools('AK8SoftDropCat0h3btag'),
+        mk_sframe_and_plot_tools('AK8SoftDropCat0h2btag'),
+        mk_sframe_and_plot_tools('CA15FilteredCat1htag'),
+        mk_sframe_and_plot_tools('CA15FilteredCat0h3btag'),
+        mk_sframe_and_plot_tools('CA15FilteredCat0h2btag'),
+        mk_merged_cat_plots(
+            'CA15FilteredCatAll',
+            ['CA15FilteredCat1htag',
+             'CA15FilteredCat0h3btag',
+             'CA15FilteredCat0h2btag']
+        ),
+        mk_merged_cat_plots(
+            'AK8SoftDropCatAll',
+            ['AK8SoftDropCat1htag',
+             'AK8SoftDropCat0h3btag',
+             'AK8SoftDropCat0h2btag']
+        ),
+        mk_sframe_and_plot_tools('AK8SoftDropCat1htagWith1b'),
+        mk_sframe_and_plot_tools('CA15FilteredCat1htagWith1b'),
+        mk_sframe_and_plot_tools('AK8SoftDropCat1htagWith0b'),
+        mk_sframe_and_plot_tools('CA15FilteredCat1htagWith0b'),
     ]
 )

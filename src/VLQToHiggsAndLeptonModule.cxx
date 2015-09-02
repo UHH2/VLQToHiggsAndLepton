@@ -303,15 +303,15 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     v_hists.emplace_back(cf_hists);
 
     // insert 2D cut
-    unsigned pos_2d_cut = 9;
-    sel_module->insert_selection(pos_2d_cut, new TwoDCutSel(ctx, DR_2D_CUT, DPT_2D_CUT));
-    nm1_hists->insert_hists(pos_2d_cut, new TwoDCutHist(ctx, "Nm1Selection"));
-    cf_hists->insert_step(pos_2d_cut, "2D cut");
-    v_hists.insert(v_hists.begin() + pos_2d_cut, move(unique_ptr<Hists>(new TwoDCutHist(ctx, "NoSelection"))));
+    // unsigned pos_2d_cut = 9;
+    // sel_module->insert_selection(pos_2d_cut, new TwoDCutSel(ctx, DR_2D_CUT, DPT_2D_CUT));
+    // nm1_hists->insert_hists(pos_2d_cut, new TwoDCutHist(ctx, "Nm1Selection"));
+    // cf_hists->insert_step(pos_2d_cut, "2D cut");
+    // v_hists.insert(v_hists.begin() + pos_2d_cut, move(unique_ptr<Hists>(new TwoDCutHist(ctx, "NoSelection"))));
 
     // fat jet hists
-    // v_hists.emplace_back(new TopJetHists(ctx, "HiggsJetsNoSel", 2, "h_jets"));
-    // v_hists_after_sel.emplace_back(new TopJetHists(ctx, "HiggsJetsAfterSel", 2, "h_jets"));
+    v_hists.emplace_back(new TopJetHists(ctx, "HiggsJetsNoSel", 2, "h_jets"));
+    v_hists_after_sel.emplace_back(new TopJetHists(ctx, "HiggsJetsAfterSel", 2, "h_jets"));
 
     // v_hists.emplace_back(new SingleLepTrigHists(ctx, "SingleLepTrig", "HLT_Ele95_CaloIdVT_GsfTrkIdT_v", true));
     // v_hists.emplace_back(new SingleLepTrigHists(ctx, "SingleLepTrig", "HLT_Mu40_v", false));

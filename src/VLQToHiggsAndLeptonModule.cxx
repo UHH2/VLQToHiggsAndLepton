@@ -142,32 +142,8 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
 
     const string & category = ctx.get("category", "");
 
-    // higgs tag with filtered jets
-
-    // higgs tag with filtered jets
-    if (category == "CA15FilteredCat1htag") {
-        cat_check_module.reset(new HandleSelection<int>(ctx, "n_htags_filtered", 1));
-        v_cat_modules.emplace_back(new CollectionProducer<TopJet>(
-            ctx, "patJetsCa15CHSJetsFilteredPacked_daughters", "h_jets", 
-            TopJetId(HiggsTag(60.f, 99999., CSVBTag(CSVBTag::WP_LOOSE)))));
-        v_cat_modules.emplace_back(new CollectionSizeProducer<TopJet>(
-            ctx, "patJetsCa15CHSJetsFilteredPacked_daughters", "n_htags", 
-            TopJetId(HiggsTag(60.f, 99999., CSVBTag(CSVBTag::WP_LOOSE)))));
-
-    } else if (category == "CA15FilteredCat0h3btag") {
-        cat_check_module.reset(new MyAndSelection({
-            new HandleSelection<int>(ctx, "n_htags_filtered", 0, 0),
-            new HandleSelection<int>(ctx, "n_btags", 3)
-        }));
-
-    } else if (category == "CA15FilteredCat0h2btag") {
-        cat_check_module.reset(new MyAndSelection({
-            new HandleSelection<int>(ctx, "n_htags_filtered", 0, 0),
-            new HandleSelection<int>(ctx, "n_btags", 0, 2)
-        }));
-
     // higgs tag with softdrop jets
-    } else if (category == "AK8SoftDropCat1htag") {
+    if (category == "AK8SoftDropCat1htag") {
         cat_check_module.reset(new HandleSelection<int>(ctx, "n_htags", 1));
         v_cat_modules.emplace_back(new CollectionProducer<TopJet>(
             ctx, "patJetsAk8CHSJetsSoftDropPacked_daughters", "h_jets", 
@@ -181,12 +157,18 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
             new HandleSelection<int>(ctx, "n_htags", 0, 0),
             new HandleSelection<int>(ctx, "n_btags", 3)
         }));
+        v_cat_modules.emplace_back(new CollectionProducer<TopJet>(
+            ctx, "patJetsAk8CHSJetsSoftDropPacked_daughters", "h_jets", 
+            TopJetId(HiggsTag(60.f, 99999., CSVBTag(CSVBTag::WP_LOOSE)))));
 
     } else if (category == "AK8SoftDropCat0h2btag") {
         cat_check_module.reset(new MyAndSelection({
             new HandleSelection<int>(ctx, "n_htags", 0, 0),
             new HandleSelection<int>(ctx, "n_btags", 0, 2)
         }));
+        v_cat_modules.emplace_back(new CollectionProducer<TopJet>(
+            ctx, "patJetsAk8CHSJetsSoftDropPacked_daughters", "h_jets", 
+            TopJetId(HiggsTag(60.f, 99999., CSVBTag(CSVBTag::WP_LOOSE)))));
 
     // other categories
     } else if (category == "AK8SoftDropCat1htagWith1b") {
@@ -198,30 +180,11 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
             ctx, "patJetsAk8CHSJetsSoftDropPacked_daughters", "h_jets", 
             TopJetId(OneBTagHiggsTag(60.f, 99999., CSVBTag(CSVBTag::WP_LOOSE)))));
 
-    } else if (category == "CA15FilteredCat1htagWith1b") {
-        cat_check_module.reset(new MyAndSelection({
-            new HandleSelection<int>(ctx, "n_htags_filtered", 0, 0),
-            new HandleSelection<int>(ctx, "n_htags_filtered_onebtag", 1)
-        }));
-        v_cat_modules.emplace_back(new CollectionProducer<TopJet>(
-            ctx, "patJetsAk8CHSJetsSoftDropPacked_daughters", "h_jets", 
-            TopJetId(OneBTagHiggsTag(60.f, 99999., CSVBTag(CSVBTag::WP_LOOSE)))));
-
     } else if (category == "AK8SoftDropCat1htagWith0b") {
         cat_check_module.reset(new MyAndSelection({
             new HandleSelection<int>(ctx, "n_htags", 0, 0),
             new HandleSelection<int>(ctx, "n_htags_onebtag", 0, 0),
             new HandleSelection<int>(ctx, "n_htags_zerobtag", 1)
-        }));
-        v_cat_modules.emplace_back(new CollectionProducer<TopJet>(
-            ctx, "patJetsAk8CHSJetsSoftDropPacked_daughters", "h_jets", 
-            TopJetId(OneBTagHiggsTag(60.f, 99999., is_true<Jet>))));
-
-    } else if (category == "CA15FilteredCat1htagWith0b") {
-        cat_check_module.reset(new MyAndSelection({
-            new HandleSelection<int>(ctx, "n_htags_filtered", 0, 0),
-            new HandleSelection<int>(ctx, "n_htags_filtered_onebtag", 0, 0),
-            new HandleSelection<int>(ctx, "n_htags_filtered_zerobtag", 1)
         }));
         v_cat_modules.emplace_back(new CollectionProducer<TopJet>(
             ctx, "patJetsAk8CHSJetsSoftDropPacked_daughters", "h_jets", 

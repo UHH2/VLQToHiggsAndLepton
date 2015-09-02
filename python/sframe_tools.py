@@ -81,19 +81,9 @@ def mk_merged_cat_plots(toolname, input_categories):
 sframe_tools = varial.tools.ToolChain(  # Parallel(
     'EventLoopAndPlots',
     [
-        
         mk_sframe_and_plot_tools('AK8SoftDropCat1htag'),
         mk_sframe_and_plot_tools('AK8SoftDropCat0h3btag'),
         mk_sframe_and_plot_tools('AK8SoftDropCat0h2btag'),
-        mk_sframe_and_plot_tools('CA15FilteredCat1htag'),
-        mk_sframe_and_plot_tools('CA15FilteredCat0h3btag'),
-        mk_sframe_and_plot_tools('CA15FilteredCat0h2btag'),
-        mk_merged_cat_plots(
-            'CA15FilteredCatAll',
-            ['CA15FilteredCat1htag',
-             'CA15FilteredCat0h3btag',
-             'CA15FilteredCat0h2btag']
-        ),
         mk_merged_cat_plots(
             'AK8SoftDropCatAll',
             ['AK8SoftDropCat1htag',
@@ -101,8 +91,6 @@ sframe_tools = varial.tools.ToolChain(  # Parallel(
              'AK8SoftDropCat0h2btag']
         ),
         mk_sframe_and_plot_tools('AK8SoftDropCat1htagWith1b'),
-        mk_sframe_and_plot_tools('CA15FilteredCat1htagWith1b'),
         mk_sframe_and_plot_tools('AK8SoftDropCat1htagWith0b'),
-        mk_sframe_and_plot_tools('CA15FilteredCat1htagWith0b'),
     ]
 )

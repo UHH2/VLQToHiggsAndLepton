@@ -14,20 +14,17 @@ static const float DR_2D_CUT = 0.25;
 static const float DPT_2D_CUT = 40.0;
 
 
-static const vector<shared_ptr<SelectionItem>> SEL_ITEMS_VLQ2HT {
+static vector<shared_ptr<SelectionItem>> SEL_ITEMS_VLQ2HT {
     // shared_ptr<SelectionItem>(new SelDatI("trigger_accept",    "trigger accept",                    2, -.5, 1.5         ,1      )),
     shared_ptr<SelectionItem>(new SelDatI("n_jets",            "N_{jet}",                           21, -.5, 20.5       ,2      )),
     shared_ptr<SelectionItem>(new SelDatI("n_leptons",         "N_{lepton}",                        11, -.5, 10.5       ,1      )),
     shared_ptr<SelectionItem>(new SelDatF("event_chi2",        "event chi2",                        100, 0, 200         ,0.,5000)),
-    
+    shared_ptr<SelectionItem>(new SelDatI("n_leading_btags",   "N_{b-tag leading}",                 11, -.5, 10.5       ,1      )),
     shared_ptr<SelectionItem>(new SelDatF("dr_higg_top",       "#DeltaR(H, t)",                     50, 0, 5            ,2      )),
-    shared_ptr<SelectionItem>(new SelDatF("h_topjet_mass",     "jet mass from subjets / 5 GeV",     50, 50, 300         ,60, 160)),
     shared_ptr<SelectionItem>(new SelDatF("h_pt",              "Higgs p_{T} / 20 GeV",              50, 0, 1000         ,100    )),
     shared_ptr<SelectionItem>(new SelDatF("tlep_pt",           "lept. top p_{T} / 20 GeV",          50, 0, 1000         ,100    )),
-
-    shared_ptr<SelectionItem>(new SelDatF("h_mass",            "Higgs mass / 5 GeV",                50, 50, 300                 )),
+    shared_ptr<SelectionItem>(new SelDatF("h_mass",            "Higgs candidate mass / 5 GeV",      50, 50, 300         ,60, 160)),
     shared_ptr<SelectionItem>(new SelDatF("abs_largest_jet_eta", "most forward jet #eta",           50, 0., 5.                  )),
-    shared_ptr<SelectionItem>(new SelDatI("n_leading_btags",   "N_{b-tag leading}",                 11, -.5, 10.5               )),
 
     // shared_ptr<SelectionItem>(new SelDatF("abs_vlq_eta",       "T #eta",                            50, 0., 5.                  )),
     shared_ptr<SelectionItem>(new SelDatI("n_btags",           "N_{b-tag}",                         11, -.5, 10.5               )),
@@ -38,10 +35,12 @@ static const vector<shared_ptr<SelectionItem>> SEL_ITEMS_VLQ2HT {
 
     shared_ptr<SelectionItem>(new SelDatI("n_fwd_jets",        "N_{fwd jet}",                       11, -.5, 10.5               )),
     shared_ptr<SelectionItem>(new SelDatI("n_htags",           "N_{H jet}",                         11, -.5, 10.5               )),
-    shared_ptr<SelectionItem>(new SelDatD("ST",                "ST / 50 GeV",                       100, 0, 5000                )),
-    shared_ptr<SelectionItem>(new SelDatD("STgt40",            "STgt40 / 50 GeV",                   100, 0, 5000                )),
+    shared_ptr<SelectionItem>(new SelDatD("ST",                "ST / 30 GeV",                       80, 0, 2400                )),
+    shared_ptr<SelectionItem>(new SelDatD("STgt70",            "STgt70 / 30 GeV",                   80, 0, 2400                )),
+    shared_ptr<SelectionItem>(new SelDatF("lep_plus_met_vec_sum", "p_{T} of prim. lep + MET / 20 GeV", 75, 0, 1500              )),
+    shared_ptr<SelectionItem>(new SelDatF("lep_plus_met",      "sum of p_{T} of prim. lep and MET / 20 GeV", 75, 0, 1500        )),
     shared_ptr<SelectionItem>(new SelDatF("tlep_eta",          "lept. top #eta",                    50, -5., 5.                 )),
-    shared_ptr<SelectionItem>(new SelDatF("tlep_mass",         "lept. top mass / 5 GeV",            50, 100, 350                 )),
+    shared_ptr<SelectionItem>(new SelDatF("tlep_mass",         "lept. top mass / 5 GeV",            50, 100, 350                )),
     shared_ptr<SelectionItem>(new SelDatF("h_eta",             "Higgs #eta",                        50, -5., 5.                 )),
     shared_ptr<SelectionItem>(new SelDatF("vlq_pt",            "T p_{T} / 20 GeV",                  50, 0, 1000                 )),
     shared_ptr<SelectionItem>(new SelDatF("vlq_eta",           "T #eta",                            50, -5., 5.                 )),

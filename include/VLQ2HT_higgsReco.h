@@ -48,10 +48,14 @@ public:
 
         if (h_jets.size()) {
             // first option: from higgs-tagged jets
-
+            
             for (const auto & hj : h_jets) {
+                LorentzVector hj_v4;
+                for (const auto & sub_j : hj.subjets()) {
+                    hj_v4 += sub_j.v4();
+                }
                 reco_hyps.emplace_back(
-                    hj.v4(),
+                    hj_v4,
                     vector<TopJet>({hj}),
                     hj.subjets()
                 );

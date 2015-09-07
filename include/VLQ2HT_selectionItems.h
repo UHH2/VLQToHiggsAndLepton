@@ -23,7 +23,7 @@ static vector<shared_ptr<SelectionItem>> SEL_ITEMS_VLQ2HT {
     shared_ptr<SelectionItem>(new SelDatF("dr_higg_top",       "#DeltaR(H, t)",                     50, 0, 5            ,2      )),
     shared_ptr<SelectionItem>(new SelDatF("h_pt",              "Higgs p_{T} / 20 GeV",              50, 0, 1000         ,100    )),
     shared_ptr<SelectionItem>(new SelDatF("tlep_pt",           "lept. top p_{T} / 20 GeV",          50, 0, 1000         ,100    )),
-    shared_ptr<SelectionItem>(new SelDatF("h_mass",            "Higgs candidate mass / 5 GeV",      50, 50, 300         ,60, 160)),
+    shared_ptr<SelectionItem>(new SelDatF("h_mass",            "Higgs candidate mass / 5 GeV",      50, 50, 300                 )),
     shared_ptr<SelectionItem>(new SelDatF("abs_largest_jet_eta", "most forward jet #eta",           50, 0., 5.                  )),
 
     // shared_ptr<SelectionItem>(new SelDatF("abs_vlq_eta",       "T #eta",                            50, 0., 5.                  )),

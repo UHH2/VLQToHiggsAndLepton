@@ -82,24 +82,24 @@ sframe_tools = varial.tools.ToolChain(  # Parallel(
     'EventLoopAndPlots',
     [
         mk_sframe_and_plot_tools('AK8SoftDropCat1htag'),
-        mk_sframe_and_plot_tools('AK8SoftDropCat1htagLowMass'),
+        mk_sframe_and_plot_tools('AK8SoftDropCat1htagMassSB'),
         mk_merged_cat_plots(
             'AK8SoftDropCatAll',
             [
                 'AK8SoftDropCat1htag',
-                'AK8SoftDropCat1htagLowMass',
+                'AK8SoftDropCat1htagMassSB',
                 # 'AK8SoftDropCat0h3btag',
                 # 'AK8SoftDropCat0h2btag'
             ]
         ),
 
         mk_sframe_and_plot_tools('AK8SoftDropCat1htagWith1b'),
-        mk_sframe_and_plot_tools('AK8SoftDropCat1htagWith1bLowMass'),
+        mk_sframe_and_plot_tools('AK8SoftDropCat1htagWith1bMassSB'),
         mk_merged_cat_plots(
             'AK8SoftDropCatAllWith1b',
             [
                 'AK8SoftDropCat1htagWith1b',
-                'AK8SoftDropCat1htagWith1bLowMass',
+                'AK8SoftDropCat1htagWith1bMassSB',
                 # 'AK8SoftDropCat0h3btag',
                 # 'AK8SoftDropCat0h2btag'
             ]

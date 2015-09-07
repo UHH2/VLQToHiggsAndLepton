@@ -4,6 +4,7 @@
 import UHH2.VLQSemiLepPreSel.vlq_settings as vlq_settings
 import UHH2.VLQSemiLepPreSel.common as common
 import sframe_tools
+import overlays
 # import sensitivity
 import tex_content
 
@@ -26,6 +27,7 @@ tc = varial.tools.ToolChain(
         ]),
         # varial.tools.UserInteraction('Really run sframe? (Kill me otherwise.)'),
         sframe_tools.sframe_tools,
+        overlays.tc,
         # sensitivity.tc,
         # varial.tools.PrintToolTree(),
         varial.tools.WebCreator(),

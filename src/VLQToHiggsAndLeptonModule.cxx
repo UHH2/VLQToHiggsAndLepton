@@ -104,7 +104,7 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
         TopJetId(AndId<TopJet>(
             PrimaryLeptonDeltaPhiId(ctx, 1.5),
             OrId<TopJet>(
-                HiggsTag(60., 100., CSVBTag(CSVBTag::WP_LOOSE)),
+                HiggsTag(80., 100., CSVBTag(CSVBTag::WP_LOOSE)),
                 HiggsTag(160., 99999., CSVBTag(CSVBTag::WP_LOOSE))
             )
         ))
@@ -123,7 +123,7 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
         TopJetId(AndId<TopJet>(
             PrimaryLeptonDeltaPhiId(ctx, 1.5),
             OrId<TopJet>(
-                OneBTagHiggsTag(60., 100., CSVBTag(CSVBTag::WP_LOOSE)),
+                OneBTagHiggsTag(80., 100., CSVBTag(CSVBTag::WP_LOOSE)),
                 OneBTagHiggsTag(160., 99999., CSVBTag(CSVBTag::WP_LOOSE))
             )
         ))
@@ -222,7 +222,7 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
             TopJetId(AndId<TopJet>(
                 PrimaryLeptonDeltaPhiId(ctx, 1.5),
                 OrId<TopJet>(
-                    HiggsTag(60., 100., CSVBTag(CSVBTag::WP_LOOSE)),
+                    HiggsTag(80., 100., CSVBTag(CSVBTag::WP_LOOSE)),
                     HiggsTag(160., 99999., CSVBTag(CSVBTag::WP_LOOSE))
                 )
             ))
@@ -238,7 +238,7 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
             TopJetId(AndId<TopJet>(
                 PrimaryLeptonDeltaPhiId(ctx, 1.5),
                 OrId<TopJet>(
-                    OneBTagHiggsTag(60., 100., CSVBTag(CSVBTag::WP_LOOSE)),
+                    OneBTagHiggsTag(80., 100., CSVBTag(CSVBTag::WP_LOOSE)),
                     OneBTagHiggsTag(160., 99999., CSVBTag(CSVBTag::WP_LOOSE))
                 )
             ))

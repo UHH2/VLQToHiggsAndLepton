@@ -30,6 +30,7 @@ def hook_loaded_histos(wrps):
         wrps, category=lambda w: w.file_path.split('/')[-3])
     wrps = sorted(wrps, key=lambda w: '%s__%s' % (w.category, w.sample))
     wrps = plot.merge_samples(wrps)
+    wrps = varial.gen.gen_norm_to_integral(wrps)
     #wrps = varial.gen.attribute_printer(wrps, 'category')
     #wrps = varial.gen.attribute_printer(wrps, 'sample')
     return wrps

@@ -106,6 +106,19 @@ sframe_tools = varial.tools.ToolChain(  # Parallel(
         ),
 
         mk_sframe_and_plot_tools('AK8SoftDropCat1htagWith0b'),
+        mk_merged_cat_plots(
+            'AK8SoftDropCatAllAll',
+            [
+                'AK8SoftDropCat1htag',
+                'AK8SoftDropCat1htagMassSB',
+                'AK8SoftDropCat1htagWith1b',
+                'AK8SoftDropCat1htagWith1bMassSB',
+                'AK8SoftDropCat1htagWith0b',
+            ]
+        ),
+
+
+        
 
         # mk_sframe_and_plot_tools('AK8SoftDropCat0h3btag'),
         # mk_sframe_and_plot_tools('AK8SoftDropCat0h2btag'),

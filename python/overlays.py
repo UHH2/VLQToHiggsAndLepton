@@ -19,27 +19,24 @@ def hook_loaded_histos(wrps):
     # wrps = varial.gen.attribute_printer(wrps, 'legend')
     wrps = varial.gen.gen_norm_to_integral(wrps)
     wrps = varial.gen.apply_linewidth(wrps)
-
-    def colorize_signal_region(wrp):
-    	wrp.obj.SetFillColor(varial.ROOT.kGray)
-    	wrp.obj.SetLineColor(varial.ROOT.kBlack)
-    	wrp.obj.SetLineWidth(1)
-    	return wrp
-    wrps = varial.gen.imap_conditional(
-    	wrps,
-    	lambda w: 'signal region' == w.legend,
-    	colorize_signal_region,
-	)
+    wrps = varial.gen.apply_linecolor(wrps) #, varial.settings.default_colors[:7])
 
     return wrps
 
 
+def colorize_signal_region(wrp):
+	wrp.obj.SetFillColor(varial.ROOT.kGray)
+	wrp.obj.SetLineColor(varial.ROOT.kBlack)
+	wrp.obj.SetLineWidth(1)
+	return wrp
+
+
 def plot_setup(grps):
-	grps = varial.plotter.default_plot_colorizer(grps)
 	for grp in grps:
 		grp = list(grp)
 		signal = filter(lambda w: 'signal region' == w.legend, grp)
 		others = filter(lambda w: 'signal region' != w.legend, grp)
+		colorize_signal_region(signal[0])
 		signal = [varial.op.stack(signal)]
 		yield signal + others
 
@@ -60,15 +57,37 @@ def mk_plttr(plot_folder):
 tc = varial.tools.ToolChain(
 	'PlotOverlays',
 	[
-		varial.tools.HistoLoader(
-		    filter_keyfunc=lambda w: (
-		    	any(w.in_file_path.endswith(p) for p in plots)
-			  	and 'TTbar' in w.file_path
-		  	),
-		  	hook_loaded_histos=hook_loaded_histos,
+		varial.tools.ToolChain(
+			'StandardSideBand', 
+			[
+				varial.tools.HistoLoader(
+				    filter_keyfunc=lambda w: (
+				    	any(w.in_file_path.endswith(p) for p in plots)
+				    	and 'MassPlus' not in w.file_path
+					  	and 'TTbar' in w.file_path
+				  	),
+				  	hook_loaded_histos=hook_loaded_histos,
+				),
+				mk_plttr('NoSelection'),
+				mk_plttr('Nm1Selection'),
+			]
 		),
-		mk_plttr('NoSelection'),
-		mk_plttr('Nm1Selection'),
+		varial.tools.ToolChain(
+			'MassPlus', 
+			[
+				varial.tools.HistoLoader(
+				    filter_keyfunc=lambda w: (
+				    	any(w.in_file_path.endswith(p) for p in plots)
+				    	and ('MassPlus' in w.file_path 
+				    		 or 'Cat1htag/' in w.file_path)
+					  	and 'TTbar' in w.file_path
+				  	),
+				  	hook_loaded_histos=hook_loaded_histos,
+				),
+				mk_plttr('NoSelection'),
+				mk_plttr('Nm1Selection'),
+			]
+		),
 	],
 )
 

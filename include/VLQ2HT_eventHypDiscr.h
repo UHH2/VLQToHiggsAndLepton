@@ -16,7 +16,8 @@ public:
         h_h_hyps(ctx.get_handle<vector<HiggsRecoHyp>>(higgshyps_name)),
         h_higgs(ctx.get_handle<LorentzVector>("h")),
         h_top_lep(ctx.get_handle<LorentzVector>("tlep")),
-        h_event_chi2(ctx.get_handle<float>("event_chi2")) {}
+        h_event_chi2(ctx.get_handle<float>("event_chi2")),
+        h_higgs_tau21(ctx.get_handle<float>("h_tau21")) {}
 
     virtual bool process(Event & event) override {
         if (!event.is_valid(h_h_hyps)) {
@@ -73,6 +74,12 @@ public:
         auto best_t_hyp = get_best_hypothesis(t_hyps, "Chi2_event", chi2);
         if (best_h_hyp) {
             event.set(h_higgs, best_h_hyp->higgs_v4);
+            if (best_h_hyp->higgs_jets.size()) {
+                auto j = best_h_hyp->higgs_jets[0];
+                event.set(h_higgs_tau21, j.tau2() / j.tau1());
+            } else {
+                event.set(h_higgs_tau21, 0.);
+            }
         }
         if (best_t_hyp) {
             event.set(h_top_lep, best_t_hyp->toplep_v4);
@@ -90,4 +97,5 @@ private:
     Event::Handle<LorentzVector> h_higgs;
     Event::Handle<LorentzVector> h_top_lep;
     Event::Handle<float> h_event_chi2;
+    Event::Handle<float> h_higgs_tau21;
 };

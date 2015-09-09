@@ -16,8 +16,6 @@ static const float DPT_2D_CUT = 40.0;
 
 static vector<shared_ptr<SelectionItem>> SEL_ITEMS_VLQ2HT {
     // shared_ptr<SelectionItem>(new SelDatI("trigger_accept",    "trigger accept",                    2, -.5, 1.5         ,1      )),
-    shared_ptr<SelectionItem>(new SelDatI("n_jets",            "N_{jet}",                           21, -.5, 20.5       ,2      )),
-    shared_ptr<SelectionItem>(new SelDatI("n_leptons",         "N_{lepton}",                        11, -.5, 10.5       ,1      )),
     shared_ptr<SelectionItem>(new SelDatF("event_chi2",        "event chi2",                        100, 0, 200         ,0.,5000)),
     shared_ptr<SelectionItem>(new SelDatI("n_leading_btags",   "N_{b-tag leading}",                 11, -.5, 10.5       ,1      )),
     shared_ptr<SelectionItem>(new SelDatF("dr_higg_top",       "#DeltaR(H, t)",                     50, 0, 5            ,2      )),
@@ -33,10 +31,13 @@ static vector<shared_ptr<SelectionItem>> SEL_ITEMS_VLQ2HT {
     shared_ptr<SelectionItem>(new SelDatF("largest_jet_eta",   "most forward jet #eta",             50, -5., 5.                 )),
     shared_ptr<SelectionItem>(new SelDatF("primary_lepton_pt", "primary lepton p_{T} / 20 GeV",     75, 0., 1500                )),
 
+    shared_ptr<SelectionItem>(new SelDatF("h_tau21",           "Higgs candidate #tau_{2}/#tau_{1}", 50, 0, 1                    )),
+    shared_ptr<SelectionItem>(new SelDatI("n_jets",            "N_{jet}",                           21, -.5, 20.5               )),
+    shared_ptr<SelectionItem>(new SelDatI("n_leptons",         "N_{lepton}",                        11, -.5, 10.5               )),
     shared_ptr<SelectionItem>(new SelDatI("n_fwd_jets",        "N_{fwd jet}",                       11, -.5, 10.5               )),
     shared_ptr<SelectionItem>(new SelDatI("n_htags",           "N_{H jet}",                         11, -.5, 10.5               )),
-    shared_ptr<SelectionItem>(new SelDatD("ST",                "ST / 30 GeV",                       80, 0, 2400                )),
-    shared_ptr<SelectionItem>(new SelDatD("STgt70",            "STgt70 / 30 GeV",                   80, 0, 2400                )),
+    shared_ptr<SelectionItem>(new SelDatD("ST",                "ST / 30 GeV",                       80, 0, 2400                 )),
+    shared_ptr<SelectionItem>(new SelDatD("STgt70",            "STgt70 / 30 GeV",                   80, 0, 2400                 )),
     shared_ptr<SelectionItem>(new SelDatF("lep_plus_met_vec_sum", "p_{T} of prim. lep + MET / 20 GeV", 75, 0, 1500              )),
     shared_ptr<SelectionItem>(new SelDatF("lep_plus_met",      "sum of p_{T} of prim. lep and MET / 20 GeV", 75, 0, 1500        )),
     shared_ptr<SelectionItem>(new SelDatF("tlep_eta",          "lept. top #eta",                    50, -5., 5.                 )),

@@ -1,4 +1,4 @@
-import varial.tools
+import varial.extensions.tex
 
 # categories
 p_filt1h = 'VLQ2HT/EventLoopAndPlots/FilteredCat1htag/'
@@ -37,7 +37,7 @@ plain_files = {
 
 
 dirname = 'AutoContentVLQ2HT'
-tex_content = varial.tools.TexContent(
+tex_content = varial.extensions.tex.TexContent(
     images,
     plain_files,
     r"\includegraphics[width=0.49\textwidth]{" + dirname + "/%s}",

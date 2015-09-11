@@ -8,6 +8,8 @@ import overlays
 # import sensitivity
 import tex_content
 
+import varial.extensions.make
+import varial.extensions.git
 import varial.tools
 import os
 
@@ -19,12 +21,13 @@ uhh_base = os.getenv('CMSSW_BASE') + '/src/UHH2/'
 tc = varial.tools.ToolChain(
     dir_name,
     [
-        varial.tools.CompileTool([
+        varial.extensions.make.Make([
             uhh_base + 'core',
             uhh_base + 'common',
             uhh_base + 'VLQSemiLepPreSel',
             uhh_base + 'VLQToHiggsAndLepton',
         ]),
+        varial.extensions.git.GitAdder(),
         # varial.tools.UserInteraction('Really run sframe? (Kill me otherwise.)'),
         sframe_tools.sframe_tools,
         overlays.tc,
@@ -33,7 +36,7 @@ tc = varial.tools.ToolChain(
         varial.tools.WebCreator(),
         # tex_content.tex_content,
         # varial.tools.CopyTool('~/www/test'),
-        varial.tools.GitTagger(),
+        varial.extensions.git.GitTagger(commit_prefix='VLQ2HT'),
     ]
 )
 

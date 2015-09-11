@@ -7,6 +7,9 @@ import varial.tools
 import plot
 
 
+disable_plots = False
+
+
 sframe_cfg = os.getenv('CMSSW_BASE') + \
              '/src/UHH2/VLQToHiggsAndLepton/config/VLQToHiggsAndLepton.xml'
 
@@ -33,7 +36,7 @@ def mk_sframe_and_plot_tools(catname):
     )
     tc = varial.tools.ToolChain(
         catname,
-        [sframe, plots]
+        [sframe] if disable_plots else [sframe, plots]
     )
     return tc
 
@@ -73,7 +76,7 @@ def mk_merged_cat_plots(toolname, input_categories):
     )
     tc = varial.tools.ToolChain(
         toolname,
-        [plots]
+        [] if disable_plots else [plots]
     )
     return tc
 

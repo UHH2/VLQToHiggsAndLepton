@@ -121,7 +121,7 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     ));
     auto n_htags_zerobtag_massplus = TopJetId(AndId<TopJet>(
         PrimaryLeptonDeltaPhiId(ctx, 1.5),
-        OneBTagHiggsTag(100., 190., is_true<Jet>)
+        OneBTagHiggsTag(105., 195., is_true<Jet>)
     ));
 
     // setup modules to check if this event belongs into this category

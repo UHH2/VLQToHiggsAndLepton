@@ -90,37 +90,44 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     }
 
     auto n_htags = TopJetId(AndId<TopJet>(
-        PrimaryLeptonDeltaPhiId(ctx, 1.5),
+        PrimaryLeptonDeltaPhiId(ctx, 1.0),
         HiggsTag(100., 160., CSVBTag(CSVBTag::WP_LOOSE))
     ));
     auto n_htags_masssb = TopJetId(AndId<TopJet>(
-        PrimaryLeptonDeltaPhiId(ctx, 1.5),
+        PrimaryLeptonDeltaPhiId(ctx, 1.0),
         OrId<TopJet>(
             HiggsTag(60., 100., CSVBTag(CSVBTag::WP_LOOSE)),
             HiggsTag(160., 99999., CSVBTag(CSVBTag::WP_LOOSE))
         )
     ));
     auto n_htags_onebtag = TopJetId(AndId<TopJet>(
-        PrimaryLeptonDeltaPhiId(ctx, 1.5),
+        PrimaryLeptonDeltaPhiId(ctx, 1.0),
         OneBTagHiggsTag(100., 160., CSVBTag(CSVBTag::WP_LOOSE))
     ));
     auto n_htags_onebtag_masssb = TopJetId(AndId<TopJet>(
-        PrimaryLeptonDeltaPhiId(ctx, 1.5),
+        PrimaryLeptonDeltaPhiId(ctx, 1.0),
         OrId<TopJet>(
             OneBTagHiggsTag(60., 100., CSVBTag(CSVBTag::WP_LOOSE)),
             OneBTagHiggsTag(160., 99999., CSVBTag(CSVBTag::WP_LOOSE))
         )
     ));
     auto n_htags_onebtag_massplus = TopJetId(AndId<TopJet>(
-        PrimaryLeptonDeltaPhiId(ctx, 1.5),
+        PrimaryLeptonDeltaPhiId(ctx, 1.0),
         OneBTagHiggsTag(100., 175., CSVBTag(CSVBTag::WP_LOOSE))
     ));
     auto n_htags_zerobtag = TopJetId(AndId<TopJet>(
-        PrimaryLeptonDeltaPhiId(ctx, 1.5),
+        PrimaryLeptonDeltaPhiId(ctx, 1.0),
         OneBTagHiggsTag(100., 160., is_true<Jet>)
     ));
+    auto n_htags_zerobtag_masssb = TopJetId(AndId<TopJet>(
+        PrimaryLeptonDeltaPhiId(ctx, 1.0),
+        OrId<TopJet>(
+            OneBTagHiggsTag(60., 100., is_true<Jet>),
+            OneBTagHiggsTag(160., 99999., is_true<Jet>)
+        )
+    ));
     auto n_htags_zerobtag_massplus = TopJetId(AndId<TopJet>(
-        PrimaryLeptonDeltaPhiId(ctx, 1.5),
+        PrimaryLeptonDeltaPhiId(ctx, 1.0),
         OneBTagHiggsTag(105., 195., is_true<Jet>)
     ));
 
@@ -138,6 +145,8 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
         ctx, "patJetsAk8CHSJetsSoftDropPacked_daughters", "n_htags_onebtag_massplus", n_htags_onebtag_massplus));
     v_pre_modules.emplace_back(new CollectionSizeProducer<TopJet>(
         ctx, "patJetsAk8CHSJetsSoftDropPacked_daughters", "n_htags_zerobtag", n_htags_zerobtag));
+    v_pre_modules.emplace_back(new CollectionSizeProducer<TopJet>(
+        ctx, "patJetsAk8CHSJetsSoftDropPacked_daughters", "n_htags_zerobtag_masssb", n_htags_zerobtag_masssb));
     v_pre_modules.emplace_back(new CollectionSizeProducer<TopJet>(
         ctx, "patJetsAk8CHSJetsSoftDropPacked_daughters", "n_htags_zerobtag_massplus", n_htags_zerobtag_massplus));
     v_pre_modules.emplace_back(new CollectionSizeProducer<Jet>(
@@ -211,6 +220,15 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
             new HandleSelection<int>(ctx, "n_htags", 0, 0),
             new HandleSelection<int>(ctx, "n_htags_onebtag", 0, 0),
             new HandleSelection<int>(ctx, "n_htags_zerobtag", 1)
+        }));
+        v_cat_modules.emplace_back(new CollectionProducer<TopJet>(
+            ctx, "patJetsAk8CHSJetsSoftDropPacked_daughters", "h_jets", n_htags_zerobtag));
+
+    } else if (category == "AK8SoftDropCat1htagWith0bMassSB") {
+        cat_check_module.reset(new VectorAndSelection({
+            new HandleSelection<int>(ctx, "n_htags_masssb", 0, 0),
+            new HandleSelection<int>(ctx, "n_htags_onebtag_masssb", 0, 0),
+            new HandleSelection<int>(ctx, "n_htags_zerobtag_masssb", 1)
         }));
         v_cat_modules.emplace_back(new CollectionProducer<TopJet>(
             ctx, "patJetsAk8CHSJetsSoftDropPacked_daughters", "h_jets", n_htags_zerobtag));

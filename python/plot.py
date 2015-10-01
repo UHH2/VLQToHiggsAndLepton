@@ -51,17 +51,17 @@ def plotter_factory_split_bkg(**kws):
     return varial.tools.Plotter(**kws)
 
 
-def loader_hook_sigx30(wrps):
+def loader_hook_sigx10(wrps):
     wrps = loader_hook(wrps)
     for w in wrps:
         if common.is_signal(w.sample):
-            w.lumi /= 30.
+            w.lumi /= 10.
             w = varial.op.norm_to_lumi(w)
         yield w
 
 
-def plotter_factory_stack_sigx30(**kws):
-    kws['hook_loaded_histos'] = loader_hook_sigx30
+def plotter_factory_stack_sigx10(**kws):
+    kws['hook_loaded_histos'] = loader_hook_sigx10
     kws['save_lin_log_scale'] = True
     kws['plot_setup'] = gen.mc_stack_n_data_sum
     return varial.tools.Plotter(**kws)
@@ -96,7 +96,7 @@ def mk_tools(input_pattern=None):
         varial.tools.mk_rootfile_plotter(
             pattern=input_pattern,
             name='VLQ2HT_stack',
-            plotter_factory=plotter_factory_stack,
+            plotter_factory=plotter_factory_stack_sigx10,
             combine_files=True,
             auto_legend=False,
         ),
@@ -107,14 +107,6 @@ def mk_tools(input_pattern=None):
         #    pattern=input_pattern,
         #    name='VLQ2HT_norm',
         #    plotter_factory=plotter_factory_norm,
-        #    combine_files=True,
-        #    auto_legend=False,
-        #),
-
-        #varial.tools.mk_rootfile_plotter(
-        #    pattern=input_pattern,
-        #    name='VLQ2HT_stack_signalx30',
-        #    plotter_factory=plotter_factory_stack_sigx30,
         #    combine_files=True,
         #    auto_legend=False,
         #),

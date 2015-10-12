@@ -41,29 +41,37 @@ signal samples for plotting
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 -->
 
+<!--
 <InputData Lumi="100000" NEventsMax="-1" Type="MC" Version="TpB_TH_LH_M0700" Cacheable="True">
     <In FileName="/nfs/dust/cms/user/tholenhe/VLQSemiLepPreSel/Run2-ntuple/uhh2.AnalysisModuleRunner.MC.TpB_TH_LH_M0700.root" Lumi="0.0"/>
     <InputTree Name="AnalysisTree" />
-    <!-- <OutputTree Name="AnalysisTree" /> -->
 </InputData>
 
 <InputData Lumi="100000" NEventsMax="-1" Type="MC" Version="TpB_TH_LH_M1700" Cacheable="True">
     <In FileName="/nfs/dust/cms/user/tholenhe/VLQSemiLepPreSel/Run2-ntuple/uhh2.AnalysisModuleRunner.MC.TpB_TH_LH_M1700.root" Lumi="0.0"/>
     <InputTree Name="AnalysisTree" />
-    <!-- <OutputTree Name="AnalysisTree" /> -->
 </InputData>
 
 <InputData Lumi="100000" NEventsMax="-1" Type="MC" Version="TpB_TH_RH_M0700" Cacheable="True">
     <In FileName="/nfs/dust/cms/user/tholenhe/VLQSemiLepPreSel/Run2-ntuple/uhh2.AnalysisModuleRunner.MC.TpB_TH_RH_M0700.root" Lumi="0.0"/>
     <InputTree Name="AnalysisTree" />
-    <!-- <OutputTree Name="AnalysisTree" /> -->
 </InputData>
 
 <InputData Lumi="100000" NEventsMax="-1" Type="MC" Version="TpB_TH_RH_M1700" Cacheable="True">
     <In FileName="/nfs/dust/cms/user/tholenhe/VLQSemiLepPreSel/Run2-ntuple/uhh2.AnalysisModuleRunner.MC.TpB_TH_RH_M1700.root" Lumi="0.0"/>
     <InputTree Name="AnalysisTree" />
-    <!-- <OutputTree Name="AnalysisTree" /> -->
 </InputData>
+-->
+<InputData Lumi="100000" NEventsMax="-1" Type="MC" Version="TpB_TH_700" Cacheable="True">
+    <In FileName="/nfs/dust/cms/user/tholenhe/VLQSemiLepPreSel/Run2-ntuple/uhh2.AnalysisModuleRunner.MC.TpB_TH_RH_M0700.root" Lumi="0.0"/>
+    <InputTree Name="AnalysisTree" />
+</InputData>
+
+<InputData Lumi="100000" NEventsMax="-1" Type="MC" Version="TpB_TH_1700" Cacheable="True">
+    <In FileName="/nfs/dust/cms/user/tholenhe/VLQSemiLepPreSel/Run2-ntuple/uhh2.AnalysisModuleRunner.MC.TpB_TH_RH_M1700.root" Lumi="0.0"/>
+    <InputTree Name="AnalysisTree" />
+</InputData>
+
 
 <!--
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

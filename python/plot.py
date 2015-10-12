@@ -6,6 +6,7 @@ import UHH2.VLQSemiLepPreSel.cutflow_tables as cutflow_tables
 from UHH2.VLQSemiLepPreSel.plot import *
 
 import varial.generators as gen
+import varial.history
 import varial.tools
 import time
 import os
@@ -51,13 +52,18 @@ def plotter_factory_split_bkg(**kws):
     return varial.tools.Plotter(**kws)
 
 
+@varial.history.track_history
+def scale_signal(w):
+    if w.is_signal:
+        w.lumi /= 20.
+        w = varial.op.norm_to_lumi(w)
+    return w
+
+
 def loader_hook_sigx10(wrps):
     wrps = loader_hook(wrps)
-    for w in wrps:
-        if common.is_signal(w.sample):
-            w.lumi /= 10.
-            w = varial.op.norm_to_lumi(w)
-        yield w
+    wrps = (scale_signal(w) for w in wrps)
+    return wrps
 
 
 def plotter_factory_stack_sigx10(**kws):
@@ -69,6 +75,7 @@ def plotter_factory_stack_sigx10(**kws):
 
 def loader_hook_cat_merging(wrps):
     wrps = common.add_wrp_info(wrps)
+    wrps = (scale_signal(w) for w in wrps)
     group_key = lambda w: w.in_file_path + '__' + w.sample
     wrps = sorted(wrps, key=group_key)
     wrps = gen.group(wrps, key_func=group_key)

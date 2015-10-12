@@ -15,6 +15,7 @@ git add VARIAL_VERSION
 cd $cwd
 
 
+# preselection
 cwd="$(pwd)"
 repo_base="$(git rev-parse --show-toplevel)"
 presel_dir=$repo_base/../VLQSemiLepPreSel
@@ -25,5 +26,20 @@ cd $repo_base
 echo "Adding VLQPRESEL_VERSION:"
 cat VLQPRESEL_VERSION
 git add VLQPRESEL_VERSION
+cd $cwd
+
+
+#uhh2
+repo_base="$(git rev-parse --show-toplevel)"
+uhh2_dir=$repo_base/../
+
+cwd="$(pwd)"
+cd $uhh2_dir
+git rev-parse --verify HEAD > UHH2_VERSION
+mv UHH2_VERSION $repo_base
+cd $repo_base
+echo "Adding UHH2_VERSION:"
+cat UHH2_VERSION
+git add UHH2_VERSION
 cd $cwd
 

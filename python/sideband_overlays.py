@@ -7,6 +7,11 @@ import UHH2.VLQSemiLepPreSel.common as common
 plots = ['vlq_mass', 'vlq_pt', 'h_mass', 'h_pt', 'tlep_pt', 'tlep_mass']
 
 
+def rename_y_axis(wrp):
+	wrp.obj.GetYaxis().SetTitle('a.u.')
+	return wrp
+
+
 def hook_loaded_histos(wrps):
     wrps = common.add_wrp_info(wrps)
     wrps = common.label_axes(wrps)
@@ -16,17 +21,29 @@ def hook_loaded_histos(wrps):
         				 if not w.is_data else 'Data',
         draw_option=lambda w: 'hist' if not w.is_data else 'E1X0',
     )
+    wrps = varial.gen.touch_legend_color(wrps)
     # wrps = sorted(wrps, key=lambda w: '%s__%s' % (w.category, w.sample))
     # wrps = plot.merge_samples(wrps)
     # wrps = varial.gen.attribute_printer(wrps, 'legend')
     wrps = varial.gen.gen_norm_to_integral(wrps)
+    wrps = (rename_y_axis(w) for w in wrps)
     wrps = varial.gen.switch(
     	wrps,
     	lambda w: not w.is_data,
     	lambda wrps: varial.gen.apply_linecolor(
     					 varial.gen.apply_linewidth(wrps))
     )
+    wrps = varial.gen.sort(wrps)
     return wrps
+
+
+def hook_loaded_histos_sqash_mc(wrps):
+	key=lambda w: w.in_file_path + '___%s' % w.is_data
+	wrps = sorted(wrps, key=key)
+	wrps = varial.gen.group(wrps, key)
+	wrps = varial.gen.gen_merge(wrps)
+	wrps = hook_loaded_histos(wrps)
+	return wrps
 
 
 def colorize_signal_region(wrp):
@@ -64,19 +81,20 @@ def mk_plttr(plot_folder):
     )
 
 
-tc = varial.tools.ToolChain(
-	'PlotOverlays',
-	[
+def mk_overlay_chains(samplename):
+	input_path = '../../../../Loaders/%s' % samplename
+	return varial.tools.ToolChainParallel(samplename, [
 		varial.tools.ToolChain(
 			'StandardSideBand', 
 			[
 				varial.tools.HistoLoader(
-				    filter_keyfunc=lambda w: (
-				    	any(w.in_file_path.endswith(p) for p in plots)
-				    	and 'MassPlus' not in w.file_path
-					  	and 'TTbar' in w.file_path
+					input_result_path=input_path,
+				    filter_keyfunc=lambda w: any(
+				    	t in w.file_path for t in [
+				    	    '1htag/', '1htagMassSB/',
+				    	    '1htagWith1b/', '1htagWith0b/'
+				    	]
 				  	),
-				  	hook_loaded_histos=hook_loaded_histos,
 				),
 				mk_plttr('NoSelection'),
 				mk_plttr('Nm1Selection'),
@@ -86,13 +104,12 @@ tc = varial.tools.ToolChain(
 			'MassPlus', 
 			[
 				varial.tools.HistoLoader(
+					input_result_path=input_path,
 				    filter_keyfunc=lambda w: (
-				    	any(w.in_file_path.endswith(p) for p in plots)
-				    	and ('MassPlus' in w.file_path 
+				    	('MassPlus' in w.file_path 
 				    			or 'Cat1htag/' in w.file_path)
-				  		and 'TTbar' in w.file_path
+				    	and not '.DATA.' in w.file_path
 				  	),
-				  	hook_loaded_histos=hook_loaded_histos,
 				),
 				mk_plttr('NoSelection'),
 				mk_plttr('Nm1Selection'),
@@ -102,18 +119,16 @@ tc = varial.tools.ToolChain(
 			'CompareToDataWith0bMassPlus', 
 			[
 				varial.tools.HistoLoader(
+					input_result_path=input_path,
 				    filter_keyfunc=lambda w: (
-				    	any(w.in_file_path.endswith(p) for p in plots)
-				    	and (
+				    	(
 				    		('.DATA.' in w.file_path and (
 				    			'Cat1htagWith0bMassPlus/' in w.file_path
 				    		))
 				    	or
-				    		('TTbar' in w.file_path and 'Cat1htag/' in w.file_path)
+				    		('Cat1htag/' in w.file_path)
 				    	)
-				    	
 				  	),
-				  	hook_loaded_histos=hook_loaded_histos,
 				),
 				mk_plttr('NoSelection'),
 				mk_plttr('Nm1Selection'),
@@ -123,23 +138,60 @@ tc = varial.tools.ToolChain(
 			'CompareToDataWith1bMassPlus', 
 			[
 				varial.tools.HistoLoader(
+					input_result_path=input_path,
 				    filter_keyfunc=lambda w: (
-				    	any(w.in_file_path.endswith(p) for p in plots)
-				    	and (
+				    	(
 				    		('.DATA.' in w.file_path and (
 				    			'Cat1htagWith1bMassPlus/' in w.file_path
 				    		))
 				    	or
-				    		('TTbar' in w.file_path and 'Cat1htag/' in w.file_path)
+				    		('Cat1htag/' in w.file_path)
 				    	)
 				    	
 				  	),
-				  	hook_loaded_histos=hook_loaded_histos,
+				  	
 				),
 				mk_plttr('NoSelection'),
 				mk_plttr('Nm1Selection'),
 			]
 		),
-	],
-)
+	])
 
+good_plot = lambda w: any(w.in_file_path.endswith(p) for p in plots)
+good_data = lambda w: '.DATA.' in w.file_path and 'bMassPlus/' in w.file_path
+
+tc = varial.tools.ToolChain(
+	'Sidebands', [
+		varial.tools.ToolChainParallel(
+			'Loaders', [
+				varial.tools.HistoLoader(
+				    filter_keyfunc=lambda w: (
+				    		good_plot(w)						    # check plot name
+				    	and (
+				    		good_data(w) or 'TTbar' in w.file_path  # check sample
+				    	)
+				    ),
+		            hook_loaded_histos=hook_loaded_histos,
+		            name='TTbar',
+				),
+				varial.tools.HistoLoader(
+				    filter_keyfunc=lambda w: (
+				    		good_plot(w)						    # check plot name
+				    	and (
+				    		good_data(w) or 'WJets' in w.file_path  # check sample
+				    	)
+				    ),
+		            hook_loaded_histos=hook_loaded_histos,
+		            name='WJets',
+				),
+			]
+		),
+		varial.tools.ToolChainParallel(
+			'Plots', [
+			    mk_overlay_chains('TTbar'),
+	    		mk_overlay_chains('WJets'),
+	    		# mk_overlay_chains('SquashMC'),
+			]
+		)
+	]
+)

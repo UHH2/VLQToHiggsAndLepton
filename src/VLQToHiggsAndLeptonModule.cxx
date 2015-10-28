@@ -89,6 +89,9 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
         cout << " " << kv.first << " = " << kv.second << endl;
     }
 
+    // remove everything from the output branch
+    ctx.undeclare_all_event_output();
+
     auto n_htags = TopJetId(AndId<TopJet>(
         PrimaryLeptonDeltaPhiId(ctx, 1.0),
         HiggsTag(100., 160., CSVBTag(CSVBTag::WP_LOOSE))
@@ -130,6 +133,7 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
         PrimaryLeptonDeltaPhiId(ctx, 1.0),
         OneBTagHiggsTag(105., 195., is_true<Jet>)
     ));
+    auto n_htags_all = TopJetId(HiggsTag(60., 99999., is_true<Jet>));
 
     // setup modules to check if this event belongs into this category
     v_pre_modules.emplace_back(new PrimaryLepton(ctx, "PrimaryLepton"));
@@ -231,7 +235,7 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
             new HandleSelection<int>(ctx, "n_htags_zerobtag_masssb", 1)
         }));
         v_cat_modules.emplace_back(new CollectionProducer<TopJet>(
-            ctx, "patJetsAk8CHSJetsSoftDropPacked_daughters", "h_jets", n_htags_zerobtag));
+            ctx, "patJetsAk8CHSJetsSoftDropPacked_daughters", "h_jets", n_htags_zerobtag_masssb));
 
     } else if (category == "AK8SoftDropCat1htagWith0bMassPlus") {
         cat_check_module.reset(new VectorAndSelection({
@@ -243,6 +247,11 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
         }));
         v_cat_modules.emplace_back(new CollectionProducer<TopJet>(
             ctx, "patJetsAk8CHSJetsSoftDropPacked_daughters", "h_jets", n_htags_zerobtag_massplus));
+
+    } else if (category == "MakeFlatTuple") {
+        cat_check_module.reset(new HandleSelection<int>(ctx, "n_htags"));  // always true
+        v_cat_modules.emplace_back(new CollectionProducer<TopJet>(
+            ctx, "patJetsAk8CHSJetsSoftDropPacked_daughters", "h_jets", n_htags_all));
 
     // a category must be given
     } else {
@@ -283,10 +292,10 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
         ctx, "h_jets", "h_topjet_mass"));
 
     // event variables
-    v_cat_modules.emplace_back(new LepPtPlusMETProducer(ctx, "PrimaryLepton", "lep_plus_met", "lep_plus_met_vec_sum"));
+    // v_cat_modules.emplace_back(new LepPtPlusMETProducer(ctx, "PrimaryLepton", "lep_plus_met", "lep_plus_met_vec_sum"));
     v_cat_modules.emplace_back(new HTCalculator(ctx, boost::none, "HT"));
     v_cat_modules.emplace_back(new STCalculator(ctx, "ST", JetId(PtEtaCut(0., 2.4))));
-    v_cat_modules.emplace_back(new STCalculator(ctx, "STgt70", JetId(PtEtaCut(70., 2.4))));
+    // v_cat_modules.emplace_back(new STCalculator(ctx, "STgt70", JetId(PtEtaCut(70., 2.4))));
     // v_pre_modules.emplace_back(new EventShapeVariables(ctx, "jets", "", "", "es_", 2., 100));
     // v_pre_modules.emplace_back(new EventShapeVariables(ctx, "jets", "electrons", "muons", "es_plus_lep_", 2., 100));
 
@@ -298,6 +307,8 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     v_cat_modules.emplace_back(new LorentzVectorInfoProducer(ctx, "tlep"));
     v_cat_modules.emplace_back(new LorentzVectorInfoProducer(ctx, "h"));
     v_cat_modules.emplace_back(new LorentzVectorInfoProducer(ctx, "vlq"));
+    v_cat_modules.emplace_back(new CollectionSizeProducer<Jet>(
+        ctx, "h_subjets", "h_n_subjet_btags", JetId(CSVBTag(CSVBTag::WP_LOOSE))));
 
     // Other CutProducers
     v_cat_modules.emplace_back(new EventWeightOutputHandle(ctx, "weight"));
@@ -306,11 +317,22 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     v_cat_modules.emplace_back(new TwoDCutProducer(ctx));
     // v_pre_modules.emplace_back(new AbsValueProducer<float>(ctx, "vlq_eta"));
 
+    v_cat_modules.emplace_back(new TriggerAcceptProducer(ctx, TRIGGER_PATHS, "trigger_accept"));
+    // if (version == "Run2015D_Mu") {
+    //     v_cat_modules.emplace_back(new TriggerAcceptProducer(ctx, TRIGGER_PATHS_DATA, "trigger_accept"));
+    // } else if (version == "Run2015D_Ele") {
+    //     v_cat_modules.emplace_back(new TriggerAcceptProducer(ctx, TRIGGER_PATHS_DATA, TRIGGER_PATHS_DATA_ELE_VETO, "trigger_accept"));
+    // } else if (version == "Run2015D_Had") {
+    //     v_cat_modules.emplace_back(new TriggerAcceptProducer(ctx, TRIGGER_PATHS_DATA, TRIGGER_PATHS_DATA_HAD_VETO, "trigger_accept"));
+    // } else {
+    //     v_cat_modules.emplace_back(new TriggerAcceptProducer(ctx, TRIGGER_PATHS, "trigger_accept"));
+    // }
+
     // Selection Producer
     SelItemsHelper sel_helper(SEL_ITEMS_VLQ2HT, ctx);
     // sel_helper.write_cuts_to_texfile();
     sel_module.reset(new SelectionProducer(ctx, sel_helper));
-    // sel_helper.declare_items_for_output();
+    sel_helper.declare_items_for_output();
 
     // 3. Set up Hists classes:
     sel_helper.fill_hists_vector(v_hists, "NoSelection");
@@ -350,32 +372,6 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
         v_hists_after_sel.emplace_back(new VLQ2HTRecoGenComparison(ctx, "GenRecoHistsAfterSel"));
         v_hists_after_sel.emplace_back(new VLQ2HTRecoGenMatchHists(ctx, "Chi2SignalMatchAfterSel"));
     }
-
-    // if (type == "MC") {
-    if (false) {
-        ctx.undeclare_event_output("GenParticles");
-        ctx.undeclare_event_output("beamspot_x0");
-        ctx.undeclare_event_output("beamspot_y0");
-        ctx.undeclare_event_output("beamspot_z0");
-        ctx.undeclare_event_output("event");
-        ctx.undeclare_event_output("genInfo");
-        ctx.undeclare_event_output("isRealData");
-        ctx.undeclare_event_output("luminosityBlock");
-        ctx.undeclare_event_output("offlineSlimmedPrimaryVertices");
-        ctx.undeclare_event_output("patJetsCa15CHSJetsFilteredPacked_daughters");
-        ctx.undeclare_event_output("patJetsAk8CHSJetsSoftDropPacked_daughters");
-        ctx.undeclare_event_output("rho");
-        ctx.undeclare_event_output("run");
-        ctx.undeclare_event_output("slimmedElectronsUSER");
-        ctx.undeclare_event_output("slimmedMETs");
-        ctx.undeclare_event_output("slimmedMuonsUSER");
-        ctx.undeclare_event_output("slimmedTaus");
-        ctx.undeclare_event_output("triggerNames");
-        ctx.undeclare_event_output("triggerResults");
-        // ctx.undeclare_event_output("trigger_accept");
-    }
-
-    // TODO - adjust lepton pt cut to lowest trigger (should go into every trigger leg and test??)
 }
 
 

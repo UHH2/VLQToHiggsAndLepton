@@ -12,7 +12,6 @@ import time
 import os
 
 
-# varial.settings.max_num_processes = 1
 # varial.settings.debug_mode = True
 input_pat = './uhh2.*.root'
 
@@ -38,7 +37,6 @@ def loader_hook_split_bkg(wrps):
     #wrps = common.yield_n_objs(wrps, 20)
     #wrps = apply_match_eff(wrps)
     wrps = common.add_wrp_info(wrps)
-    #wrps = merge_samples(wrps)
     wrps = (w for w in wrps if w.histo.Integral() > 1e-5)
     wrps = common.label_axes(wrps)
     wrps = gen.gen_make_th2_projections(wrps)
@@ -80,7 +78,6 @@ def loader_hook_cat_merging(wrps):
     wrps = sorted(wrps, key=group_key)
     wrps = gen.group(wrps, key_func=group_key)
     wrps = gen.gen_merge(wrps)
-    wrps = merge_samples(wrps)
     wrps = common.label_axes(wrps)
     wrps = gen.gen_make_th2_projections(wrps)
     return wrps

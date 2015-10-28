@@ -8,6 +8,19 @@
 
 
 class EventHypDiscr: public AnalysisModule {
+private:
+    // input
+    Event::Handle<vector<TopLeptRecoHyp>> h_t_hyps;
+    Event::Handle<vector<HiggsRecoHyp>> h_h_hyps;
+
+    // output
+    Event::Handle<LorentzVector> h_higgs;
+    Event::Handle<LorentzVector> h_top_lep;
+    Event::Handle<float> h_event_chi2;
+    Event::Handle<vector<Jet>> h_subjets;
+    Event::Handle<float> h_higgs_tau21;
+    Event::Handle<float> h_higgs_tau32;
+
 public:
     EventHypDiscr(Context & ctx,
                     const string & tophyps_name,
@@ -17,9 +30,13 @@ public:
         h_higgs(ctx.get_handle<LorentzVector>("h")),
         h_top_lep(ctx.get_handle<LorentzVector>("tlep")),
         h_event_chi2(ctx.get_handle<float>("event_chi2")),
-        h_higgs_tau21(ctx.get_handle<float>("h_tau21")) {}
+        h_subjets(ctx.get_handle<vector<Jet>>("h_subjets")),
+        h_higgs_tau21(ctx.get_handle<float>("h_tau21")),
+        h_higgs_tau32(ctx.get_handle<float>("h_tau32")) {}
 
     virtual bool process(Event & event) override {
+        event.set(h_subjets, vector<Jet>());
+
         if (!event.is_valid(h_h_hyps)) {
             return false;
         }
@@ -76,9 +93,9 @@ public:
             event.set(h_higgs, best_h_hyp->higgs_v4);
             if (best_h_hyp->higgs_jets.size()) {
                 auto j = best_h_hyp->higgs_jets[0];
+                event.set(h_subjets, j.subjets());
                 event.set(h_higgs_tau21, j.tau2() / j.tau1());
-            } else {
-                event.set(h_higgs_tau21, 0.);
+                event.set(h_higgs_tau32, j.tau3() / j.tau2());
             }
         }
         if (best_t_hyp) {
@@ -87,15 +104,4 @@ public:
         event.set(h_event_chi2, chi2);
         return true;
     }
-
-private:
-    // input
-    Event::Handle<vector<TopLeptRecoHyp>> h_t_hyps;
-    Event::Handle<vector<HiggsRecoHyp>> h_h_hyps;
-
-    // output
-    Event::Handle<LorentzVector> h_higgs;
-    Event::Handle<LorentzVector> h_top_lep;
-    Event::Handle<float> h_event_chi2;
-    Event::Handle<float> h_higgs_tau21;
 };

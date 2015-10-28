@@ -74,7 +74,8 @@ sb_0btag_selection = baseline_selection + [
 sb_super_selection = baseline_selection + [
     'h_n_subjet_btags       == 1',
     'abs_largest_jet_eta    < 1.5',
-    'tlep_mass              < 250',
+    'tlep_mass              > 160',
+    #'tlep_mass              < 350',
 ]
 
 sec_sel_weight = [

@@ -95,7 +95,7 @@ def mk_tools(input_pattern=None):
         input_pattern = input_pat
 
     return [
-        cutflow_tables.mk_cutflow_chain(input_pattern, loader_hook),
+        #cutflow_tables.mk_cutflow_chain(input_pattern, loader_hook),
 
         varial.tools.mk_rootfile_plotter(
             pattern=input_pattern,

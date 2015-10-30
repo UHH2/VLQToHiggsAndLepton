@@ -7,6 +7,7 @@ import varial.tools
 from varial.extensions.limits import ThetaLimits, theta_auto
 
 
+################################################ fitting with MC background ###
 def get_model(hist_dir):
     model = theta_auto.build_model_from_rootfile(
         hist_dir,
@@ -34,11 +35,46 @@ def hook_loaded_histos(wrps):
     return wrps
 
 
-def mk_sense_chain(name, cat_tokens):
+############################################## fitting with DATA background ###
+def get_model_data_bkg(hist_dir):
+    model = theta_auto.build_model_from_rootfile(
+        hist_dir,
+        include_mc_uncertainties=True
+    )
+    model.fill_histogram_zerobins()
+    model.set_signal_processes(['TpB_TH_700', 'TpB_TH_1700'])
+    model.add_lognormal_uncertainty('bkg_rate', math.log(1.15), 'Bkg')
+    model.add_lognormal_uncertainty('signal_700_rate', math.log(1.15), 'TpB_TH_700')
+    model.add_lognormal_uncertainty('signal_1700_rate', math.log(1.15), 'TpB_TH_1700')
+    return model
+
+
+def hook_loaded_histos_data_bkg(wrps):
+    wrps = hook_loaded_histos(wrps)
+    wrps = filter(lambda w: not w.is_background, wrps)
+    wrps = filter(lambda w: not (w.is_signal and w.category == 'SidebandTest'), wrps)
+    signals = filter(lambda w: w.is_signal, wrps)
+    sr, = filter(lambda w: w.is_data and w.category == 'SignalRegion', wrps)
+    sb, = filter(lambda w: w.is_data and w.category == 'SidebandTest', wrps)
+
+    # re-interpret sideband histogram for fitting
+    scale_factor = sr.obj.Integral() / sb.obj.Integral()
+    sb = varial.op.prod([sb, varial.wrp.FloatWrapper(scale_factor)])
+    sb.sample = 'Bkg'
+    sb.legend = 'Sideband'
+    sb.category = 'SignalRegion'
+    sb.is_data = False
+    sb.lumi = sr.lumi
+
+    return signals + [sb, sr]
+
+
+########################################################### make toolchains ###
+def mk_sense_chain(name, cat_tokens, hook=hook_loaded_histos, model=get_model):
     loader = varial.tools.HistoLoader(
         filter_keyfunc=lambda w: (w.name == 'vlq_mass'
                                   and any(t in w.in_file_path for t in cat_tokens)),
-        hook_loaded_histos=hook_loaded_histos,
+        hook_loaded_histos=hook,
     )
     plotter = varial.tools.Plotter(
         input_result_path='../HistoLoader',
@@ -48,16 +84,18 @@ def mk_sense_chain(name, cat_tokens):
         save_name_func=lambda w: w.category
     )
     limits = ThetaLimits(
-        model_func=get_model,
+        model_func=model,
         cat_key=lambda w: w.category,
     )
     tc = varial.tools.ToolChain(name, [loader, plotter, limits])
     return tc
 
 
-tc = varial.tools.ToolChain(  # Parallel(
+tc = varial.tools.ToolChainParallel(
     'Limits', [
         mk_sense_chain('SignalRegionOnly', ['SignalRegion']),
         mk_sense_chain('SignalRegionAndSideband', ['SignalRegion', 'SidebandTest']),
+        mk_sense_chain('DataBackground', ['SignalRegion', 'SidebandTest'], 
+            hook_loaded_histos_data_bkg, get_model_data_bkg),
     ]
 )

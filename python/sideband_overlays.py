@@ -17,8 +17,7 @@ def hook_loaded_histos(wrps):
     wrps = common.label_axes(wrps)
     wrps = varial.generators.gen_add_wrp_info(
         wrps, 
-        legend=lambda w: (w.file_path.split('/')[-3][19:] or 'signal region') 
-        				 if not w.is_data else 'Data',
+        legend=lambda w: w.in_file_path.split('/')[0],
         draw_option=lambda w: 'hist' if not w.is_data else 'E1X0',
     )
     wrps = varial.gen.touch_legend_color(wrps)
@@ -37,12 +36,14 @@ def hook_loaded_histos(wrps):
     return wrps
 
 
-def hook_loaded_histos_sqash_mc(wrps):
+def hook_loaded_histos_squash_mc(wrps):
 	key=lambda w: w.in_file_path + '___%s' % w.is_data
+
+	wrps = hook_loaded_histos(wrps)
 	wrps = sorted(wrps, key=key)
 	wrps = varial.gen.group(wrps, key)
 	wrps = varial.gen.gen_merge(wrps)
-	wrps = hook_loaded_histos(wrps)
+	wrps = varial.gen.gen_norm_to_integral(wrps)
 	return wrps
 
 
@@ -58,8 +59,8 @@ def plot_setup(grps):
 		grp = list(grp)
 		dat, bkg, sig = varial.gen.split_data_bkg_sig(grp)
 		dat, bkg, sig = list(dat), list(bkg), list(sig)
-		signal = filter(lambda w: 'signal region' == w.legend, bkg)
-		others = filter(lambda w: 'signal region' != w.legend, bkg)
+		signal = filter(lambda w: 'SignalRegion' == w.legend, bkg)
+		others = filter(lambda w: 'SignalRegion' != w.legend, bkg)
 		colorize_signal_region(signal[0])
 		signal = [varial.op.stack(signal)]
 		if dat:
@@ -70,12 +71,13 @@ def plot_setup(grps):
 def mk_plttr(plot_folder):
 	return varial.tools.Plotter(
 		plot_folder,
-	    filter_keyfunc=lambda w: (
-	    	w.in_file_path.startswith(plot_folder)
-	      	and any(p in w.in_file_path for p in plots)
-	  	),
+		#filter_keyfunc=lambda w: any(
+		#	t in w.in_file_path for t in [
+		#	    'SignalRegion/', 'SidebandTest',
+		#	]
+		#),
 	  	input_result_path='../HistoLoader',
-	    plot_grouper=varial.plotter.plot_grouper_by_in_file_path,
+	    plot_grouper=varial.plotter.plot_grouper_by_name,
 	    plot_setup=plot_setup,
 	    canvas_decorators=[varial.rnd.Legend],
     )
@@ -85,111 +87,95 @@ def mk_overlay_chains(samplename):
 	input_path = '../../../../Loaders/%s' % samplename
 	return varial.tools.ToolChainParallel(samplename, [
 		varial.tools.ToolChain(
-			'StandardSideBand', 
+			'SideBandTest', 
 			[
 				varial.tools.HistoLoader(
 					input_result_path=input_path,
 				    filter_keyfunc=lambda w: any(
-				    	t in w.file_path for t in [
-				    	    '1htag/', '1htagMassSB/',
-				    	    '1htagWith1b/', '1htagWith0b/'
-				    	]
-				  	),
+				    	t in w.in_file_path for t in [
+				    	    'SignalRegion', 'SidebandTest',
+				    	],
+				  	) and not 'Run20' in w.file_path,
 				),
-				mk_plttr('NoSelection'),
-				mk_plttr('Nm1Selection'),
+				mk_plttr('Plotter'),
 			]
 		),
-		varial.tools.ToolChain(
-			'MassPlus', 
-			[
-				varial.tools.HistoLoader(
-					input_result_path=input_path,
-				    filter_keyfunc=lambda w: (
-				    	('MassPlus' in w.file_path 
-				    			or 'Cat1htag/' in w.file_path)
-				    	and not '.DATA.' in w.file_path
-				  	),
-				),
-				mk_plttr('NoSelection'),
-				mk_plttr('Nm1Selection'),
-			]
-		),
-		varial.tools.ToolChain(
-			'CompareToDataWith0bMassPlus', 
-			[
-				varial.tools.HistoLoader(
-					input_result_path=input_path,
-				    filter_keyfunc=lambda w: (
-				    	(
-				    		('.DATA.' in w.file_path and (
-				    			'Cat1htagWith0bMassPlus/' in w.file_path
-				    		))
-				    	or
-				    		('Cat1htag/' in w.file_path)
-				    	)
-				  	),
-				),
-				mk_plttr('NoSelection'),
-				mk_plttr('Nm1Selection'),
-			]
-		),
-		varial.tools.ToolChain(
-			'CompareToDataWith1bMassPlus', 
-			[
-				varial.tools.HistoLoader(
-					input_result_path=input_path,
-				    filter_keyfunc=lambda w: (
-				    	(
-				    		('.DATA.' in w.file_path and (
-				    			'Cat1htagWith1bMassPlus/' in w.file_path
-				    		))
-				    	or
-				    		('Cat1htag/' in w.file_path)
-				    	)
-				    	
-				  	),
-				  	
-				),
-				mk_plttr('NoSelection'),
-				mk_plttr('Nm1Selection'),
-			]
-		),
+		#varial.tools.ToolChain(
+		#	'MassPlus', 
+		#	[
+		#		varial.tools.HistoLoader(
+		#			input_result_path=input_path,
+		#		    filter_keyfunc=lambda w: (
+		#		    	('MassPlus' in w.file_path 
+		#		    			or 'Cat1htag/' in w.file_path)
+		#		    	and not '.DATA.' in w.file_path
+		#		  	),
+		#		),
+		#		mk_plttr('NoSelection'),
+		#		mk_plttr('Nm1Selection'),
+		#	]
+		#),
+		#varial.tools.ToolChain(
+		#	'CompareToDataWith0bMassPlus', 
+		#	[
+		#		varial.tools.HistoLoader(
+		#			input_result_path=input_path,
+		#		    filter_keyfunc=lambda w: (
+		#		    	(
+		#		    		('.DATA.' in w.file_path and (
+		#		    			'Cat1htagWith0bMassPlus/' in w.file_path
+		#		    		))
+		#		    	or
+		#		    		('Cat1htag/' in w.file_path)
+		#		    	)
+		#		  	),
+		#		),
+		#		mk_plttr('NoSelection'),
+		#		mk_plttr('Nm1Selection'),
+		#	]
+		#),
+		#varial.tools.ToolChain(
+		#	'CompareToDataWith1bMassPlus', 
+		#	[
+		#		varial.tools.HistoLoader(
+		#			input_result_path=input_path,
+		#		    filter_keyfunc=lambda w: (
+		#		    	(
+		#		    		('.DATA.' in w.file_path and (
+		#		    			'Cat1htagWith1bMassPlus/' in w.file_path
+		#		    		))
+		#		    	or
+		#		    		('Cat1htag/' in w.file_path)
+		#		    	)
+		#		    	
+		#		  	),
+		#		  	
+		#		),
+		#		mk_plttr('NoSelection'),
+		#		mk_plttr('Nm1Selection'),
+		#	]
+		#),
 	])
 
-good_plot = lambda w: any(w.in_file_path.endswith(p) for p in plots)
-good_data = lambda w: '.DATA.' in w.file_path and 'bMassPlus/' in w.file_path
+good_name = lambda w: any(w.name == p for p in plots)
+good_smpl = lambda w: not '_TH_' in w.file_path
+good_hist = lambda w: good_name(w) and good_smpl(w)
 
 tc = varial.tools.ToolChain(
 	'Sidebands', [
 		varial.tools.ToolChainParallel(
 			'Loaders', [
 				varial.tools.HistoLoader(
-				    filter_keyfunc=lambda w: (
-				    		good_plot(w)						    # check plot name
-				    	and (
-				    		good_data(w) or 'TTbar' in w.file_path  # check sample
-				    	)
-				    ),
-		            hook_loaded_histos=hook_loaded_histos,
-		            name='TTbar',
-				),
-				varial.tools.HistoLoader(
-				    filter_keyfunc=lambda w: (
-				    		good_plot(w)						    # check plot name
-				    	and (
-				    		good_data(w) or 'WJets' in w.file_path  # check sample
-				    	)
-				    ),
-		            hook_loaded_histos=hook_loaded_histos,
-		            name='WJets',
+				    filter_keyfunc=good_hist,
+		            hook_loaded_histos=hook_loaded_histos_squash_mc,
+		            name='AllSamples',
 				),
 			]
 		),
 		varial.tools.ToolChainParallel(
 			'Plots', [
-			    mk_overlay_chains('TTbar'),
-	    		mk_overlay_chains('WJets'),
+			    mk_overlay_chains('AllSamples'),
+	    		# mk_overlay_chains('WJets'),
 	    		# mk_overlay_chains('SquashMC'),
 			]
 		)

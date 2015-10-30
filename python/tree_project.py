@@ -60,7 +60,7 @@ baseline_selection = [
 
 sr_selection = baseline_selection + [
     'h_n_subjet_btags       == 2',
-    'abs_largest_jet_eta    > 1.5',
+    'abs_largest_jet_eta    > 2.4',
 ]
 
 sb_1btag_selection = baseline_selection + [
@@ -73,7 +73,7 @@ sb_0btag_selection = baseline_selection + [
 
 sb_super_selection = baseline_selection + [
     'h_n_subjet_btags       == 1',
-    'abs_largest_jet_eta    < 1.5',
+    'abs_largest_jet_eta    < 2.4',
     'tlep_mass              > 160',
     #'tlep_mass              < 350',
 ]
@@ -86,18 +86,10 @@ sec_sel_weight = [
     ('SidebandTest', sb_super_selection, 'weight'),
 ]
 
-input_pat = '/nfs/dust/cms/user/tholenhe/VLQToHiggsAndLepton/samples/uhh2*.root'
 
-tp = TreeProjector(samples, input_pat, params, sec_sel_weight)
-plt = varial.tools.ToolChainParallel(
-    'Plots',
-    lazy_eval_tools_func=lambda: plot.mk_tools(
-        '%s/../TreeProjector/*.root' % varial.analysis.cwd)
-)
-tc = varial.tools.ToolChain(
-    'Histograms', [tp, plt]
-)
-
+def mk_tp(input_pat):
+    return TreeProjector(samples, input_pat, params, sec_sel_weight)
 
 if __name__ == '__main__':
-    varial.tools.Runner(tp)
+    input_pat = './*.root'
+    varial.tools.Runner(mk_tp(input_pat))

@@ -349,20 +349,18 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     // v_hists.insert(v_hists.begin() + pos_2d_cut, move(unique_ptr<Hists>(new TwoDCutHist(ctx, "NoSelection"))));
 
     // fat jet hists
-    v_hists.emplace_back(new TopJetHists(ctx, "HiggsJetsNoSel", 2, "h_jets"));
     v_hists_after_sel.emplace_back(new TopJetHists(ctx, "HiggsJetsAfterSel", 2, "h_jets"));
 
     // v_hists.emplace_back(new SingleLepTrigHists(ctx, "SingleLepTrig", "HLT_Ele95_CaloIdVT_GsfTrkIdT_v", true));
     // v_hists.emplace_back(new SingleLepTrigHists(ctx, "SingleLepTrig", "HLT_Mu40_v", false));
 
-    v_hists.emplace_back(new ElectronHists(ctx, "SanityCheckEle", true));
-    v_hists.emplace_back(new MuonHists(ctx, "SanityCheckMu"));
-    v_hists.emplace_back(new EventHists(ctx, "SanityCheckEvent"));
-    v_hists.emplace_back(new JetHists(ctx, "SanityCheckJets"));
-    v_hists.emplace_back(new JetHists(ctx, "SanityCheckFwdJets", 4, "fwd_jets"));
+    v_hists_after_sel.emplace_back(new ElectronHists(ctx, "SanityCheckEle", true));
+    v_hists_after_sel.emplace_back(new MuonHists(ctx, "SanityCheckMu"));
+    v_hists_after_sel.emplace_back(new EventHists(ctx, "SanityCheckEvent"));
+    v_hists_after_sel.emplace_back(new JetHists(ctx, "SanityCheckJets"));
+    v_hists_after_sel.emplace_back(new JetHists(ctx, "SanityCheckFwdJets", 4, "fwd_jets"));
 
     // event reconstruction
-    v_hists.emplace_back(new VLQ2HTEventReco(ctx, "EventRecoBeforeSel"));
     v_hists_after_sel.emplace_back(new VLQ2HTEventReco(ctx, "EventRecoAfterSel"));
 
     // signal sample gen hists

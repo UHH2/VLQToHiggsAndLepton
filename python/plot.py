@@ -135,6 +135,13 @@ def mk_tools(input_pattern=None):
     ]
 
 
+def mk_toolchain(name, input_pattern):
+    return varial.tools.ToolChainParallel(
+        name,
+        lazy_eval_tools_func=lambda: mk_tools(input_pattern)
+    )
+
+
 if __name__ == '__main__':
     all_tools = mk_tools()
     tc = varial.tools.ToolChainParallel(

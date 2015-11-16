@@ -30,6 +30,8 @@ static vector<shared_ptr<SelectionItem>> SEL_ITEMS_VLQ2HT {
     shared_ptr<SelectionItem>(new SelDatF("subleading_jet_pt", ";sub-leading ak4 jet p_{T};events / 20 GeV",    50, 0., 1000                )),
     shared_ptr<SelectionItem>(new SelDatF("largest_jet_eta",   "most forward ak4 jet #eta",                     50, -5., 5.                 )),
     shared_ptr<SelectionItem>(new SelDatF("primary_lepton_pt", ";primary lepton p_{T};events / 20 GeV",         50, 0., 1000                )),
+    shared_ptr<SelectionItem>(new SelDatF("primary_lepton_eta", ";primary lepton #eta;events",                  25, -5., 5.                 )),
+    shared_ptr<SelectionItem>(new SelDatI("primary_lepton_charge", ";primary lepton charge;events",             3, -1.5, 1.5                )),
 
     shared_ptr<SelectionItem>(new SelDatI("h_n_subjet_btags",  "N_{H jet subjet b-tags}",                       5, -.5, 4.5               )),
     shared_ptr<SelectionItem>(new SelDatF("h_tau21",           "Higgs candidate #tau_{2}/#tau_{1}",             50, 0, 1                    )),

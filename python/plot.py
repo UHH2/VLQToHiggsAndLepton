@@ -8,6 +8,7 @@ from UHH2.VLQSemiLepPreSel.plot import *
 import varial.generators as gen
 import varial.history
 import varial.tools
+import itertools
 import time
 import os
 
@@ -16,56 +17,24 @@ import os
 input_pat = './uhh2.*.root'
 
 
-#def loader_hook(wrps):
-#    wrps = (w for w in wrps if w.histo.Integral() > 1e-20)
-#    wrps = common.label_axes(wrps)
-#    wrps = gen.switch(
-#        wrps,
-#        lambda w: w.in_file_path.split('/')[0] == 'GenHists',
-#        gen.gen_make_th2_projections
-#    )
-#    wrps = gen.gen_make_eff_graphs(wrps)
-#    wrps = gen.switch(
-#        wrps,
-#        lambda w: 'TH1' in w.type,
-#        gen.gen_noex_norm_to_integral
-#    )
-#    return wrps
-
-
-def loader_hook_split_bkg(wrps):
-    #wrps = common.yield_n_objs(wrps, 20)
-    #wrps = apply_match_eff(wrps)
-    wrps = common.add_wrp_info(wrps)
-    wrps = (w for w in wrps if w.histo.Integral() > 1e-5)
-    wrps = common.label_axes(wrps)
-    wrps = gen.gen_make_th2_projections(wrps)
-    #wrps = gen.gen_make_eff_graphs(wrps)
-    return wrps
-
-
-def plotter_factory_split_bkg(**kws):
-    kws['hook_loaded_histos'] = loader_hook_split_bkg
-    kws['save_lin_log_scale'] = True
-    return varial.tools.Plotter(**kws)
-
-
 @varial.history.track_history
 def scale_signal(w):
     if w.is_signal:
         w.lumi /= 20.
+        w.legend += ' (*20)'
         w = varial.op.norm_to_lumi(w)
     return w
 
 
-def loader_hook_sigx10(wrps):
+def loader_hook_sig_scale(wrps):
     wrps = loader_hook(wrps)
     wrps = (scale_signal(w) for w in wrps)
+    wrps = itertools.ifilter(lambda w: 'Signal_' not in w.sample, wrps)  # filter signals that are not for plotting
     return wrps
 
 
 def plotter_factory_stack_sigx10(**kws):
-    kws['hook_loaded_histos'] = loader_hook_sigx10
+    kws['hook_loaded_histos'] = loader_hook_sig_scale
     kws['save_lin_log_scale'] = True
     kws['plot_setup'] = gen.mc_stack_n_data_sum
     return varial.tools.Plotter(**kws)
@@ -119,15 +88,6 @@ def mk_tools(input_pattern=None):
         #    pattern=input_pat,
         #    name='VLQ2HT_no_signal',
         #    plotter_factory=plotter_factory,
-        #    combine_files=True,
-        #    auto_legend=False,
-        #    filter_keyfunc=lambda w: not common.is_signal(w.file_path)
-        #),
-
-        #varial.tools.mk_rootfile_plotter(
-        #    pattern=input_pat,
-        #    name='VLQ2HT_norm_split_bkg',
-        #    plotter_factory=plotter_factory_split_bkg,
         #    combine_files=True,
         #    auto_legend=False,
         #    filter_keyfunc=lambda w: not common.is_signal(w.file_path)

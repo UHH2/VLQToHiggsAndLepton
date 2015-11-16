@@ -19,6 +19,8 @@ histo_names_args = {
     'subleading_jet_pt': (';sub-leading ak4 jet p_{T};events / 20 GeV',    50, 0., 1000  ),
     'largest_jet_eta':   ('most forward ak4 jet #eta',                     50, -5., 5.   ),
     'primary_lepton_pt': (';primary lepton p_{T};events / 20 GeV',         50, 0., 1000  ),
+    'primary_lepton_eta':(';primary lepton #eta;events',                   25, -5., 5.   ),
+    'primary_lepton_charge': (';primary lepton charge;events',             3, -1.5, 1.5  ),
     'h_tau21':           ('Higgs candidate #tau_{2}/#tau_{1}',             50, 0, 1      ),
     'h_tau32':           ('Higgs candidate #tau_{3}/#tau_{2}',             50, 0, 1      ),
     'n_jets':            ('N_{ak4 jet}',                                   21, -.5, 20.5 ),
@@ -39,7 +41,7 @@ params = {
     'treename': 'AnalysisTree',
 }
 
-samples = (
+samples = [
     'TTbar',
     'SingleT',
     'QCD',
@@ -47,8 +49,8 @@ samples = (
     'WJets',
     'Run2015D',
     'TpB_TH_700',
-    'TpB_TH_1700'
-)
+    'TpB_TH_1700',
+] + varial.settings.my_lh_signals  + varial.settings.my_rh_signals
 
 baseline_selection = [
     'h_pt                   > 100',
@@ -63,27 +65,28 @@ sr_selection = baseline_selection + [
     'abs_largest_jet_eta    > 2.4',
 ]
 
-sb_1btag_selection = baseline_selection + [
-    'h_n_subjet_btags       == 1',
-]
-
-sb_0btag_selection = baseline_selection + [
-    'h_n_subjet_btags       == 0',
-]
-
-sb_super_selection = baseline_selection + [
+sb_test_selection = baseline_selection + [
     'h_n_subjet_btags       == 1',
     'abs_largest_jet_eta    < 2.4',
     'tlep_mass              > 160',
     #'tlep_mass              < 350',
 ]
 
+sb_lepchargeplus_selection = baseline_selection + [
+    'primary_lepton_charge  > 0.1',
+]
+
+sb_lepchargeminus_selection = baseline_selection + [
+    'primary_lepton_charge  < 0.1',
+]
+
+
 sec_sel_weight = [
     ('PreSelection', '', 'weight'),
     ('SignalRegion', sr_selection, 'weight'),
-    ('Sideband1btag', sb_1btag_selection, 'weight'),
-    ('Sideband0btag', sb_0btag_selection, 'weight'),
-    ('SidebandTest', sb_super_selection, 'weight'),
+    ('SidebandTest', sb_test_selection, 'weight'),
+    ('PS_lep_plus', sb_lepchargeplus_selection, 'weight'),
+    ('PS_lep_minus', sb_lepchargeminus_selection, 'weight'),
 ]
 
 

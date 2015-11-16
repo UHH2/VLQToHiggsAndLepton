@@ -264,6 +264,7 @@ class VLQ2HTGenHists: public Hists {
 public:
     VLQ2HTGenHists(Context & ctx, const string & dir):
         Hists(ctx, dir),
+
         higgTopDr(book<TH1F>(
             "higgTopDr",
             ";#DeltaR(H, top);events",
@@ -336,9 +337,14 @@ public:
             100, 0, 1000,
             100, -6., 6.
         )),
+        topWProdCharge(book<TH1F>(
+            "topWProdCharge",
+            ";charge of W decay prods.;events",
+            31, -1.55, 1.55
+        )),
         topWProdKinematic(book<TH2F>(
             "topWProdKinematic",
-            ";W decay prods. p_{T};W decay prods. #eta",
+            ";p_{T} of W decay prods.;#eta of W decay prods.",
             100, 0, 1000,
             100, -6., 6.
         )),
@@ -429,7 +435,7 @@ public:
                     top_w,
                     top_b;
         for (const auto &gp : *gps) {
-            if (abs(gp.pdgId()) == 6000006) {
+            if (abs(gp.pdgId()) > 6000000) {
                 tprime = gp;
                 break;
             }
@@ -438,14 +444,14 @@ public:
             auto mom = tprime.mother(gps, 1);
             auto d1 = mom->daughter(gps,1);
             auto d2 = mom->daughter(gps,2);
-            if (abs(d1->pdgId()) == 6000006) {
+            if (abs(d1->pdgId()) > 6000000) {
                 fwd_parton = *d2;
             } else {
                 fwd_parton = *d1;
             }
         } else {
             for (const auto &gp : *gps) {
-                if (!gp.mother(gps, 1) && abs(gp.pdgId()) != 6000006) {
+                if (!gp.mother(gps, 1) && abs(gp.pdgId()) < 6000000) {
                     fwd_parton = gp;
                     break;
                 }
@@ -481,14 +487,21 @@ public:
         if (top_w.pdgId()) {
             topWKinematic->Fill(top_w.pt(), top_w.eta(), w);
             topBKinematic->Fill(top_b.pt(), top_b.eta(), w);
-            if (top_w.daughter(gps, 1)) {
+            if (top_w.daughter(gps, 1) && top_w.daughter(gps, 2)) {
                 auto tw_d1 = top_w.daughter(gps, 1);
                 auto tw_d2 = top_w.daughter(gps, 2);
+
                 topWProdKinematic->Fill(tw_d1->pt(), tw_d1->eta(), w);
                 topWProdKinematic->Fill(tw_d2->pt(), tw_d2->eta(), w);
 
-                auto tw_nu_v4 = (tw_d1->pdgId() % 2 == 0) ? tw_d1->v4() : tw_d2->v4();
-                auto tw_le_v4 = (tw_d1->pdgId() % 2 == 0) ? tw_d2->v4() : tw_d1->v4();
+                topWProdCharge->Fill(tw_d1->charge(), w);
+                topWProdCharge->Fill(tw_d2->charge(), w);
+
+                auto tw_nu = (tw_d1->pdgId() % 2 == 0) ? tw_d1 : tw_d2;
+                auto tw_le = (tw_d1->pdgId() % 2 == 0) ? tw_d2 : tw_d1;
+
+                auto tw_nu_v4 = tw_nu->v4();
+                auto tw_le_v4 = tw_le->v4();
 
                 float dr1 = deltaR(top_b.v4(), tw_nu_v4);
                 float dr2 = deltaR(top_b.v4(), tw_le_v4);
@@ -522,10 +535,10 @@ public:
         higgKinematic->Fill(higg.pt(), higg.eta(), w);
         if (higg.daughter(gps, 1)) {
             higgProdKinematic->Fill(higg.daughter(gps, 1)->pt(), higg.daughter(gps, 1)->eta(), w);
-            higgProdKinematic->Fill(higg.daughter(gps, 2)->pt(), higg.daughter(gps, 2)->eta(), w);
             higgProdPdgId->Fill(to_string(abs(higg.daughter(gps, 1)->pdgId())).c_str(), w);
         }
         if (higg.daughter(gps, 1) && higg.daughter(gps, 2)) {
+            higgProdKinematic->Fill(higg.daughter(gps, 2)->pt(), higg.daughter(gps, 2)->eta(), w);
             higgProdDr->Fill(deltaR(higg.daughter(gps, 1)->v4(),
                                     higg.daughter(gps, 2)->v4()), w);
             higgProdDPhi->Fill(deltaPhi(higg.daughter(gps, 1)->v4(),
@@ -547,6 +560,7 @@ private:
     TH2F * topKinematic;
     TH2F * topWKinematic;
     TH2F * topBKinematic;
+    TH1F * topWProdCharge;
     TH2F * topWProdKinematic;
     TH1F * topProdMaxDr;
     TH1F * topProdMaxDPhi;

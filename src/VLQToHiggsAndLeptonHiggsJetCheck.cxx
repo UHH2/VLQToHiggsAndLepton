@@ -143,7 +143,7 @@ VLQToHiggsAndLeptonHiggsJetCheck::VLQToHiggsAndLeptonHiggsJetCheck(Context & ctx
     // setup modules to check if this event belongs into this category
     string ak8_topjets = "topjets";
     v_pre_modules.emplace_back(new PrimaryLepton(ctx, "PrimaryLepton", 50, 115));
-    v_pre_modules.emplace_back(new LeptonPtProducer(ctx, "PrimaryLepton", "primary_lepton_pt"));
+    v_pre_modules.emplace_back(new PrimaryLeptonInfoProducer(ctx));
     prim_lep_check_module.reset(new HandleSelection<float>(ctx, "primary_lepton_pt", 1.));
 
     v_pre_modules.emplace_back(new CollectionSizeProducer<TopJet>(

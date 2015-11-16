@@ -133,7 +133,10 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
         PrimaryLeptonDeltaPhiId(ctx, 1.0),
         OneBTagHiggsTag(105., 195., is_true<Jet>)
     ));
-    auto n_htags_all = TopJetId(HiggsTag(60., 99999., is_true<Jet>));
+    auto n_htags_all = TopJetId(AndId<TopJet>(
+        PrimaryLeptonDeltaPhiId(ctx, 1.0),
+        HiggsTag(60., 99999., is_true<Jet>)
+    ));
 
     // setup modules to check if this event belongs into this category
     v_pre_modules.emplace_back(new PrimaryLepton(ctx, "PrimaryLepton"));
@@ -252,6 +255,13 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
         cat_check_module.reset(new HandleSelection<int>(ctx, "n_htags"));  // always true
         v_cat_modules.emplace_back(new CollectionProducer<TopJet>(
             ctx, "patJetsAk8CHSJetsSoftDropPacked_daughters", "h_jets", n_htags_all));
+        v_cat_modules.emplace_back(new CollectionSizeProducer<TopJet>(
+            ctx, "h_jets", "n_htags"));
+
+        if (version.size() > 7 && version.substr(0, 7) == "TpB_TH_") {
+            gen_hists.reset(new VLQ2HTGenHists(ctx, "GenHists"));
+        }
+
 
     // a category must be given
     } else {
@@ -262,12 +272,14 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     // weights
     v_cat_modules.emplace_back(new MCLumiWeight(ctx));
     v_cat_modules.emplace_back(new MCPileupReweight(ctx));
+    v_cat_modules.emplace_back(new MCBTagScaleFactor(ctx, CSVBTag::WP_LOOSE, "h_jets"));
 
     // leptons
     v_cat_modules.emplace_back(new ElectronCleaner(PtEtaCut(105.0, 2.4)));
     v_cat_modules.emplace_back(new MuonCleaner(PtEtaCut(50.0, 2.4)));
     v_cat_modules.emplace_back(new NLeptonsProducer(ctx, "n_leptons"));
-    v_cat_modules.emplace_back(new LeptonPtProducer(ctx, "PrimaryLepton", "primary_lepton_pt"));
+    v_cat_modules.emplace_back(new PrimaryLeptonInfoProducer(ctx, 
+        "PrimaryLepton", "primary_lepton_pt", "primary_lepton_eta", "primary_lepton_charge"));
 
     // jets
     v_cat_modules.emplace_back(new LargestJetEtaProducer(
@@ -290,6 +302,39 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
         ctx, "subleading_jet_pt"));
     v_cat_modules.emplace_back(new LeadingTopjetMassProducer(
         ctx, "h_jets", "h_topjet_mass"));
+
+    // map<string, vector<string>> trg_items = {
+    //     {"trg_Ele32_eta2p1_WP75_Gsf",
+    //         {"HLT_Ele32_eta2p1_WP75_Gsf_v*",}
+    //     },
+    //     {"trg_Ele105_CaloIdVT_GsfTrkIdT",
+    //         {"HLT_Ele105_CaloIdVT_GsfTrkIdT_v*",}
+    //     },
+    //     {"trg_Ele45_CaloIdVT_GsfTrkIdT_PFJet200_PFJet50",
+    //         {"HLT_Ele45_CaloIdVT_GsfTrkIdT_PFJet200_PFJet50_v*",}
+    //     },
+    //     {"trg_Ele15_IsoVVVL_PFHT600_v",
+    //         {"HLT_Ele15_IsoVVVL_PFHT600_v*",}
+    //     },
+    //     {"trg_IsoMu24_eta2p1",
+    //         {"HLT_IsoMu24_eta2p1_v*",}
+    //     },
+    //     {"trg_Mu45_eta2p1",
+    //         {"HLT_Mu45_eta2p1_v*",}
+    //     },
+    //     {"trg_Mu40_eta2p1_PFJet200_PFJet50",
+    //         {"HLT_Mu40_eta2p1_PFJet200_PFJet50_v*",}
+    //     },
+    //     {"trg_Mu15_IsoVVVL_PFHT600",
+    //         {"HLT_Mu15_IsoVVVL_PFHT600_v*",}
+    //     },
+    //     {"trg_PFHT800",
+    //         {"HLT_PFHT800Emu_v*",}
+    //     },
+    // };
+    // for (auto & kv: trg_items) {
+    //     v_pre_modules.emplace_back(new TriggerAcceptProducer(ctx, kv.second, kv.first));
+    // }
 
     // event variables
     // v_cat_modules.emplace_back(new LepPtPlusMETProducer(ctx, "PrimaryLepton", "lep_plus_met", "lep_plus_met_vec_sum"));
@@ -350,6 +395,7 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
 
     // fat jet hists
     v_hists_after_sel.emplace_back(new TopJetHists(ctx, "HiggsJetsAfterSel", 2, "h_jets"));
+    v_hists_after_sel.emplace_back(new BTagMCEfficiencyHists(ctx, "BTagMCEfficiencyHists", CSVBTag::WP_LOOSE, "h_jets"));
 
     // v_hists.emplace_back(new SingleLepTrigHists(ctx, "SingleLepTrig", "HLT_Ele95_CaloIdVT_GsfTrkIdT_v", true));
     // v_hists.emplace_back(new SingleLepTrigHists(ctx, "SingleLepTrig", "HLT_Mu40_v", false));

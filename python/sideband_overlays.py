@@ -39,8 +39,21 @@ def hook_loaded_histos(wrps):
 def hook_loaded_histos_squash_mc(wrps):
 	key=lambda w: w.in_file_path + '___%s' % w.is_data
 
-	wrps = hook_loaded_histos(wrps)
 	wrps = sorted(wrps, key=key)
+	wrps = hook_loaded_histos(wrps)
+
+	vlq_masses = filter(lambda w: w.name=='vlq_mass' and w.is_background, wrps)
+	categories = set(w.in_file_path for w in vlq_masses)
+	for cat in categories:
+		print '='*20
+		print cat
+		vlq_masses_cat = filter(lambda w: w.in_file_path == cat, vlq_masses)
+		total_int = sum(1./w.lumi for w in vlq_masses_cat)
+		for w in vlq_masses_cat:
+			inte = 1./w.lumi
+			print 'fraction of %20s: %8.2f / %8.2f = %5.3f' % (
+									w.sample, inte, total_int, inte/total_int)
+	
 	wrps = varial.gen.group(wrps, key)
 	wrps = varial.gen.gen_merge(wrps)
 	wrps = varial.gen.gen_norm_to_integral(wrps)
@@ -63,6 +76,7 @@ def plot_setup(grps):
 		others = filter(lambda w: 'SignalRegion' != w.legend, bkg)
 		colorize_signal_region(signal[0])
 		signal = [varial.op.stack(signal)]
+		others[0].is_pseudo_data = True
 		if dat:
 			dat = [varial.op.norm_to_integral(varial.op.merge(dat))]
 		yield signal + others + dat
@@ -79,7 +93,7 @@ def mk_plttr(plot_folder):
 	  	input_result_path='../HistoLoader',
 	    plot_grouper=varial.plotter.plot_grouper_by_name,
 	    plot_setup=plot_setup,
-	    canvas_decorators=[varial.rnd.Legend],
+	    # canvas_decorators=[varial.rnd.Legend],
     )
 
 

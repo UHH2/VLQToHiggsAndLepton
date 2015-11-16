@@ -1,15 +1,5 @@
 #!/usr/bin/env python
 
-
-import UHH2.VLQSemiLepPreSel.vlq_settings as vlq_settings
-import UHH2.VLQSemiLepPreSel.common as common
-#import sframe_tools
-import sideband_overlays
-import tree_project
-import sensitivity
-import tex_content
-import plot
-
 from varial.extensions.hadd import Hadd
 import varial.extensions.make
 import varial.extensions.git
@@ -20,6 +10,17 @@ import os
 dir_name = 'VLQ2HT'
 uhh_base = os.getenv('CMSSW_BASE') + '/src/UHH2/'
 input_pat = '/nfs/dust/cms/user/tholenhe/VLQToHiggsAndLepton/samples/uhh2*.root'
+
+varial.settings.my_lh_signals = [
+    'Signal_TpB_TH_LH_M0700',
+    'Signal_TpB_TH_LH_M1200',
+    'Signal_TpB_TH_LH_M1700',
+]
+varial.settings.my_rh_signals = [
+    'Signal_TpB_TH_RH_M0700',
+    'Signal_TpB_TH_RH_M1300',
+    'Signal_TpB_TH_RH_M1700',
+]
 
 hadd = Hadd(
     input_pat, 
@@ -33,6 +34,18 @@ hadd = Hadd(
     ], 
     add_aliases_to_analysis=False,
 )
+
+
+import UHH2.VLQSemiLepPreSel.vlq_settings as vlq_settings
+import UHH2.VLQSemiLepPreSel.common as common
+#import sframe_tools
+import sideband_overlays
+import lep_plus_minus
+import tree_project
+import sensitivity
+import tex_content
+import plot
+
 
 tc = varial.tools.ToolChain(
     dir_name,
@@ -58,6 +71,7 @@ tc = varial.tools.ToolChain(
                 plot.mk_toolchain('Selections', '%s/Inputs/TreeProjector/*.root' % dir_name),
                 plot.mk_toolchain('SFramePlots', '%s/Inputs/Hadd/*.root' % dir_name),
                 sideband_overlays.tc,
+                lep_plus_minus.pltr,
                 sensitivity.tc,
             ]
         ),

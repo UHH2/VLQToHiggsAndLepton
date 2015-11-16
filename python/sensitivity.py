@@ -14,14 +14,14 @@ def get_model(hist_dir):
         include_mc_uncertainties=True
     )
     model.fill_histogram_zerobins()
-    model.set_signal_processes(['TpB_TH_700', 'TpB_TH_1700'])
+    model.set_signal_processes(varial.settings.my_lh_signals)
     model.add_lognormal_uncertainty('ttbar_rate', math.log(1.15), 'TTbar')
     model.add_lognormal_uncertainty('qcd_rate', math.log(1.30), 'QCD')
     model.add_lognormal_uncertainty('wjets_rate', math.log(1.25), 'WJets')
     model.add_lognormal_uncertainty('dyjets_rate', math.log(1.50), 'DYJets')
     model.add_lognormal_uncertainty('singlet_rate', math.log(1.50), 'SingleT')
-    model.add_lognormal_uncertainty('signal_700_rate', math.log(1.15), 'TpB_TH_700')
-    model.add_lognormal_uncertainty('signal_1700_rate', math.log(1.15), 'TpB_TH_1700')
+    for s in varial.settings.my_lh_signals:
+        model.add_lognormal_uncertainty(s+'_rate', math.log(1.15), s)
     return model
 
 
@@ -42,10 +42,10 @@ def get_model_data_bkg(hist_dir):
         include_mc_uncertainties=True
     )
     model.fill_histogram_zerobins()
-    model.set_signal_processes(['TpB_TH_700', 'TpB_TH_1700'])
+    model.set_signal_processes(varial.settings.my_lh_signals)
     model.add_lognormal_uncertainty('bkg_rate', math.log(1.15), 'Bkg')
-    model.add_lognormal_uncertainty('signal_700_rate', math.log(1.15), 'TpB_TH_700')
-    model.add_lognormal_uncertainty('signal_1700_rate', math.log(1.15), 'TpB_TH_1700')
+    for s in varial.settings.my_lh_signals:
+        model.add_lognormal_uncertainty(s+'_rate', math.log(1.15), s)
     return model
 
 
@@ -72,8 +72,12 @@ def hook_loaded_histos_data_bkg(wrps):
 ########################################################### make toolchains ###
 def mk_sense_chain(name, cat_tokens, hook=hook_loaded_histos, model=get_model):
     loader = varial.tools.HistoLoader(
-        filter_keyfunc=lambda w: (w.name == 'vlq_mass'
-                                  and any(t in w.in_file_path for t in cat_tokens)),
+        filter_keyfunc=lambda w: (
+            w.name == 'vlq_mass'
+            and (not '_TH_' in w.file_path 
+                    or any(s in w.file_path for s in varial.settings.my_lh_signals))
+            and any(t in w.in_file_path for t in cat_tokens)
+        ),
         hook_loaded_histos=hook,
     )
     plotter = varial.tools.Plotter(

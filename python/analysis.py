@@ -60,7 +60,7 @@ tc = varial.tools.ToolChain(
         # varial.tools.UserInteraction('Really run sframe? (Kill me otherwise.)'),
         # sframe_tools.sframe_tools,
         
-        varial.tools.ToolChainParallel(
+        varial.tools.ToolChain(
             'Inputs', [
                 tree_project.mk_tp(input_pat),
                 hadd,

@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 
-from varial.extensions.treeprojector import TreeProjector
+from varial.extensions.treeprojector import TreeProjector, SGETreeProjector
 import varial.tools
 import plot
+
+import glob
 
 
 histo_names_args = {
@@ -53,6 +55,8 @@ samples = [
 ] + varial.settings.my_lh_signals  + varial.settings.my_rh_signals
 
 baseline_selection = [
+    'ST                     > 500',
+    'leading_jet_pt         > 130',
     'h_pt                   > 100',
     'tlep_pt                > 100',
     'h_mass                 > 90',
@@ -85,13 +89,22 @@ sec_sel_weight = [
     ('PreSelection', '', 'weight'),
     ('SignalRegion', sr_selection, 'weight'),
     ('SidebandTest', sb_test_selection, 'weight'),
-    ('PS_lep_plus', sb_lepchargeplus_selection, 'weight'),
+    ('PS_lep_plus',  sb_lepchargeplus_selection, 'weight'),
     ('PS_lep_minus', sb_lepchargeminus_selection, 'weight'),
 ]
 
-
 def mk_tp(input_pat):
-    return TreeProjector(samples, input_pat, params, sec_sel_weight)
+    all_files = glob.glob(input_pat)
+    filenames = dict(
+        (sample, list(f for f in all_files if sample in f))
+        for sample in samples
+    )
+
+    return TreeProjector(
+        samples, filenames, params, sec_sel_weight, 
+        # suppress_job_submission=True, 
+        name='TreeProjector'
+    )
 
 if __name__ == '__main__':
     input_pat = './*.root'

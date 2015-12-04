@@ -60,24 +60,25 @@ public:
                     hj.subjets()
                 );
             }
-        } else {
-            // else try combos from b-jets
-
-            for (unsigned i1 = 0; i1 < b_jets.size() - 1; i1++) {
-                const auto &bj1 = b_jets[i1];
-
-                for (unsigned i2 = i1 + 1; i2 < b_jets.size(); i2++) {
-                    const auto &bj2 = b_jets[i2];
-
-                    LorentzVector higgs_v4 = bj1.v4() + bj2.v4();
-                    reco_hyps.emplace_back(
-                        higgs_v4,
-                        vector<TopJet>(),
-                        vector<Jet>({bj1, bj2})
-                    );
-                }
-            }
-        }
+        } 
+//        else {
+//            // else try combos from b-jets
+//
+//            for (unsigned i1 = 0; i1 < b_jets.size() - 1; i1++) {
+//                const auto &bj1 = b_jets[i1];
+//
+//                for (unsigned i2 = i1 + 1; i2 < b_jets.size(); i2++) {
+//                    const auto &bj2 = b_jets[i2];
+//
+//                    LorentzVector higgs_v4 = bj1.v4() + bj2.v4();
+//                    reco_hyps.emplace_back(
+//                        higgs_v4,
+//                        vector<TopJet>(),
+//                        vector<Jet>({bj1, bj2})
+//                    );
+//                }
+//            }
+//        }
 
         event.set(h_recohyps, reco_hyps);
         return true;

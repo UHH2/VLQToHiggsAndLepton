@@ -77,15 +77,10 @@ private:
 
 VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
 
-    // If needed, access the configuration of the module here, e.g.:
-    // string testvalue = ctx.get("TestKey", "<not set>");
-    // cout << "TestKey in the configuration was: " << testvalue << endl;
     version = ctx.get("dataset_version", "");
     type = ctx.get("dataset_type", "");
+    auto data_dir_path = ctx.get("data_dir_path");
 
-    // If running in SFrame, the keys "dataset_version", "dataset_type" and "dataset_lumi"
-    // are set to the according values in the xml file. For CMSSW, these are
-    // not set automatically, but can be set in the python config file.
     for(auto & kv : ctx.get_all()){
         cout << " " << kv.first << " = " << kv.second << endl;
     }
@@ -93,7 +88,25 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     // remove everything from the output branch
     ctx.undeclare_all_event_output();
 
-    // pre-modules and cat_check_module for quick pre-selection
+    // jet correction (if nominal, the corrections were already applied in the preselection)
+    if (ctx.get("jecsmear_direction", "nominal") != "nominal") {
+        auto ak8_corr = (type == "MC") ? JERFiles::Summer15_25ns_L123_AK8PFchs_MC 
+                                       : JERFiles::Summer15_25ns_L123_AK8PFchs_DATA;
+        auto ak4_corr = (type == "MC") ? JERFiles::Summer15_25ns_L123_AK8PFchs_MC 
+                                       : JERFiles::Summer15_25ns_L123_AK8PFchs_DATA;
+        v_pre_modules.emplace_back(new GenericTopJetCorrector(ctx,
+            ak8_corr, "patJetsAk8CHSJetsSoftDropPacked_daughters"));
+        v_pre_modules.emplace_back(new GenericSubJetCorrector(ctx,
+            ak4_corr, "patJetsAk8CHSJetsSoftDropPacked_daughters"));
+        v_pre_modules.emplace_back(new JetCorrector(ctx, ak4_corr));
+    }
+    // v_pre_modules.emplace_back(new GenericTopJetCleaner(ctx,
+    //     PtEtaCut(150., 2.4), "patJetsAk8CHSJetsSoftDropPacked_daughters"));
+    if (type == "MC") {
+        v_pre_modules.emplace_back(new JetResolutionSmearer(ctx));    
+    }
+
+    // first event content modules
     auto n_htags_all = TopJetId(AndId<TopJet>(
         PrimaryLeptonDeltaPhiId(ctx, 1.0),
         HiggsTag(60., 99999., is_true<Jet>)
@@ -103,13 +116,20 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
         ctx, "patJetsAk8CHSJetsSoftDropPacked_daughters", "h_jets", n_htags_all));
     v_pre_modules.emplace_back(new CollectionSizeProducer<TopJet>(
         ctx, "h_jets", "n_htags"));
-    cat_check_module.reset(new HandleSelection<int>(ctx, "n_htags", 1.)); 
+    
+    // cat_check_module.reset(new HandleSelection<int>(ctx, "n_htags", 1.)); want to have the full thing over presel in the cutflow.
 
     // setup modules to prepare the event.
     // weights
     v_cat_modules.emplace_back(new MCLumiWeight(ctx));
     v_cat_modules.emplace_back(new MCPileupReweight(ctx));
-    // v_cat_modules.emplace_back(new MCBTagScaleFactor(ctx, CSVBTag::WP_LOOSE, "h_jets"));
+    v_cat_modules.emplace_back(new MCBTagScaleFactor(ctx, CSVBTag::WP_LOOSE, "h_jets"));
+    v_cat_modules.emplace_back(new MCMuonScaleFactor(ctx, 
+        data_dir_path + "MuonID_Z_RunD_Reco74X_Nov20.root", 
+        "NUM_TightIDandIPCut_DEN_genTracks_PAR_pt_spliteta_bin1", 1., "id"));
+    v_cat_modules.emplace_back(new MCMuonScaleFactor(ctx, 
+        data_dir_path + "SingleMuonTrigger_Z_RunD_Reco74X_Nov20.root", 
+        "Mu45_eta2p1_PtEtaBins", 1., "trg"));
 
     // leptons
     v_cat_modules.emplace_back(new ElectronCleaner(PtEtaCut(105.0, 2.4)));
@@ -168,7 +188,8 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     // Other CutProducers
     v_cat_modules.emplace_back(new EventWeightOutputHandle(ctx, "weight"));
     v_cat_modules.emplace_back(new AbsValueProducer<float>(ctx, "largest_jet_eta"));
-    v_cat_modules.emplace_back(new TwoDCutProducer(ctx));
+    v_cat_modules.emplace_back(new TwoDCutProducer(ctx, "PrimaryLepton", "TwoDCut_dr", "TwoDCut_ptrel", true));
+    
     // v_pre_modules.emplace_back(new AbsValueProducer<float>(ctx, "vlq_eta"));
 
     v_cat_modules.emplace_back(new TriggerAcceptProducer(ctx, TRIGGER_PATHS, "trigger_accept"));
@@ -196,11 +217,11 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     v_hists.emplace_back(cf_hists);
 
     // insert 2D cut
-    // unsigned pos_2d_cut = 9;
-    // sel_module->insert_selection(pos_2d_cut, new TwoDCutSel(ctx, DR_2D_CUT, DPT_2D_CUT));
-    // nm1_hists->insert_hists(pos_2d_cut, new TwoDCutHist(ctx, "Nm1Selection"));
-    // cf_hists->insert_step(pos_2d_cut, "2D cut");
-    // v_hists.insert(v_hists.begin() + pos_2d_cut, move(unique_ptr<Hists>(new TwoDCutHist(ctx, "NoSelection"))));
+    unsigned pos_2d_cut = 0;
+    sel_module->insert_selection(pos_2d_cut, new TwoDCutSel(ctx, DR_2D_CUT, DPT_2D_CUT));
+    nm1_hists->insert_hists(pos_2d_cut, new TwoDCutHist(ctx, "Nm1Selection"));
+    cf_hists->insert_step(pos_2d_cut, "2D cut");
+    v_hists.insert(v_hists.begin() + pos_2d_cut, move(unique_ptr<Hists>(new TwoDCutHist(ctx, "NoSelection"))));
 
     // fat jet hists
     v_hists_after_sel.emplace_back(new TopJetHists(ctx, "HiggsJetsAfterSel", 2, "h_jets"));
@@ -214,6 +235,7 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     v_hists_after_sel.emplace_back(new EventHists(ctx, "SanityCheckEvent"));
     v_hists_after_sel.emplace_back(new JetHists(ctx, "SanityCheckJets"));
     v_hists_after_sel.emplace_back(new JetHists(ctx, "SanityCheckFwdJets", 4, "fwd_jets"));
+    v_hists_after_sel.emplace_back(new TopJetHists(ctx, "SanityCheckAK8Jets", 2, "patJetsAk8CHSJetsSoftDropPacked_daughters"));
 
     // event reconstruction
     v_hists_after_sel.emplace_back(new VLQ2HTEventReco(ctx, "EventRecoAfterSel"));
@@ -252,7 +274,7 @@ bool VLQToHiggsAndLeptonModule::process(Event & event) {
     for (auto & mod : v_pre_modules) {
         mod->process(event);
     }
-    if (!cat_check_module->passes(event)) {
+    if (cat_check_module && !cat_check_module->passes(event)) {
         return false;
     }
 

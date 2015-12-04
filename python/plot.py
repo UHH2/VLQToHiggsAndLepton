@@ -35,7 +35,6 @@ def loader_hook_sig_scale(wrps):
 
 def plotter_factory_stack_sigx10(**kws):
     kws['hook_loaded_histos'] = loader_hook_sig_scale
-    kws['save_lin_log_scale'] = True
     kws['plot_setup'] = gen.mc_stack_n_data_sum
     return varial.tools.Plotter(**kws)
 
@@ -54,18 +53,20 @@ def loader_hook_cat_merging(wrps):
 
 def plotter_factory_stack_cat_merging(**kws):
     kws['hook_loaded_histos'] = loader_hook_cat_merging
-    kws['save_lin_log_scale'] = True
     kws['plot_setup'] = gen.mc_stack_n_data_sum
     return varial.tools.Plotter(**kws)
 
 
-def mk_tools(input_pattern=None):
+def mk_tools(input_pattern=None, cutflow=False):
     if not input_pattern:
         input_pattern = input_pat
 
-    return [
-        #cutflow_tables.mk_cutflow_chain(input_pattern, loader_hook),
+    if cutflow:
+        cft = [cutflow_tables.mk_cutflow_chain(input_pattern, loader_hook)]
+    else:
+        cft = []
 
+    return cft + [
         varial.tools.mk_rootfile_plotter(
             pattern=input_pattern,
             name='VLQ2HT_stack',
@@ -95,10 +96,10 @@ def mk_tools(input_pattern=None):
     ]
 
 
-def mk_toolchain(name, input_pattern):
+def mk_toolchain(name, input_pattern, cutflow=False):
     return varial.tools.ToolChainParallel(
         name,
-        lazy_eval_tools_func=lambda: mk_tools(input_pattern)
+        lazy_eval_tools_func=lambda: mk_tools(input_pattern, cutflow)
     )
 
 

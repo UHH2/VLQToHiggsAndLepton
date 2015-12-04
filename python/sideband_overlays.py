@@ -101,13 +101,13 @@ def mk_overlay_chains(samplename):
 	input_path = '../../../../Loaders/%s' % samplename
 	return varial.tools.ToolChainParallel(samplename, [
 		varial.tools.ToolChain(
-			'SideBandTest', 
+			'SideBandRegion', 
 			[
 				varial.tools.HistoLoader(
 					input_result_path=input_path,
 				    filter_keyfunc=lambda w: any(
 				    	t in w.in_file_path for t in [
-				    	    'SignalRegion', 'SidebandTest',
+				    	    'SignalRegion', 'SidebandRegion',
 				    	],
 				  	) and not 'Run20' in w.file_path,
 				),

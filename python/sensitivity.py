@@ -52,10 +52,10 @@ def get_model_data_bkg(hist_dir):
 def hook_loaded_histos_data_bkg(wrps):
     wrps = hook_loaded_histos(wrps)
     wrps = filter(lambda w: not w.is_background, wrps)
-    wrps = filter(lambda w: not (w.is_signal and w.category == 'SidebandTest'), wrps)
+    wrps = filter(lambda w: not (w.is_signal and w.category == 'SidebandRegion'), wrps)
     signals = filter(lambda w: w.is_signal, wrps)
     sr, = filter(lambda w: w.is_data and w.category == 'SignalRegion', wrps)
-    sb, = filter(lambda w: w.is_data and w.category == 'SidebandTest', wrps)
+    sb, = filter(lambda w: w.is_data and w.category == 'SidebandRegion', wrps)
 
     # re-interpret sideband histogram for fitting
     scale_factor = sr.obj.Integral() / sb.obj.Integral()
@@ -98,8 +98,8 @@ def mk_sense_chain(name, cat_tokens, hook=hook_loaded_histos, model=get_model):
 tc = varial.tools.ToolChainParallel(
     'Limits', [
         mk_sense_chain('SignalRegionOnly', ['SignalRegion']),
-        mk_sense_chain('SignalRegionAndSideband', ['SignalRegion', 'SidebandTest']),
-        mk_sense_chain('DataBackground', ['SignalRegion', 'SidebandTest'], 
+        mk_sense_chain('SignalRegionAndSideband', ['SignalRegion', 'SidebandRegion']),
+        mk_sense_chain('DataBackground', ['SignalRegion', 'SidebandRegion'], 
             hook_loaded_histos_data_bkg, get_model_data_bkg),
     ]
 )

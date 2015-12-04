@@ -38,7 +38,7 @@
 ]>
 
 <!--
-   <ConfigParse NEventsBreak="50000" FileSplit="0" />
+   <ConfigParse NEventsBreak="100000" FileSplit="0" />
    <ConfigSGE RAM ="2" DISK ="2" Mail="heiner@cern.de" Notification="as" Workdir="workdir"/>
 -->
 
@@ -309,6 +309,7 @@ backgrounds
             <Item Name="GenParticleCollection" Value="GenParticles" />
             <Item Name="additionalBranches" Value="triggerNames triggerResults patJetsAk8CHSJetsSoftDropPacked_daughters" />
 
+            <Item Name="data_dir_path" Value="/afs/desy.de/user/t/tholenhe/xxl-af-cms/CMSSW_7_4_15_patch1/src/UHH2/common/data/" />
             <Item Name="lumi_file" Value="/afs/desy.de/user/t/tholenhe/xxl-af-cms/CMSSW_7_4_15_patch1/src/UHH2/common/data/Latest_2015_Golden_JSON.root" />
             <Item Name="lumihists_lumi_per_bin" Value="0.2"/>
 
@@ -320,8 +321,12 @@ backgrounds
             <Item Name="BTagCalibration" Value="/afs/desy.de/user/t/tholenhe/xxl-af-cms/CMSSW_7_4_15_patch1/src/UHH2/common/data/CSVv2.csv" />
 
             <!-- specific to analysis -->
+            <!-- "jecsmear_direction": either "nominal", "up", or "down" -->
+            <!-- "jersmear_direction": either "nominal", "up", or "down" -->
+            <Item Name="jecsmear_direction" Value="nominal" /> 
+            <Item Name="jersmear_direction" Value="nominal" /> 
+            <Item Name="jersmear_smear_met" Value="true" /> 
             <Item Name="AnalysisModule" Value="VLQToHiggsAndLeptonModule" /> 
-            <Item Name="category" Value="MakeFlatTuple" />
             <Item Name="TestKey" Value="VLQToHiggsAndLeptonModule" />
             <Item Name="use_sframe_weight" Value="false" />
         </UserConfig>

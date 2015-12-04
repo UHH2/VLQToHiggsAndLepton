@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 
+import UHH2.VLQSemiLepPreSel.vlq_settings as vlq_settings
+import UHH2.VLQSemiLepPreSel.common as common
 from varial.extensions.hadd import Hadd
 import varial.extensions.make
-import varial.extensions.git
 import varial.tools
 import os
 
@@ -22,6 +23,17 @@ varial.settings.my_rh_signals = [
     'Signal_TpB_TH_RH_M1700',
 ]
 
+
+# these imports might need the settings above
+import sideband_overlays
+import lep_plus_minus
+#import sframe_tools
+import tree_project
+import sensitivity
+import tex_content
+import plot
+
+
 hadd = Hadd(
     input_pat, 
     [
@@ -33,18 +45,8 @@ hadd = Hadd(
         'uhh2.AnalysisModuleRunner.MC.SingleT',
     ], 
     add_aliases_to_analysis=False,
+    samplename_func=common.get_samplename
 )
-
-
-import UHH2.VLQSemiLepPreSel.vlq_settings as vlq_settings
-import UHH2.VLQSemiLepPreSel.common as common
-import sideband_overlays
-import lep_plus_minus
-#import sframe_tools
-import tree_project
-import sensitivity
-import tex_content
-import plot
 
 
 tc = varial.tools.ToolChain(
@@ -56,7 +58,6 @@ tc = varial.tools.ToolChain(
         #     uhh_base + 'VLQSemiLepPreSel',
         #     uhh_base + 'VLQToHiggsAndLepton',
         # ]),
-        # varial.extensions.git.GitAdder(),
         # varial.tools.UserInteraction('Really run sframe? (Kill me otherwise.)'),
         # sframe_tools.sframe_tools,
         
@@ -69,7 +70,7 @@ tc = varial.tools.ToolChain(
         varial.tools.ToolChainParallel(
             'Histograms', [
                 plot.mk_toolchain('Selections', '%s/Inputs/TreeProjector/*.root' % dir_name),
-                plot.mk_toolchain('SFramePlots', '%s/Inputs/Hadd/*.root' % dir_name),
+                plot.mk_toolchain('SFramePlots', '%s/Inputs/Hadd/*.root' % dir_name, cutflow=True),
                 sideband_overlays.tc,
                 lep_plus_minus.pltr,
                 sensitivity.tc,
@@ -78,9 +79,8 @@ tc = varial.tools.ToolChain(
 
         # varial.tools.PrintToolTree(),
         varial.tools.WebCreator(),
-        # tex_content.tex_content,
+        tex_content.tc,
         varial.tools.CopyTool('~/www/auth/VLQ2HT', use_rsync=True),
-        # varial.extensions.git.GitTagger(commit_prefix='VLQ2HT'),
     ]
 )
 

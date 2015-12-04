@@ -86,7 +86,7 @@ public:
         }
 
         // find best hyps and store
-        float chi2 = 99999.;
+        float chi2 = 999999.;
         auto best_h_hyp = get_best_hypothesis(h_hyps, "Chi2_event", chi2);
         auto best_t_hyp = get_best_hypothesis(t_hyps, "Chi2_event", chi2);
         if (best_h_hyp) {

@@ -2,8 +2,9 @@ import varial.extensions.tex
 
 # base path
 p = 'VLQ2HT/Histograms/'
-ext = '.png'
-target_ext = '.png'
+ext = '.pdf'
+target_ext = '.pdf'
+varial.settings.rootfile_postfixes += ['.pdf']
 
 
 ######################################################## AutoContentObjects ###
@@ -119,7 +120,7 @@ p_lim = p + 'Limits/DataBackground/'
 images = {
     'limits': (
         p_lim+'Plotter/SignalRegion_lin'+ext,
-        p_lim+'ThetaLimits/plots/limit_band_plot-log-acls'+ext,
+        p_lim+'ThetaLimits/plots/limit_band_plot-log-acls.png',
     ),
 }
 AutoContentLimits = varial.extensions.tex.TexContent(

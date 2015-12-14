@@ -73,7 +73,6 @@ sr_selection = baseline_selection + [
 sb_selection = baseline_selection + [
     'h_n_subjet_btags       == 1',
     'abs_largest_jet_eta    < 2.4',
-    'tlep_mass              > 150',
 ]
 
 sb_175top_selection = baseline_selection + [
@@ -82,16 +81,17 @@ sb_175top_selection = baseline_selection + [
     'tlep_mass              > 175',
 ]
 
-sb_notop_selection = baseline_selection + [
+sb_150top_selection = baseline_selection + [
     'h_n_subjet_btags       == 1',
     'abs_largest_jet_eta    < 2.4',
+    'tlep_mass              > 150',
 ]
 
-sb_lepchargeplus_selection = baseline_selection + [
+lepchargeplus_selection = [
     'primary_lepton_charge  > 0.1',
 ]
 
-sb_lepchargeminus_selection = baseline_selection + [
+lepchargeminus_selection = [
     'primary_lepton_charge  < 0.1',
 ]
 
@@ -100,10 +100,12 @@ sec_sel_weight = [
     ('BaseLineSelection', baseline_selection, 'weight'),
     ('SignalRegion', sr_selection, 'weight'),
     ('SidebandRegion', sb_selection, 'weight'),
-    ('SidebandNoMTCut', sb_notop_selection, 'weight'),
+    ('SidebandMT150', sb_150top_selection, 'weight'),
     ('SidebandMT175', sb_175top_selection, 'weight'),
-    # ('PS_lep_plus',  sb_lepchargeplus_selection, 'weight'),
-    # ('PS_lep_minus', sb_lepchargeminus_selection, 'weight'),
+    ('BaselineLepPlus', baseline_selection + lepchargeplus_selection, 'weight'),
+    ('BaselineLepMnus', baseline_selection + lepchargeminus_selection, 'weight'),
+    ('SRLepPlus', sr_selection + lepchargeplus_selection, 'weight'),
+    ('SRLepMnus', sr_selection + lepchargeminus_selection, 'weight'),
 ]
 
 

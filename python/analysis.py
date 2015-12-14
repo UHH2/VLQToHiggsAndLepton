@@ -22,12 +22,25 @@ varial.settings.my_rh_signals = [
     'Signal_TpB_TH_RH_M1300',
     'Signal_TpB_TH_RH_M1700',
 ]
+varial.settings.pretty_names.update({
+     'no sel._tex':                 r'no sel.',
+     'trigger_accept_tex':          r'trigger',
+     '2D cut_tex':                  r'2D-iso',
+     'primary_lepton_pt_tex':       r'lep. \pt',
+     'leading_jet_pt_tex':          r'ld. jet \pt',
+     'ST_tex':                      r'ST',
+     'event_chi2_tex':              r'$\chi^2$',
+     'dr_higg_top_tex':             r'$\Delta R(H, t)$',
+     'tlep_pt_tex':                 r't \pt',
+     'h_mass_tex':                  r'$M(H)$',
+     '1000 X output/input_tex':     r'$\epsilon$ * 1000'
+})
 
 
 # these imports might need the settings above
 import sideband_overlays
 import lep_plus_minus
-#import sframe_tools
+# import sframe_tools
 import tree_project
 import sensitivity
 import tex_content
@@ -64,6 +77,7 @@ tc = varial.tools.ToolChain(
         varial.tools.ToolChain(
             'Inputs', [
                 tree_project.mk_tp(input_pat),
+                tree_project.mk_sys_tps(),
                 hadd,
             ]
         ),

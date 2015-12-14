@@ -47,7 +47,7 @@
     <Library Name="libSUHH2VLQToHiggsAndLepton"/>
     <Package Name="SUHH2VLQToHiggsAndLepton.par" />
 
-   <Cycle Name="uhh2::AnalysisModuleRunner" OutputDirectory="/nfs/dust/cms/user/tholenhe/VLQToHiggsAndLepton/" PostFix="" TargetLumi="2110." >
+   <Cycle Name="uhh2::AnalysisModuleRunner" OutputDirectory="/nfs/dust/cms/user/tholenhe/VLQToHiggsAndLepton/" PostFix="" TargetLumi="2006." >
 <!--
    <Cycle Name="uhh2::AnalysisModuleRunner"  RunMode="PROOF" ProofServer="lite://"  ProofWorkDir="/nfs/dust/cms/user/tholenhe/proof-wd/" ProofNodes="22" OutputDirectory="./" PostFix="" TargetLumi="552.67" >
    <Cycle Name="uhh2::AnalysisModuleRunner"  RunMode="PROOF" ProofServer="tholenhe@naf-uhhcms04.desy.de:21001"  ProofWorkDir="/nfs/dust/cms/user/tholenhe/proof-wd/" ProofNodes="30" OutputDirectory="./" PostFix="" TargetLumi="552.67" >
@@ -310,10 +310,9 @@ backgrounds
             <Item Name="additionalBranches" Value="triggerNames triggerResults patJetsAk8CHSJetsSoftDropPacked_daughters" />
 
             <Item Name="data_dir_path" Value="/afs/desy.de/user/t/tholenhe/xxl-af-cms/CMSSW_7_4_15_patch1/src/UHH2/common/data/" />
-            <Item Name="lumi_file" Value="/afs/desy.de/user/t/tholenhe/xxl-af-cms/CMSSW_7_4_15_patch1/src/UHH2/common/data/Latest_2015_Golden_JSON.root" />
-            <Item Name="lumihists_lumi_per_bin" Value="0.2"/>
+            <Item Name="lumihists_lumi_per_bin" Value="50"/>
 
-            <Item Name="pileup_directory_data" Value="/nfs/dust/cms/user/marchesi/PUData/25ns_v2/MyDataPileupHistogram.root" />
+            <Item Name="pileup_directory_data" Value="/afs/desy.de/user/t/tholenhe/xxl-af-cms/CMSSW_7_4_15_patch1/src/UHH2/common/data/MyDataPileupHistogram_JSON_Golden.root" />
             <Item Name="pileup_directory_25ns" Value="/nfs/dust/cms/user/nowatsd/PUHistogram-25ns-v2/Pileup.MC.TTbar.root"/>
 
 

@@ -20,6 +20,7 @@
 #include "UHH2/common/include/ElectronHists.h"
 #include "UHH2/common/include/MuonHists.h"
 #include "UHH2/common/include/JetHists.h"
+#include "UHH2/common/include/LuminosityHists.h"
 #include "UHH2/common/include/NSelections.h"
 #include "UHH2/common/include/TTbarReconstruction.h"
 #include "UHH2/common/include/CollectionProducer.h"
@@ -217,7 +218,7 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     v_hists.emplace_back(cf_hists);
 
     // insert 2D cut
-    unsigned pos_2d_cut = 0;
+    unsigned pos_2d_cut = 1;
     sel_module->insert_selection(pos_2d_cut, new TwoDCutSel(ctx, DR_2D_CUT, DPT_2D_CUT));
     nm1_hists->insert_hists(pos_2d_cut, new TwoDCutHist(ctx, "Nm1Selection"));
     cf_hists->insert_step(pos_2d_cut, "2D cut");
@@ -241,6 +242,11 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     v_hists_after_sel.emplace_back(new VLQ2HTEventReco(ctx, "EventRecoAfterSel"));
     v_hists_after_sel.emplace_back(new HistCollector(ctx, "EventHistsPost", type == "MC"));
 
+    // lumi hists
+    if (type == "DATA") {
+        v_hists          .emplace_back(new LuminosityHists(ctx, "LumiHistPre"));
+        v_hists_after_sel.emplace_back(new LuminosityHists(ctx, "LumiHistPost"));
+    }
 
     // signal sample gen hists
     if (version.substr(version.size() - 4, 100) == "Tlep") {

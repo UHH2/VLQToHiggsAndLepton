@@ -28,7 +28,7 @@ images = {
 }
 AutoContentObjects = varial.extensions.tex.TexContent(
     images,
-    include_str=r'\includegraphics[width=0.49\textwidth]{%s}',
+    include_str=r'\includegraphics[width=0.45\textwidth]{%s}',
     name='AutoContentObjects',
 )
 
@@ -54,7 +54,7 @@ images = {
 }
 AutoContentTopHiggVlq = varial.extensions.tex.TexContent(
     images,
-    include_str=r'\includegraphics[width=0.49\textwidth]{%s}',
+    include_str=r'\includegraphics[width=0.45\textwidth]{%s}',
     name='AutoContentTopHiggVlq',
 )
 
@@ -73,7 +73,7 @@ images = {
         p_nm1sel + 'ST_lin' + ext,
     ),
     'secondblock': (
-        p_nm1sel + 'event_chi2_lin' + ext,
+        p_nm1sel + 'event_chi2_log' + ext,
         p_nm1sel + 'dr_higg_top_lin' + ext,
         p_nm1sel + 'tlep_pt_lin' + ext,
         p_nm1sel + 'h_mass_lin' + ext,
@@ -83,7 +83,7 @@ plain_files = {
     'p_cutflow_tabular.tex':
         p_cutflow + 'CutflowTableTex/cutflow_tabular.tex',
     'p_cutflow_stack'+target_ext:
-        p_cutflow + 'CutflowStack/cutflow_lin'+ext,
+        p_cutflow + 'CutflowStack/cutflow_log'+ext,
 }
 AutoContentSelection = varial.extensions.tex.TexContent(
     images,

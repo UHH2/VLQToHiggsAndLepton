@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
-from varial.extensions.treeprojector import TreeProjector, SGETreeProjector
+from varial_ext.treeprojector import TreeProjector, SGETreeProjector
+from os.path import join
 import varial.tools
 import plot
-
 import glob
 
 
@@ -74,9 +74,18 @@ sb_selection = baseline_selection + [
     'h_n_subjet_btags       == 1',
     'abs_largest_jet_eta    < 2.4',
     'tlep_mass              > 150',
-    #'tlep_mass              < 350',
 ]
-# TODO no_top_mass_cut_sb for comparison
+
+sb_175top_selection = baseline_selection + [
+    'h_n_subjet_btags       == 1',
+    'abs_largest_jet_eta    < 2.4',
+    'tlep_mass              > 175',
+]
+
+sb_notop_selection = baseline_selection + [
+    'h_n_subjet_btags       == 1',
+    'abs_largest_jet_eta    < 2.4',
+]
 
 sb_lepchargeplus_selection = baseline_selection + [
     'primary_lepton_charge  > 0.1',
@@ -91,9 +100,12 @@ sec_sel_weight = [
     ('BaseLineSelection', baseline_selection, 'weight'),
     ('SignalRegion', sr_selection, 'weight'),
     ('SidebandRegion', sb_selection, 'weight'),
+    ('SidebandNoMTCut', sb_notop_selection, 'weight'),
+    ('SidebandMT175', sb_175top_selection, 'weight'),
     # ('PS_lep_plus',  sb_lepchargeplus_selection, 'weight'),
     # ('PS_lep_minus', sb_lepchargeminus_selection, 'weight'),
 ]
+
 
 def mk_tp(input_pat):
     all_files = glob.glob(input_pat)
@@ -105,8 +117,84 @@ def mk_tp(input_pat):
     return TreeProjector(
         samples, filenames, params, sec_sel_weight, 
         # suppress_job_submission=True, 
-        name='TreeProjector'
+        name='TreeProjector',
     )
+
+
+def mk_sys_tps():
+    # some defs
+    base_path = '/nfs/dust/cms/user/tholenhe/VLQToHiggsAndLepton/'
+    sys_params = {
+        'histos': {'vlq_mass': histo_names_args['vlq_mass']},
+        'treename': 'AnalysisTree',
+    }
+
+    # first put together jerc uncert with nominal weights
+    jercs = list(
+        (
+            name.replace('_down', '__minus').replace('_up', '__plus'), 
+            base_path + name + '/workdir/uhh2*.root'
+        ) 
+        for name in ('jec_down', 'jec_up', 'jer_down', 'jer_up')
+    )
+    nominal_sec_sel_weight = [
+        ('SignalRegion', sr_selection, 'weight'),
+        ('SidebandRegion', sb_selection, 'weight'),
+    ]
+    sys_tps = list(
+        TreeProjector(
+            samples, 
+            dict(
+                (sample, list(f for f in glob.glob(pat) if sample in f))
+                for sample in samples
+            ), 
+            sys_params, 
+            nominal_sec_sel_weight,
+            add_aliases_to_analysis=False,
+            name=name,
+        )
+        for name, pat in jercs
+    )
+
+    # next put together nominal samples with with weight uncerts.
+    nominal_files = base_path + 'workdir/uhh2*.root'
+    filenames = dict(
+        (sample, list(f for f in glob.glob(nominal_files) if sample in f))
+        for sample in samples
+    )
+    sys_sec_sel_weight = list(
+        (name, [
+            ('SignalRegion', sr_selection, 'weight*' + w),
+            ('SidebandRegion', sb_selection, 'weight*' + w),
+        ])
+        for name, w in (
+            ('btag_bc__minus', 'weight_btag_bc_down/weight_btag'),
+            ('btag_bc__plus', 'weight_btag_bc_up/weight_btag'),
+            ('btag_udsg__minus', 'weight_btag_udsg_down/weight_btag'),
+            ('btag_udsg__plus', 'weight_btag_udsg_up/weight_btag'),
+            ('sfmu_id__minus', 'weight_sfmu_id_down/weight_sfmu_id'),
+            ('sfmu_id__plus', 'weight_sfmu_id_up/weight_sfmu_id'),
+            ('sfmu_trg__minus', 'weight_sfmu_trg_down/weight_sfmu_trg'),
+            ('sfmu_trg__plus', 'weight_sfmu_trg_up/weight_sfmu_trg'),
+        )
+    )
+    sys_tps += list(
+        TreeProjector(
+            samples, 
+            filenames, 
+            sys_params, 
+            ssw,
+            add_aliases_to_analysis=False,
+            name=name,
+        )
+        for name, ssw in sys_sec_sel_weight
+    )
+
+    # make it complete with a tooloolchain!
+    return varial.tools.ToolChain(
+        'SysTreeProjectors', sys_tps
+    )
+
 
 if __name__ == '__main__':
     input_pat = './*.root'

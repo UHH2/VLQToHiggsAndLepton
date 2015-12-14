@@ -3,14 +3,13 @@
 import UHH2.VLQSemiLepPreSel.common as common
 import UHH2.VLQSemiLepPreSel.vlq_settings as vlq_settings
 import UHH2.VLQSemiLepPreSel.cutflow_tables as cutflow_tables
-from UHH2.VLQSemiLepPreSel.plot import *
+from UHH2.VLQSemiLepPreSel.plot import loader_hook
 
 import varial.generators as gen
 import varial.history
 import varial.tools
 import itertools
 import time
-import os
 
 
 # varial.settings.debug_mode = True
@@ -19,9 +18,19 @@ input_pat = './uhh2.*.root'
 
 @varial.history.track_history
 def scale_signal(w):
+    if w.legend.endswith('_0'):
+        w.legend = w.legend[:-2]
     if w.is_signal:
-        w.lumi /= 20.
-        w.legend += ' (*20)'
+        w.lumi /= 10.
+        w.legend += ' (10pb)'
+        w = varial.op.norm_to_lumi(w)
+    return w
+
+
+@varial.history.track_history
+def scale_mc_down_to_1p266invfb(w):
+    if not w.is_data:
+        w.lumi /= 6./10.
         w = varial.op.norm_to_lumi(w)
     return w
 
@@ -29,7 +38,10 @@ def scale_signal(w):
 def loader_hook_sig_scale(wrps):
     wrps = loader_hook(wrps)
     wrps = (scale_signal(w) for w in wrps)
-    wrps = itertools.ifilter(lambda w: 'Signal_' not in w.sample, wrps)  # filter signals that are not for plotting
+    # wrps = (scale_mc_down_to_1p266invfb(w) for w in wrps)
+
+    # filter signals that are not for plotting
+    wrps = itertools.ifilter(lambda w: 'Signal_' not in w.sample, wrps)
     return wrps
 
 

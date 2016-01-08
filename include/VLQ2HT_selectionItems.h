@@ -15,14 +15,17 @@ static const float DPT_2D_CUT = 40.0;
 
 
 static vector<shared_ptr<SelectionItem>> SEL_ITEMS_VLQ2HT {
-    shared_ptr<SelectionItem>(new SelDatI("trigger_accept",    "trigger accept",                                2, -.5, 1.5       ,1        )),
-    shared_ptr<SelectionItem>(new SelDatF("primary_lepton_pt", ";primary lepton p_{T};events / 20 GeV",         50, 0., 1000      ,47.      )),
+    shared_ptr<SelectionItem>(new SelDatI("trigger_accept",    "trigger accept",                                2, -.5, 1.5       ,1        )),    
+    shared_ptr<SelectionItem>(new SelDatI("ele_ch_jet_cuts",   "ele. ch. jet pts",                              2, -.5, 1.5       ,1        )),    
     shared_ptr<SelectionItem>(new SelDatF("leading_jet_pt",    ";leading ak4 jet p_{T};events / 20 GeV",        50, 0., 1000      ,100      )),
     shared_ptr<SelectionItem>(new SelDatD("ST",                ";ST;events / 100 GeV",                          25, 0, 2500       ,400      )),
     shared_ptr<SelectionItem>(new SelDatF("event_chi2",        "event chi2",                                    100, 0, 200       ,-0.1,5000)),
     shared_ptr<SelectionItem>(new SelDatF("dr_higg_top",       "#DeltaR(H, t)",                                 50, 0, 5          ,2.       )),
     shared_ptr<SelectionItem>(new SelDatF("tlep_pt",           ";lept. top p_{T};events / 20 GeV",              25, 0, 1000       ,100      )),
     shared_ptr<SelectionItem>(new SelDatF("h_mass",            ";Higgs candidate mass;events / 10 GeV",         25, 50, 300       ,90 ,160  )),
+    shared_ptr<SelectionItem>(new SelDatF("primary_lepton_pt", ";primary lepton p_{T};events / 20 GeV",         50, 0., 1000                )),
+    shared_ptr<SelectionItem>(new SelDatI("trigger_accept_el", "electron trigger accept (mu veto)",             2, -.5, 1.5                 )),
+    shared_ptr<SelectionItem>(new SelDatI("trigger_accept_mu", "muon trigger accept",                                2, -.5, 1.5                 )),
     shared_ptr<SelectionItem>(new SelDatF("h_pt",              ";Higgs candidate p_{T};events / 40 GeV",        25, 0, 1000                 )),
     shared_ptr<SelectionItem>(new SelDatI("n_leading_btags",   "N_{b-tag leading}",                             11, -.5, 10.5               )),
     shared_ptr<SelectionItem>(new SelDatF("abs_largest_jet_eta", "most forward jet #eta",                       50, 0., 5.                  )),
@@ -70,58 +73,10 @@ static vector<shared_ptr<SelectionItem>> SEL_ITEMS_VLQ2HT {
 };
 
 
-// static const vector<std::string> TRIGGER_PATHS {
-//     "HLT_Ele45_CaloIdVT_GsfTrkIdT_PFJet200_PFJet50_v*",
-//     "HLT_Mu40_v*",
-//     "HLT_PFHT900_v*",
-// };
-
-
-static const vector<std::string> TRIGGER_PATHS {
-    // "HLT_Ele45_CaloIdVT_GsfTrkIdT_PFJet200_PFJet50_v*",
+static const vector<std::string> TRIGGER_PATHS_MU {
+    "HLT_Mu45_eta2p1_v*",
+};
+static const vector<std::string> TRIGGER_PATHS_ELE {
+    "HLT_Ele45_CaloIdVT_GsfTrkIdT_PFJet200_PFJet50_v*",
     // "HLT_Ele105_CaloIdVT_GsfTrkIdT_v*",
-    // "HLT_Ele32_eta2p1_WP75_Gsf_v*",
-
-    // "HLT_Mu40_eta2p1_PFJet200_PFJet50_v*",
-    "HLT_Mu45_eta2p1_v*",
-    // "HLT_Mu50_v*",
-    // "HLT_IsoMu24_eta2p1_v*",
-    // "HLT_IsoMu27_v*",
-
-    // "HLT_PFHT800Emu_v*",
 };
-
-static const vector<std::string> TRIGGER_PATHS_DATA {
-    // "HLT_Ele45_CaloIdVT_GsfTrkIdT_PFJet200_PFJet50_v*",
-    // "HLT_Ele105_CaloIdVT_GsfTrkIdT_v*",
-    // "HLT_Ele32_eta2p1_WPLoose_Gsf_v*",
-
-    // "HLT_Mu40_eta2p1_PFJet200_PFJet50_v*",
-    "HLT_Mu45_eta2p1_v*",
-    // "HLT_Mu50_v*",
-    // "HLT_IsoMu24_eta2p1_v*",
-    // "HLT_IsoMu27_v*",
-
-    // "HLT_PFHT800_v*",
-};
-
-static const vector<std::string> TRIGGER_PATHS_DATA_ELE_VETO {
-    // "HLT_Mu40_eta2p1_PFJet200_PFJet50_v*",
-    "HLT_Mu45_eta2p1_v*",
-    // "HLT_Mu50_v*",
-    // "HLT_IsoMu24_eta2p1_v*",
-    // "HLT_IsoMu27_v*",
-};
-
-static const vector<std::string> TRIGGER_PATHS_DATA_HAD_VETO {
-    // "HLT_Ele45_CaloIdVT_GsfTrkIdT_PFJet200_PFJet50_v*",
-    "HLT_Ele105_CaloIdVT_GsfTrkIdT_v*",
-    // "HLT_Ele32_eta2p1_WPLoose_Gsf_v*",
-
-    // "HLT_Mu40_eta2p1_PFJet200_PFJet50_v*",
-    "HLT_Mu45_eta2p1_v*",
-    // "HLT_Mu50_v*",
-    // "HLT_IsoMu24_eta2p1_v*",
-    // "HLT_IsoMu27_v*",
-};
-

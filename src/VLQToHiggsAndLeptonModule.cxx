@@ -87,7 +87,7 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     }
 
     // remove everything from the output branch
-    ctx.undeclare_all_event_output();
+    // ctx.undeclare_all_event_output();
 
     // jet correction (if nominal, the corrections were already applied in the preselection)
     if (ctx.get("jecsmear_direction", "nominal") != "nominal") {
@@ -112,7 +112,12 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
         PrimaryLeptonDeltaPhiId(ctx, 1.0),
         HiggsTag(60., 99999., is_true<Jet>)
     ));
-    v_pre_modules.emplace_back(new PrimaryLepton(ctx, "PrimaryLepton"));
+    v_pre_modules.emplace_back(new TriggerAcceptProducer(
+        ctx, TRIGGER_PATHS_ELE, TRIGGER_PATHS_MU, "trigger_accept_el"));  // Vetoing mu trigger!
+    v_pre_modules.emplace_back(new TriggerAcceptProducer(
+        ctx, TRIGGER_PATHS_MU, "trigger_accept_mu"));
+    v_pre_modules.emplace_back(new TriggerAwarePrimaryLepton(
+        ctx, "PrimaryLepton", "trigger_accept_el", "trigger_accept_mu", 50., 47.));
     v_pre_modules.emplace_back(new CollectionProducer<TopJet>(
         ctx, "patJetsAk8CHSJetsSoftDropPacked_daughters", "h_jets", n_htags_all));
     v_pre_modules.emplace_back(new CollectionSizeProducer<TopJet>(
@@ -133,8 +138,6 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
         "Mu45_eta2p1_PtEtaBins", 1., "trg"));
 
     // leptons
-    v_cat_modules.emplace_back(new ElectronCleaner(PtEtaCut(105.0, 2.4)));
-    v_cat_modules.emplace_back(new MuonCleaner(PtEtaCut(50.0, 2.4)));
     v_cat_modules.emplace_back(new NLeptonsProducer(ctx, "n_leptons"));
     v_cat_modules.emplace_back(new PrimaryLeptonInfoProducer(ctx, 
         "PrimaryLepton", "primary_lepton_pt", "primary_lepton_eta", "primary_lepton_charge"));
@@ -190,19 +193,8 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     v_cat_modules.emplace_back(new EventWeightOutputHandle(ctx, "weight"));
     v_cat_modules.emplace_back(new AbsValueProducer<float>(ctx, "largest_jet_eta"));
     v_cat_modules.emplace_back(new TwoDCutProducer(ctx, "PrimaryLepton", "TwoDCut_dr", "TwoDCut_ptrel", true));
-    
-    // v_pre_modules.emplace_back(new AbsValueProducer<float>(ctx, "vlq_eta"));
-
-    v_cat_modules.emplace_back(new TriggerAcceptProducer(ctx, TRIGGER_PATHS, "trigger_accept"));
-    // if (version == "Run2015D_Mu") {
-    //     v_cat_modules.emplace_back(new TriggerAcceptProducer(ctx, TRIGGER_PATHS_DATA, "trigger_accept"));
-    // } else if (version == "Run2015D_Ele") {
-    //     v_cat_modules.emplace_back(new TriggerAcceptProducer(ctx, TRIGGER_PATHS_DATA, TRIGGER_PATHS_DATA_ELE_VETO, "trigger_accept"));
-    // } else if (version == "Run2015D_Had") {
-    //     v_cat_modules.emplace_back(new TriggerAcceptProducer(ctx, TRIGGER_PATHS_DATA, TRIGGER_PATHS_DATA_HAD_VETO, "trigger_accept"));
-    // } else {
-    //     v_cat_modules.emplace_back(new TriggerAcceptProducer(ctx, TRIGGER_PATHS, "trigger_accept"));
-    // }
+    v_cat_modules.emplace_back(new TriggerXOR(ctx, "trigger_accept_el", "trigger_accept_mu", "trigger_accept"));
+    v_cat_modules.emplace_back(new EleChJetCuts(ctx, "jets", "trigger_accept_el", "ele_ch_jet_cuts"));
 
     // Selection Producer
     SelItemsHelper sel_helper(SEL_ITEMS_VLQ2HT, ctx);

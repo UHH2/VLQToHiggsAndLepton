@@ -71,8 +71,12 @@ private:
 
     // store the Hists collection
     unique_ptr<Hists> gen_hists;
-    vector<unique_ptr<Hists>> v_hists;
-    vector<unique_ptr<Hists>> v_hists_after_sel;
+    vector<unique_ptr<Hists>> v_hists_el;
+    vector<unique_ptr<Hists>> v_hists_mu;
+    vector<unique_ptr<Hists>> v_hists_after_sel_el;
+    vector<unique_ptr<Hists>> v_hists_after_sel_mu;
+
+    Event::Handle<int> h_ele_trg;
 };
 
 
@@ -194,7 +198,6 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     v_cat_modules.emplace_back(new AbsValueProducer<float>(ctx, "largest_jet_eta"));
     v_cat_modules.emplace_back(new TwoDCutProducer(ctx, "PrimaryLepton", "TwoDCut_dr", "TwoDCut_ptrel", true));
     v_cat_modules.emplace_back(new TriggerXOR(ctx, "trigger_accept_el", "trigger_accept_mu", "trigger_accept"));
-    v_cat_modules.emplace_back(new EleChJetCuts(ctx, "jets", "trigger_accept_el", "ele_ch_jet_cuts"));
 
     // Selection Producer
     SelItemsHelper sel_helper(SEL_ITEMS_VLQ2HT, ctx);
@@ -203,49 +206,81 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     sel_helper.declare_items_for_output();
 
     // 3. Set up Hists classes:
-    sel_helper.fill_hists_vector(v_hists, "NoSelection");
-    auto nm1_hists = new Nm1SelHists(ctx, "Nm1Selection", sel_helper);
-    auto cf_hists = new VLQ2HTCutflow(ctx, "Cutflow", sel_helper);
-    v_hists.emplace_back(nm1_hists);
-    v_hists.emplace_back(cf_hists);
+    sel_helper.fill_hists_vector(v_hists_el, "ElChan/NoSelection");
+    auto nm1_hists_el = new Nm1SelHists(ctx, "ElChan/Nm1Selection", sel_helper);
+    auto cf_hists_el = new VLQ2HTCutflow(ctx, "ElChan/Cutflow", sel_helper);
+    v_hists_el.emplace_back(nm1_hists_el);
+    v_hists_el.emplace_back(cf_hists_el);
+
+    sel_helper.fill_hists_vector(v_hists_mu, "MuChan/NoSelection");
+    auto nm1_hists_mu = new Nm1SelHists(ctx, "MuChan/Nm1Selection", sel_helper);
+    auto cf_hists_mu = new VLQ2HTCutflow(ctx, "MuChan/Cutflow", sel_helper);
+    v_hists_mu.emplace_back(nm1_hists_mu);
+    v_hists_mu.emplace_back(cf_hists_mu);
+
+    // insert trigger dependent jet cuts
+    sel_module->replace_selection(1, new TriggerAwareHandleSelection<float>(
+        ctx, "leading_jet_pt", "trigger_accept_el", 250, 100)); 
+    sel_module->replace_selection(2, new TriggerAwareHandleSelection<float>(
+        ctx, "subleading_jet_pt", "trigger_accept_el", 65, 10));
 
     // insert 2D cut
-    unsigned pos_2d_cut = 1;
+    unsigned pos_2d_cut = 3;
     sel_module->insert_selection(pos_2d_cut, new TwoDCutSel(ctx, DR_2D_CUT, DPT_2D_CUT));
-    nm1_hists->insert_hists(pos_2d_cut, new TwoDCutHist(ctx, "Nm1Selection"));
-    cf_hists->insert_step(pos_2d_cut, "2D cut");
-    v_hists.insert(v_hists.begin() + pos_2d_cut, move(unique_ptr<Hists>(new TwoDCutHist(ctx, "NoSelection"))));
 
-    // fat jet hists
-    v_hists_after_sel.emplace_back(new TopJetHists(ctx, "HiggsJetsAfterSel", 2, "h_jets"));
-    v_hists_after_sel.emplace_back(new BTagMCEfficiencyHists(ctx, "BTagMCEfficiencyHists", CSVBTag::WP_LOOSE, "h_jets"));
+    nm1_hists_el->insert_hists(pos_2d_cut, new TwoDCutHist(ctx, "ElChan/Nm1Selection"));
+    cf_hists_el->insert_step(pos_2d_cut, "2D cut");
+    v_hists_el.insert(v_hists_el.begin() + pos_2d_cut, move(unique_ptr<Hists>(new TwoDCutHist(ctx, "ElChan/NoSelection"))));
+    
+    nm1_hists_mu->insert_hists(pos_2d_cut, new TwoDCutHist(ctx, "MuChan/Nm1Selection"));
+    cf_hists_mu->insert_step(pos_2d_cut, "2D cut");
+    v_hists_mu.insert(v_hists_mu.begin() + pos_2d_cut, move(unique_ptr<Hists>(new TwoDCutHist(ctx, "MuChan/NoSelection"))));
 
     // v_hists.emplace_back(new SingleLepTrigHists(ctx, "SingleLepTrig", "HLT_Ele95_CaloIdVT_GsfTrkIdT_v", true));
     // v_hists.emplace_back(new SingleLepTrigHists(ctx, "SingleLepTrig", "HLT_Mu40_v", false));
 
-    v_hists_after_sel.emplace_back(new ElectronHists(ctx, "SanityCheckEle", true));
-    v_hists_after_sel.emplace_back(new MuonHists(ctx, "SanityCheckMu"));
-    v_hists_after_sel.emplace_back(new EventHists(ctx, "SanityCheckEvent"));
-    v_hists_after_sel.emplace_back(new JetHists(ctx, "SanityCheckJets"));
-    v_hists_after_sel.emplace_back(new JetHists(ctx, "SanityCheckFwdJets", 4, "fwd_jets"));
-    v_hists_after_sel.emplace_back(new TopJetHists(ctx, "SanityCheckAK8Jets", 2, "patJetsAk8CHSJetsSoftDropPacked_daughters"));
-
-    // event reconstruction
-    v_hists_after_sel.emplace_back(new VLQ2HTEventReco(ctx, "EventRecoAfterSel"));
-    v_hists_after_sel.emplace_back(new HistCollector(ctx, "EventHistsPost", type == "MC"));
+    // SanityChecks and other histograms after selection
+    // separately for ele and mu channel
+    h_ele_trg = ctx.get_handle<int>("trigger_accept_el");
+    v_hists_after_sel_el.emplace_back(new ElectronHists(ctx, "ElChan/SanityCheckEle", true));
+    v_hists_after_sel_el.emplace_back(new MuonHists(ctx, "ElChan/SanityCheckMu"));
+    v_hists_after_sel_el.emplace_back(new EventHists(ctx, "ElChan/SanityCheckEvent"));
+    v_hists_after_sel_el.emplace_back(new JetHists(ctx, "ElChan/SanityCheckJets"));
+    v_hists_after_sel_el.emplace_back(new JetHists(ctx, "ElChan/SanityCheckFwdJets", 4, "fwd_jets"));
+    v_hists_after_sel_el.emplace_back(new TopJetHists(ctx, "ElChan/SanityCheckAK8Jets", 2, "patJetsAk8CHSJetsSoftDropPacked_daughters"));
+    v_hists_after_sel_el.emplace_back(new TopJetHists(ctx, "ElChan/HiggsJetsAfterSel", 2, "h_jets"));
+    v_hists_after_sel_el.emplace_back(new BTagMCEfficiencyHists(ctx, "ElChan/BTagMCEfficiencyHists", CSVBTag::WP_LOOSE, "h_jets"));
+    v_hists_after_sel_el.emplace_back(new VLQ2HTEventReco(ctx, "ElChan/EventRecoAfterSel"));
+    v_hists_after_sel_el.emplace_back(new HistCollector(ctx, "ElChan/EventHistsPost", type == "MC"));
+    v_hists_after_sel_mu.emplace_back(new ElectronHists(ctx, "MuChan/SanityCheckEle", true));
+    v_hists_after_sel_mu.emplace_back(new MuonHists(ctx, "MuChan/SanityCheckMu"));
+    v_hists_after_sel_mu.emplace_back(new EventHists(ctx, "MuChan/SanityCheckEvent"));
+    v_hists_after_sel_mu.emplace_back(new JetHists(ctx, "MuChan/SanityCheckJets"));
+    v_hists_after_sel_mu.emplace_back(new JetHists(ctx, "MuChan/SanityCheckFwdJets", 4, "fwd_jets"));
+    v_hists_after_sel_mu.emplace_back(new TopJetHists(ctx, "MuChan/SanityCheckAK8Jets", 2, "patJetsAk8CHSJetsSoftDropPacked_daughters"));
+    v_hists_after_sel_mu.emplace_back(new TopJetHists(ctx, "MuChan/HiggsJetsAfterSel", 2, "h_jets"));
+    v_hists_after_sel_mu.emplace_back(new BTagMCEfficiencyHists(ctx, "MuChan/BTagMCEfficiencyHists", CSVBTag::WP_LOOSE, "h_jets"));
+    v_hists_after_sel_mu.emplace_back(new VLQ2HTEventReco(ctx, "MuChan/EventRecoAfterSel"));
+    v_hists_after_sel_mu.emplace_back(new HistCollector(ctx, "MuChan/EventHistsPost", type == "MC"));
 
     // lumi hists
     if (type == "DATA") {
-        v_hists          .emplace_back(new LuminosityHists(ctx, "LumiHistPre"));
-        v_hists_after_sel.emplace_back(new LuminosityHists(ctx, "LumiHistPost"));
+        v_hists_el          .emplace_back(new LuminosityHists(ctx, "ElChan/LumiHistPre"));
+        v_hists_after_sel_el.emplace_back(new LuminosityHists(ctx, "ElChan/LumiHistPost"));
+        v_hists_mu          .emplace_back(new LuminosityHists(ctx, "MuChan/LumiHistPre"));
+        v_hists_after_sel_mu.emplace_back(new LuminosityHists(ctx, "MuChan/LumiHistPost"));
     }
 
     // signal sample gen hists
     if (version.substr(version.size() - 4, 100) == "Tlep") {
-        v_hists.emplace_back(new VLQ2HTRecoGenComparison(ctx, "GenRecoHists"));
-        v_hists.emplace_back(new VLQ2HTRecoGenMatchHists(ctx, "Chi2SignalMatch"));
-        v_hists_after_sel.emplace_back(new VLQ2HTRecoGenComparison(ctx, "GenRecoHistsAfterSel"));
-        v_hists_after_sel.emplace_back(new VLQ2HTRecoGenMatchHists(ctx, "Chi2SignalMatchAfterSel"));
+        v_hists_el.emplace_back(new VLQ2HTRecoGenComparison(ctx, "ElChan/GenRecoHists"));
+        v_hists_el.emplace_back(new VLQ2HTRecoGenMatchHists(ctx, "ElChan/Chi2SignalMatch"));
+        v_hists_after_sel_el.emplace_back(new VLQ2HTRecoGenComparison(ctx, "ElChan/GenRecoHistsAfterSel"));
+        v_hists_after_sel_el.emplace_back(new VLQ2HTRecoGenMatchHists(ctx, "ElChan/Chi2SignalMatchAfterSel"));
+        v_hists_mu.emplace_back(new VLQ2HTRecoGenComparison(ctx, "MuChan/GenRecoHists"));
+        v_hists_mu.emplace_back(new VLQ2HTRecoGenMatchHists(ctx, "MuChan/Chi2SignalMatch"));
+        v_hists_after_sel_mu.emplace_back(new VLQ2HTRecoGenComparison(ctx, "MuChan/GenRecoHistsAfterSel"));
+        v_hists_after_sel_mu.emplace_back(new VLQ2HTRecoGenMatchHists(ctx, "MuChan/Chi2SignalMatchAfterSel"));
     }
 
     if (version.size() > 7 && version.substr(0, 7) == "TpB_TH_") {
@@ -284,14 +319,17 @@ bool VLQToHiggsAndLeptonModule::process(Event & event) {
     // run selection
     bool all_accepted = sel_module->process(event);
 
+    // pick histograms for channel
+    bool ele_acc = event.get(h_ele_trg);
+    const auto & v_hists = (ele_acc) ? v_hists_el : v_hists_mu;
+    const auto & v_hists_after_sel = (ele_acc) ? v_hists_after_sel_el : v_hists_after_sel_mu;
+
     // fill histograms
     if (all_accepted) {
         for (auto & hist : v_hists_after_sel) {
             hist->fill(event);
         }
     }
-
-    // all hists
     for (auto & hist : v_hists) {
         hist->fill(event);
     }

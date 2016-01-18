@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 
-from varial_ext.treeprojector import TreeProjector, SGETreeProjector
+from varial_ext.treeprojector import TreeProjector
 from os.path import join
 import varial.tools
 import plot
 import glob
 
 
-histo_names_args = {
+selection_histos = {
     'event_chi2':        ('event chi2',                                    100, 0, 200   ),
     'dr_higg_top':       ('#DeltaR(H, t)',                                 50, 0, 5      ),
     'h_pt':              (';Higgs candidate p_{T};events / 40 GeV',        25, 0, 1000   ),
@@ -36,11 +36,6 @@ histo_names_args = {
     'vlq_pt':            (';T p_{T};events / 20 GeV',                      50, 0, 1000   ),
     'vlq_eta':           ('T #eta',                                        50, -5., 5.   ),
     'vlq_mass':          (';T mass;events / 80 GeV',                       25, 0, 2000   ),
-#    'trigger_accept':    ('trigger accept',                                2, -.5, 1.5   ),
-}
-params = {
-    'histos': histo_names_args,
-    'treename': 'AnalysisTree',
 }
 
 samples = [
@@ -54,82 +49,95 @@ samples = [
     'TpB_TH_1700',
 ] + varial.settings.my_lh_signals  + varial.settings.my_rh_signals
 
-baseline_selection = [
-#    'ST                     > 400',
-#    'leading_jet_pt         > 100',
-#    'h_pt                   > 100',
-#    'tlep_pt                > 100',
-#    'h_mass                 > 90',
-#    'h_mass                 < 160',
-#    'dr_higg_top            > 2.',
-#    '(TwoDCut_ptrel > 40. || TwoDCut_dr > 0.4)',
-]
-
-sr_selection = baseline_selection + [
+sr_selection = [
+    # 'primary_lepton_charge  > 0',
     'h_n_subjet_btags       == 2',
     'abs_largest_jet_eta    > 2.4',
 ]
 
-sb_selection = baseline_selection + [
+sb_selection = [
     'h_n_subjet_btags       == 1',
     'abs_largest_jet_eta    < 2.4',
 ]
 
-sb_175top_selection = baseline_selection + [
-    'h_n_subjet_btags       == 1',
-    'abs_largest_jet_eta    < 2.4',
-    'tlep_mass              > 175',
-]
 
-sb_150top_selection = baseline_selection + [
-    'h_n_subjet_btags       == 1',
-    'abs_largest_jet_eta    < 2.4',
-    'tlep_mass              > 150',
-]
+def get_sec_sel_weight(additional_sel=None):
+    baseline_selection = [
+    #    'ST                     > 400',
+    #    'leading_jet_pt         > 100',
+    #    'h_pt                   > 100',
+    #    'tlep_pt                > 100',
+    #    'h_mass                 > 90',
+    #    'h_mass                 < 160',
+    #    'dr_higg_top            > 2.',
+    #    '(TwoDCut_ptrel > 40. || TwoDCut_dr > 0.4)',
+    ] + (additional_sel or [])
 
-lepchargeplus_selection = [
-    'primary_lepton_charge  > 0.1',
-]
+    sr_sel = baseline_selection + sr_selection
+    sb_sel = baseline_selection + sb_selection
 
-lepchargeminus_selection = [
-    'primary_lepton_charge  < 0.1',
-]
+    sb_175top_selection = baseline_selection + [
+        'h_n_subjet_btags       == 1',
+        'abs_largest_jet_eta    < 2.4',
+        'tlep_mass              > 175',
+    ]
+
+    sb_150top_selection = baseline_selection + [
+        'h_n_subjet_btags       == 1',
+        'abs_largest_jet_eta    < 2.4',
+        'tlep_mass              > 150',
+    ]
+
+    lepchargeplus_selection = [
+        'primary_lepton_charge  > 0.1',
+    ]
+
+    lepchargeminus_selection = [
+        'primary_lepton_charge  < 0.1',
+    ]
+
+    sec_sel_weight = [
+        ('BaseLineSelection', baseline_selection, 'weight'),
+        ('SignalRegion', sr_sel, 'weight'),
+        ('SidebandRegion', sb_sel, 'weight'),
+        ('SidebandMT150', sb_150top_selection, 'weight'),
+        ('SidebandMT175', sb_175top_selection, 'weight'),
+        ('BaselineLepPlus', baseline_selection + lepchargeplus_selection, 'weight'),
+        ('BaselineLepMnus', baseline_selection + lepchargeminus_selection, 'weight'),
+        ('SRLepPlus', sr_selection + lepchargeplus_selection, 'weight'),
+        ('SRLepMnus', sr_selection + lepchargeminus_selection, 'weight'),
+    ]
+
+    return sec_sel_weight
 
 
-sec_sel_weight = [
-    ('BaseLineSelection', baseline_selection, 'weight'),
-    ('SignalRegion', sr_selection, 'weight'),
-    ('SidebandRegion', sb_selection, 'weight'),
-    ('SidebandMT150', sb_150top_selection, 'weight'),
-    ('SidebandMT175', sb_175top_selection, 'weight'),
-    ('BaselineLepPlus', baseline_selection + lepchargeplus_selection, 'weight'),
-    ('BaselineLepMnus', baseline_selection + lepchargeminus_selection, 'weight'),
-    ('SRLepPlus', sr_selection + lepchargeplus_selection, 'weight'),
-    ('SRLepMnus', sr_selection + lepchargeminus_selection, 'weight'),
-]
-
-
-def mk_tp(input_pat):
+def mk_tp(input_pat, add_sel=None):
     all_files = glob.glob(input_pat)
     filenames = dict(
         (sample, list(f for f in all_files if sample in f))
         for sample in samples
     )
 
+    params = {
+        'histos': selection_histos,
+        'treename': 'AnalysisTree',
+    }
+
     return TreeProjector(
-        samples, filenames, params, sec_sel_weight, 
-        # suppress_job_submission=True, 
+        filenames, params, get_sec_sel_weight(add_sel),
         name='TreeProjector',
     )
 
 
-def mk_sys_tps():
+def mk_sys_tps(add_sel=None):
     # some defs
     base_path = '/nfs/dust/cms/user/tholenhe/VLQToHiggsAndLepton/'
     sys_params = {
-        'histos': {'vlq_mass': histo_names_args['vlq_mass']},
+        'histos': {'vlq_mass': selection_histos['vlq_mass']},
         'treename': 'AnalysisTree',
     }
+    sr_sel = sr_selection + (add_sel or [])
+    sb_sel = sb_selection + (add_sel or [])
 
     # first put together jerc uncert with nominal weights
     jercs = list(
@@ -140,12 +148,11 @@ def mk_sys_tps():
         for name in ('jec_down', 'jec_up', 'jer_down', 'jer_up')
     )
     nominal_sec_sel_weight = [
-        ('SignalRegion', sr_selection, 'weight'),
-        ('SidebandRegion', sb_selection, 'weight'),
+        ('SignalRegion', sr_sel, 'weight'),
+        ('SidebandRegion', sb_sel, 'weight'),
     ]
     sys_tps = list(
         TreeProjector(
-            samples, 
             dict(
                 (sample, list(f for f in glob.glob(pat) if sample in f))
                 for sample in samples
@@ -159,15 +166,16 @@ def mk_sys_tps():
     )
 
     # next put together nominal samples with with weight uncerts.
-    nominal_files = base_path + 'workdir/uhh2*.root'
+    nominal_files = base_path + 'samples/uhh2*.root'
     filenames = dict(
         (sample, list(f for f in glob.glob(nominal_files) if sample in f))
         for sample in samples
+        if 'Run' not in sample
     )
     sys_sec_sel_weight = list(
         (name, [
-            ('SignalRegion', sr_selection, 'weight*' + w),
-            ('SidebandRegion', sb_selection, 'weight*' + w),
+            ('SignalRegion', sr_sel, 'weight*' + w),
+            ('SidebandRegion', sb_sel, 'weight*' + w),
         ])
         for name, w in (
             ('btag_bc__minus', 'weight_btag_bc_down/weight_btag'),
@@ -182,7 +190,6 @@ def mk_sys_tps():
     )
     sys_tps += list(
         TreeProjector(
-            samples, 
             filenames, 
             sys_params, 
             ssw,
@@ -199,5 +206,5 @@ def mk_sys_tps():
 
 
 if __name__ == '__main__':
-    input_pat = './*.root'
-    varial.tools.Runner(mk_tp(input_pat))
+    inp_pat = './*.root'
+    varial.tools.Runner(mk_tp(inp_pat))

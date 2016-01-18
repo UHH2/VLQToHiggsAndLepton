@@ -38,7 +38,7 @@
 ]>
 
 <!--
-   <ConfigParse NEventsBreak="50000" FileSplit="0" />
+   <ConfigParse NEventsBreak="10000" FileSplit="0" />
    <ConfigSGE RAM ="2" DISK ="2" Mail="heiner@cern.de" Notification="as" Workdir="workdir"/>
 -->
 
@@ -61,7 +61,7 @@ data
 -->
 
 <InputData Lumi="1" NEventsMax="-1" Type="DATA" Version="Run2015D" Cacheable="False">
-    <In FileName="/nfs/dust/cms/user/tholenhe/VLQSemiLepPreSel/Run2-ntuple-split/uhh2.AnalysisModuleRunner.DATA.Run2015D_Mu*.root" Lumi="0.0"/>
+    <In FileName="/nfs/dust/cms/user/tholenhe/VLQSemiLepPreSel/Run2-ntuple-split/uhh2.AnalysisModuleRunner.DATA.Run2015D*.root" Lumi="0.0"/>
     <InputTree Name="AnalysisTree" />
     <OutputTree Name="AnalysisTree" />
 </InputData>
@@ -193,6 +193,8 @@ backgrounds
 
 
 
+
+
 <InputData Lumi="36.51028" NEventsMax="-1" Type="MC" Version="QCD_Pt80to120_MuEnr" Cacheable="False">
     <In FileName="/nfs/dust/cms/user/tholenhe/VLQSemiLepPreSel/Run2-ntuple-split/uhh2.AnalysisModuleRunner.MC.QCD_Pt80to120_MuEnr*.root" Lumi="0.0"/>
     <InputTree Name="AnalysisTree" />
@@ -242,6 +244,51 @@ backgrounds
 </InputData>
 
 
+<InputData Lumi="23.16145" NEventsMax="-1" Type="MC" Version="QCD_Pt-80to120_EMEnriched" Cacheable="False">
+    <In FileName="/nfs/dust/cms/user/tholenhe/VLQSemiLepPreSel/Run2-ntuple-split/uhh2.AnalysisModuleRunner.MC.QCD_Pt-80to120_EMEnriched*.root" Lumi="0.0"/>
+    <InputTree Name="AnalysisTree" />
+    <OutputTree Name="AnalysisTree" />
+</InputData>
+
+<InputData Lumi="134.7854" NEventsMax="-1" Type="MC" Version="QCD_Pt-120to170_EMEnriched" Cacheable="False">
+    <In FileName="/nfs/dust/cms/user/tholenhe/VLQSemiLepPreSel/Run2-ntuple-split/uhh2.AnalysisModuleRunner.MC.QCD_Pt-120to170_EMEnriched*.root" Lumi="0.0"/>
+    <InputTree Name="AnalysisTree" />
+    <OutputTree Name="AnalysisTree" />
+</InputData>
+
+<InputData Lumi="303.8623" NEventsMax="-1" Type="MC" Version="QCD_Pt-170to300_EMEnriched" Cacheable="False">
+    <In FileName="/nfs/dust/cms/user/tholenhe/VLQSemiLepPreSel/Run2-ntuple-split/uhh2.AnalysisModuleRunner.MC.QCD_Pt-170to300_EMEnriched*.root" Lumi="0.0"/>
+    <InputTree Name="AnalysisTree" />
+    <OutputTree Name="AnalysisTree" />
+</InputData>
+
+<InputData Lumi="2737.296" NEventsMax="-1" Type="MC" Version="QCD_Pt-300toInf_EMEnriched" Cacheable="False">
+    <In FileName="/nfs/dust/cms/user/tholenhe/VLQSemiLepPreSel/Run2-ntuple-split/uhh2.AnalysisModuleRunner.MC.QCD_Pt-300toInf_EMEnriched*.root" Lumi="0.0"/>
+    <InputTree Name="AnalysisTree" />
+    <OutputTree Name="AnalysisTree" />
+</InputData>
+
+
+<InputData Lumi="134.542" NEventsMax="-1" Type="MC" Version="QCD_Pt_80to170_bcToE" Cacheable="False">
+    <In FileName="/nfs/dust/cms/user/tholenhe/VLQSemiLepPreSel/Run2-ntuple-split/uhh2.AnalysisModuleRunner.MC.QCD_Pt_80to170_bcToE*.root" Lumi="0.0"/>
+    <InputTree Name="AnalysisTree" />
+    <OutputTree Name="AnalysisTree" />
+</InputData>
+
+<InputData Lumi="1113.396" NEventsMax="-1" Type="MC" Version="QCD_Pt_170to250_bcToE" Cacheable="False">
+    <In FileName="/nfs/dust/cms/user/tholenhe/VLQSemiLepPreSel/Run2-ntuple-split/uhh2.AnalysisModuleRunner.MC.QCD_Pt_170to250_bcToE*.root" Lumi="0.0"/>
+    <InputTree Name="AnalysisTree" />
+    <OutputTree Name="AnalysisTree" />
+</InputData>
+
+<InputData Lumi="4132.781" NEventsMax="-1" Type="MC" Version="QCD_Pt_250toInf_bcToE" Cacheable="False">
+    <In FileName="/nfs/dust/cms/user/tholenhe/VLQSemiLepPreSel/Run2-ntuple-split/uhh2.AnalysisModuleRunner.MC.QCD_Pt_250toInf_bcToE*.root" Lumi="0.0"/>
+    <InputTree Name="AnalysisTree" />
+    <OutputTree Name="AnalysisTree" />
+</InputData>
+
+
+
 
 
 
@@ -268,6 +315,8 @@ backgrounds
     <InputTree Name="AnalysisTree" />
     <OutputTree Name="AnalysisTree" />
 </InputData>
+
+
 
 
 

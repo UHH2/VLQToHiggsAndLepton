@@ -6,6 +6,8 @@ from varial.extensions.hadd import Hadd
 import varial.extensions.make
 import varial.tools
 import os
+ToolChain = varial.tools.ToolChain
+ToolChainParallel = varial.tools.ToolChainParallel
 
 
 dir_name = 'VLQ2HT'
@@ -27,7 +29,8 @@ varial.settings.pretty_names.update({
      'trigger_accept_tex':          r'trigger',
      '2D cut_tex':                  r'2D-iso',
      'primary_lepton_pt_tex':       r'lep. \pt',
-     'leading_jet_pt_tex':          r'ld. jet \pt',
+     'leading_jet_pt_tex':          r'1st jet \pt',
+     'subleading_jet_pt_tex':       r'2nd jet \pt',
      'ST_tex':                      r'ST',
      'event_chi2_tex':              r'$\chi^2$',
      'dr_higg_top_tex':             r'$\Delta R(H, t)$',
@@ -56,51 +59,63 @@ hadd = Hadd(
         'uhh2.AnalysisModuleRunner.MC.DYJets',
         'uhh2.AnalysisModuleRunner.MC.QCD',
         'uhh2.AnalysisModuleRunner.MC.SingleT',
-    ], 
+        'uhh2.AnalysisModuleRunner.MC.TpB_TH_700',
+        'uhh2.AnalysisModuleRunner.MC.TpB_TH_1200',
+        'uhh2.AnalysisModuleRunner.MC.TpB_TH_1700',
+    ] + list(
+        'uhh2.AnalysisModuleRunner.MC.Signal_TpB_TH_LH_M' + num 
+        for num in ('0700', '1200', '1700')
+    ) + list(
+        'uhh2.AnalysisModuleRunner.MC.Signal_TpB_TH_RH_M' + num 
+        for num in ('0700', '1300', '1700')
+    ),
+    cmd='hadd -f -v 1 -T',
     add_aliases_to_analysis=False,
-    samplename_func=common.get_samplename
+    samplename_func=common.get_samplename,
 )
 
 
-tc = varial.tools.ToolChain(
-    dir_name,
-    [
-        # varial.extensions.make.Make([
-        #     uhh_base + 'core',
-        #     uhh_base + 'common',
-        #     uhh_base + 'VLQSemiLepPreSel',
-        #     uhh_base + 'VLQToHiggsAndLepton',
-        # ]),
-        # varial.tools.UserInteraction('Really run sframe? (Kill me otherwise.)'),
-        # sframe_tools.sframe_tools,
-        
-        varial.tools.ToolChain(
-            'Inputs', [
-                tree_project.mk_tp(input_pat),
-                tree_project.mk_sys_tps(),
-                hadd,
-            ]
-        ),
-        varial.tools.ToolChainParallel(
-            'Histograms', [
-                plot.mk_toolchain('Selections', '%s/Inputs/TreeProjector/*.root' % dir_name),
-                plot.mk_toolchain('SFramePlots', '%s/Inputs/Hadd/*.root' % dir_name, cutflow=True),
-                sideband_overlays.tc,
-                lep_plus_minus.pltr,
-                sensitivity.tc,
-            ]
-        ),
+tc = ToolChain(dir_name, [
+    # varial.extensions.make.Make([
+    #     uhh_base + 'core',
+    #     uhh_base + 'common',
+    #     uhh_base + 'VLQSemiLepPreSel',
+    #     uhh_base + 'VLQToHiggsAndLepton',
+    # ]),
+    # varial.tools.UserInteraction('Really run sframe? (Kill me otherwise.)'),
+    # sframe_tools.sframe_tools,
+    
+    ToolChain('Inputs', [
+        ToolChain('El', [
+            tree_project.mk_tp(input_pat, ['trigger_accept_el > 0.5']),
+            tree_project.mk_sys_tps(['trigger_accept_el > 0.5']),
+        ]),
+        ToolChain('Mu', [
+            tree_project.mk_tp(input_pat, ['trigger_accept_mu > 0.5']),
+            tree_project.mk_sys_tps(['trigger_accept_mu > 0.5']),
+        ]),
+        hadd,
+    ]),
 
-        # varial.tools.PrintToolTree(),
-        varial.tools.WebCreator(),
-        tex_content.tc,
-        varial.tools.CopyTool('~/www/auth/VLQ2HT', use_rsync=True),
-    ]
-)
+    ToolChainParallel('Outputs', [
+        plot.mk_toolchain('SelectionsEl', '%s/Inputs/El/TreeProjector/*.root' % dir_name),
+        plot.mk_toolchain('SelectionsMu', '%s/Inputs/Mu/TreeProjector/*.root' % dir_name),
+        plot.mk_toolchain('SFramePlots', '%s/Inputs/Hadd/*.root' % dir_name),
+        plot.mk_cutflowchain('SFrameCutflowEl', '%s/Inputs/Hadd/*.root' % dir_name, lambda w: 'ElChan/' in w.in_file_path),
+        plot.mk_cutflowchain('SFrameCutflowMu', '%s/Inputs/Hadd/*.root' % dir_name, lambda w: 'MuChan/' in w.in_file_path),
+        sideband_overlays.get_tc('El'),
+        sideband_overlays.get_tc('Mu'),
+        # lep_plus_minus.pltr,
+        sensitivity.tc,
+    ]),
+
+    # varial.tools.PrintToolTree(),
+    varial.tools.WebCreator(),
+    tex_content.tc,
+    varial.tools.CopyTool('~/www/auth/VLQ2HT', use_rsync=True),
+])
 
 
 varial.settings.try_reuse_results = True
-# varial.settings.rootfile_postfixes += ['.pdf']
-# varial.tools.Runner(tc, True)
 import varial.main
 varial.main.main(toolchain=tc)

@@ -16,8 +16,8 @@ static const float DPT_2D_CUT = 40.0;
 
 static vector<shared_ptr<SelectionItem>> SEL_ITEMS_VLQ2HT {
     shared_ptr<SelectionItem>(new SelDatI("trigger_accept",    "trigger accept",                                2, -.5, 1.5       ,1        )),    
-    shared_ptr<SelectionItem>(new SelDatI("ele_ch_jet_cuts",   "ele. ch. jet pts",                              2, -.5, 1.5       ,1        )),    
-    shared_ptr<SelectionItem>(new SelDatF("leading_jet_pt",    ";leading ak4 jet p_{T};events / 20 GeV",        50, 0., 1000      ,100      )),
+    shared_ptr<SelectionItem>(new SelDatF("leading_jet_pt",    ";leading ak4 jet p_{T};events / 20 GeV",        50, 0., 1000                )),
+    shared_ptr<SelectionItem>(new SelDatF("subleading_jet_pt", ";sub-leading ak4 jet p_{T};events / 20 GeV",    50, 0., 1000                )),
     shared_ptr<SelectionItem>(new SelDatD("ST",                ";ST;events / 100 GeV",                          25, 0, 2500       ,400      )),
     shared_ptr<SelectionItem>(new SelDatF("event_chi2",        "event chi2",                                    100, 0, 200       ,-0.1,5000)),
     shared_ptr<SelectionItem>(new SelDatF("dr_higg_top",       "#DeltaR(H, t)",                                 50, 0, 5          ,2.       )),
@@ -33,7 +33,6 @@ static vector<shared_ptr<SelectionItem>> SEL_ITEMS_VLQ2HT {
     // shared_ptr<SelectionItem>(new SelDatF("abs_vlq_eta",       "T #eta",                            50, 0., 5.                  )),
     shared_ptr<SelectionItem>(new SelDatI("n_btags",           "N_{b-tag}",                                     11, -.5, 10.5               )),
     
-    shared_ptr<SelectionItem>(new SelDatF("subleading_jet_pt", ";sub-leading ak4 jet p_{T};events / 20 GeV",    50, 0., 1000                )),
     shared_ptr<SelectionItem>(new SelDatF("largest_jet_eta",   "most forward ak4 jet #eta",                     50, -5., 5.                 )),
     
     shared_ptr<SelectionItem>(new SelDatF("primary_lepton_eta", ";primary lepton #eta;events",                  25, -5., 5.                 )),

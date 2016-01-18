@@ -26,7 +26,7 @@ def add_region_and_category(wrps):
     return varial.gen.gen_add_wrp_info(
         wrps, 
         region=lambda w: w.in_file_path.split('/')[0],
-        category=lambda w: 'mu',
+        category=lambda w: 'mu' if '/Mu/' in w.file_path else 'el',
     )
 
 
@@ -56,23 +56,29 @@ def get_model_data_bkg(hist_dir):
 def hook_loaded_histos_data_bkg(wrps):
     wrps = hook_loaded_histos(wrps)
     wrps = (w for w in wrps if not w.is_background)
-    wrps = list(w for w in wrps if not (
-                                w.is_signal and w.region == 'SidebandRegion'))
+    wrps = list(w for w in wrps if not (w.is_signal and w.region == 'SidebandRegion'))
 
     sigs = list(w for w in wrps if w.sample.startswith('Signal_'))
-    sr, = list(w for w in wrps if w.is_data and w.region == 'SignalRegion')
-    sb, = list(w for w in wrps if w.is_data and w.region == 'SidebandRegion')
+    sr = (w for w in wrps if w.is_data and w.region == 'SignalRegion')
+    sr = sorted(sr, key=lambda w: w.category)
+    sb = list(w for w in wrps if w.is_data and w.region == 'SidebandRegion')
+    sb = sorted(sb, key=lambda w: w.category)
 
-    # re-interpret sideband histogram for fitting
-    scale_factor = sr.obj.Integral() / sb.obj.Integral()
-    sb = varial.op.prod([sb, varial.wrp.FloatWrapper(scale_factor)])
-    sb.sample = 'Bkg'
-    sb.legend = 'Sideband'
-    sb.region = 'SignalRegion'
-    sb.is_data = False
-    sb.lumi = sr.lumi
+    def scale_bkg(sr_, sb_):
+        scale_factor = sr_.obj.Integral() / sb_.obj.Integral()
+        sb_ = varial.op.prod([sb_, varial.wrp.FloatWrapper(scale_factor)])
+        sb_.sample = 'Bkg'
+        sb_.legend = 'Sideband'
+        sb_.region = 'SignalRegion'
+        sb_.is_data = False
+        sb_.lumi = sr_.lumi
+        return sb_
 
-    return sigs + [sb, sr]
+    sb = list(
+        scale_bkg(*sr_sb) for sr_sb in zip(sr, sb)
+    )
+
+    return sorted(sigs + sb + sr, key=lambda w: '%s__%s' % (w.region, w.category))
 
 
 def hook_sys(wrps):
@@ -91,28 +97,39 @@ def hook_sys(wrps):
     wrps = (w for g in grps for w in hook_loaded_histos_data_bkg(g))
 
     # create closure-uncertainty
-    mcs = varial.gen.dir_content('VLQ2HT/Inputs/TreeProjector/*.root')
+    mcs = varial.analysis.fs_aliases
     mcs = add_region_and_category(mcs)
     mcs = (w for w in mcs if w.region in ['SignalRegion', 'SidebandRegion'])
     mcs = (w for w in mcs if w.name == 'vlq_mass')
     mcs = varial.gen.load(mcs)
     mcs = (w for w in mcs if w.is_background)
-    mcs = varial.gen.sort_group_merge(mcs, lambda w: w.region)
-    mcs = dict((w.region, w) for w in mcs)
-    assert len(mcs) == 2, 'need one for SignalRegion and one for SidebandRegion'
-    ratio = varial.op.div((mcs['SignalRegion'], mcs['SidebandRegion']))
-    bkg = list(
-        w 
-        for w in varial.ana.lookup_result('../HistoLoader') 
-        if w.sample == 'Bkg'
-    )[0]
-    closure_ncrt_p = varial.op.prod((bkg, ratio))
-    closure_ncrt_p.region = 'SidebandRegion'
-    closure_ncrt_p.sys_type = 'closure_uncert__plus'
-    closure_ncrt_m = varial.op.copy(bkg)
-    closure_ncrt_m.region = 'SidebandRegion'
-    closure_ncrt_m.sys_type = 'closure_uncert__minus'
-    closure_ncrt = [closure_ncrt_p, closure_ncrt_m]
+    mcs = list(varial.gen.sort_group_merge(mcs, lambda w: '%s__%s' % (w.region, w.category)))
+
+    def mk_closure_uncert(mcs):
+        bkg, = list(
+            w
+            for w in varial.ana.lookup_result('../HistoLoader')
+            if w.sample == 'Bkg' and w.category == mcs[0].category
+        )
+        mcs = dict((w.region, w) for w in mcs)
+        assert len(mcs) == 2, 'need one for SignalRegion and one for SidebandRegion'
+        ratio = varial.op.div((mcs['SignalRegion'], mcs['SidebandRegion']))
+
+        closure_ncrt_p = varial.op.prod((bkg, ratio))
+        closure_ncrt_p.region = 'SidebandRegion'
+        closure_ncrt_p.sys_type = 'closure_uncert__plus'
+        closure_ncrt_m = varial.op.copy(bkg)
+        closure_ncrt_m.region = 'SidebandRegion'
+        closure_ncrt_m.sys_type = 'closure_uncert__minus'
+        return [closure_ncrt_p, closure_ncrt_m]
+
+    closure_ncrt = list(
+        ncrt
+        for cat in ['el', 'mu']
+        for ncrt in mk_closure_uncert(
+            list(m for m in mcs if cat == m.category)
+        )
+    )
 
     # append closure uncert
     wrps = (w for grp in (wrps, closure_ncrt) for w in grp)
@@ -125,51 +142,77 @@ def mk_sense_chain(name,
                    hook=hook_loaded_histos, 
                    model=get_model, 
                    sys_pat=None):
-    loader = varial.tools.HistoLoader(
-        filter_keyfunc=lambda w: (
-            w.name == 'vlq_mass'
-            and ('_TH_' not in w.file_path 
-                    or any(s in w.file_path for s in varial.settings.my_lh_signals))
-            and any(t in w.in_file_path for t in cat_tokens)
-        ),
-        hook_loaded_histos=hook,
+    tools = list(
+        t for t in
+        [
+            varial.tools.HistoLoader(
+                filter_keyfunc=lambda w: (
+                    w.name == 'vlq_mass'
+                    and ('_TH_' not in w.file_path 
+                            or any(s in w.file_path for s in varial.settings.my_lh_signals))
+                    and any(t in w.in_file_path for t in cat_tokens)
+                ),
+                hook_loaded_histos=hook,
+            ),
+            varial.tools.HistoLoader(
+                pattern=sys_pat,
+                hook_loaded_histos=hook_sys,
+                name='HistoLoaderSys',
+            ) if sys_pat else None,               ##### NOTICE IF ELSE HERE
+            varial.tools.Plotter(
+                input_result_path='../HistoLoader',
+                plot_grouper=lambda ws: varial.gen.group(
+                    ws, key_func=lambda w: '%s__%s' % (w.region, w.category)),
+                plot_setup=lambda w: varial.gen.mc_stack_n_data_sum(w, None, True),
+                save_name_func=lambda w: '%s__%s' % (w.region, w.category)
+            ),
+            varial.tools.ToolChainParallel('Theta', [
+                ThetaLimits(
+                    input_path='../../HistoLoader',
+                    input_path_sys='../../HistoLoaderSys',
+                    model_func=model,
+                    cat_key=lambda w: w.category,
+                    sys_key=lambda w: w.sys_type,
+                    asymptotic=False,
+                ),
+                ThetaLimits(
+                    input_path='../../HistoLoader',
+                    input_path_sys='../../HistoLoaderSys',
+                    model_func=model,
+                    cat_key=lambda w: w.category,
+                    sys_key=lambda w: w.sys_type,
+                    filter_keyfunc=lambda w: w.category == 'el',
+                    asymptotic=False,
+                    name='ThetaLimitsEl',
+                ),
+                ThetaLimits(
+                    input_path='../../HistoLoader',
+                    input_path_sys='../../HistoLoaderSys',
+                    model_func=model,
+                    cat_key=lambda w: w.category,
+                    sys_key=lambda w: w.sys_type,
+                    filter_keyfunc=lambda w: w.category == 'mu',
+                    asymptotic=False,
+                    name='ThetaLimitsMu',
+                ),
+            ]),
+        ]
+        if t
     )
-    plotter = varial.tools.Plotter(
-        input_result_path='../HistoLoader',
-        plot_grouper=lambda ws: varial.gen.group(
-            ws, key_func=lambda w: w.region),
-        plot_setup=lambda w: varial.gen.mc_stack_n_data_sum(w, None, True),
-        save_name_func=lambda w: w.region
-    )
-    limits = ThetaLimits(
-        model_func=model,
-        cat_key=lambda w: w.category,
-        sys_key=lambda w: w.sys_type,
-    )
-
-    if sys_pat:
-        sys_loader = varial.tools.HistoLoader(
-            pattern=sys_pat,
-            hook_loaded_histos=hook_sys,
-            name='HistoLoaderSys',
-        )
-        tools = [loader, sys_loader, plotter, limits]
-    else:
-        tools = [loader, plotter, limits]
 
     return varial.tools.ToolChain(name, tools)
 
 
 tc = varial.tools.ToolChainParallel(
     'Limits', [
-        mk_sense_chain('SignalRegionOnly', ['SignalRegion']),
+        # mk_sense_chain('SignalRegionOnly', ['SignalRegion']),
         # mk_sense_chain('SignalRegionAndSideband', ['SignalRegion', 'SidebandRegion']),
         mk_sense_chain(
             'DataBackground', 
             ['SignalRegion', 'SidebandRegion'], 
             hook_loaded_histos_data_bkg, 
             get_model_data_bkg, 
-            'VLQ2HT/Inputs/SysTreeProjectors/*/*.root'
+            'VLQ2HT/Inputs/*/SysTreeProjectors/*/*.root'
         ),
     ]
 )

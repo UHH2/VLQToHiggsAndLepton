@@ -186,27 +186,32 @@ def mk_overlay_chains(samplename):
         #),
     ])
 
-good_name = lambda w: any(w.name == p for p in plots)
-good_smpl = lambda w: '_TH_' not in w.file_path
-good_hist = lambda w: good_name(w) and good_smpl(w)
+def get_tc(pat):
+    name = 'Sidebands' + pat
+    pat = '/%s/' % pat
 
-tc = varial.tools.ToolChain(
-    'Sidebands', [
-        varial.tools.ToolChainParallel(
-            'Loaders', [
-                varial.tools.HistoLoader(
-                    filter_keyfunc=good_hist,
-                    hook_loaded_histos=hook_loaded_histos_squash_mc,
-                    name='AllSamples',
-                ),
-            ]
-        ),
-        varial.tools.ToolChainParallel(
-            'Plots', [
-                mk_overlay_chains('AllSamples'),
-                # mk_overlay_chains('WJets'),
-                # mk_overlay_chains('SquashMC'),
-            ]
-        )
-    ]
-)
+    good_name = lambda w: any(w.name == p for p in plots)
+    good_smpl = lambda w: '_TH_' not in w.file_path
+    good_chnl = lambda w: pat in w.file_path
+    good_hist = lambda w: good_chnl(w) and good_name(w) and good_smpl(w)
+
+    return varial.tools.ToolChain(
+        name, [
+            varial.tools.ToolChainParallel(
+                'Loaders', [
+                    varial.tools.HistoLoader(
+                        filter_keyfunc=good_hist,
+                        hook_loaded_histos=hook_loaded_histos_squash_mc,
+                        name='AllSamples',
+                    ),
+                ]
+            ),
+            varial.tools.ToolChainParallel(
+                'Plots', [
+                    mk_overlay_chains('AllSamples'),
+                    # mk_overlay_chains('WJets'),
+                    # mk_overlay_chains('SquashMC'),
+                ]
+            )
+        ]
+    )

@@ -21,8 +21,8 @@ def scale_signal(w):
     if w.legend.endswith('_0'):
         w.legend = w.legend[:-2]
     if w.is_signal:
-        w.lumi /= 10.
-        w.legend += ' (10pb)'
+        w.lumi /= 20.
+        w.legend += ' (20pb)'
         w = varial.op.norm_to_lumi(w)
     return w
 
@@ -69,19 +69,14 @@ def plotter_factory_stack_cat_merging(**kws):
     return varial.tools.Plotter(**kws)
 
 
-def mk_tools(input_pattern=None, cutflow=False):
+def mk_tools(input_pattern=None):
     if not input_pattern:
         input_pattern = input_pat
 
-    if cutflow:
-        cft = [cutflow_tables.mk_cutflow_chain(input_pattern, loader_hook)]
-    else:
-        cft = []
-
-    return cft + [
+    return [
         varial.tools.mk_rootfile_plotter(
             pattern=input_pattern,
-            name='VLQ2HT_stack',
+            name='Stacks',
             plotter_factory=plotter_factory_stack_sigx10,
             combine_files=True,
             auto_legend=False,
@@ -108,10 +103,19 @@ def mk_tools(input_pattern=None, cutflow=False):
     ]
 
 
-def mk_toolchain(name, input_pattern, cutflow=False):
+def mk_toolchain(name, input_pattern):
     return varial.tools.ToolChainParallel(
         name,
-        lazy_eval_tools_func=lambda: mk_tools(input_pattern, cutflow)
+        lazy_eval_tools_func=lambda: mk_tools(input_pattern)
+    )
+
+
+def mk_cutflowchain(name, input_pattern, filter_keyfunc=None):
+    return varial.tools.ToolChainParallel(
+        name,
+        lazy_eval_tools_func=lambda: [
+            cutflow_tables.mk_cutflow_chain(
+                input_pattern, loader_hook, filter_keyfunc)]
     )
 
 

@@ -20,7 +20,7 @@ import os
 
 
 if len(sys.argv) != 2:
-    print 'Pls. give me da name of da sframe-config! ... dude!'
+    print 'Plz. give me da name of da sframe-config! ... dude!'
     exit(-1)
 
 

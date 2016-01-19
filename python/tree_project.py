@@ -186,6 +186,8 @@ def mk_sys_tps(add_sel=None):
             ('sfmu_id__plus', 'weight_sfmu_id_up/weight_sfmu_id'),
             ('sfmu_trg__minus', 'weight_sfmu_trg_down/weight_sfmu_trg'),
             ('sfmu_trg__plus', 'weight_sfmu_trg_up/weight_sfmu_trg'),
+            ('pu__minus', 'weight_pu_up/weight_pu'),
+            ('pu__plus', 'weight_pu_down/weight_pu'),
         )
     )
     sys_tps += list(

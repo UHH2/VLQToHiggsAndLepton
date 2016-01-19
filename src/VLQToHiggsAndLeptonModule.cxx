@@ -85,9 +85,15 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     version = ctx.get("dataset_version", "");
     type = ctx.get("dataset_type", "");
     auto data_dir_path = ctx.get("data_dir_path");
-
+    double target_lumi = string2double(ctx.get("target_lumi"));
     for(auto & kv : ctx.get_all()){
         cout << " " << kv.first << " = " << kv.second << endl;
+    }
+
+    if (version == "Run2015D_Ele") {
+        ctx.set("lumi_file", "/afs/desy.de/user/t/tholenhe/xxl-af-cms/CMSSW_7_4_15_patch1/src/UHH2/common/data/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON_NoBadBSRuns.root");
+    } else if (version == "Run2015D_Mu") {
+        ctx.set("lumi_file", "/afs/desy.de/user/t/tholenhe/xxl-af-cms/CMSSW_7_4_15_patch1/src/UHH2/common/data/Latest_2015_Golden_JSON.root");
     }
 
     // remove everything from the output branch
@@ -131,12 +137,15 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
 
     // setup modules to prepare the event.
     // weights
+    if (type == "MC") {
+        v_cat_modules.emplace_back(new TriggerAwareEventWeight(ctx, "trigger_accept_el", (target_lumi - 90.)/target_lumi));
+    }
     v_cat_modules.emplace_back(new MCLumiWeight(ctx));
     v_cat_modules.emplace_back(new MCPileupReweight(ctx));
     v_cat_modules.emplace_back(new MCBTagScaleFactor(ctx, CSVBTag::WP_LOOSE, "h_jets"));
     v_cat_modules.emplace_back(new MCMuonScaleFactor(ctx, 
         data_dir_path + "MuonID_Z_RunD_Reco74X_Nov20.root", 
-        "NUM_TightIDandIPCut_DEN_genTracks_PAR_pt_spliteta_bin1", 1., "id"));
+        "NUM_MediumIDandIPCut_DEN_genTracks_PAR_pt_spliteta_bin1", 1., "id"));
     v_cat_modules.emplace_back(new MCMuonScaleFactor(ctx, 
         data_dir_path + "SingleMuonTrigger_Z_RunD_Reco74X_Nov20.root", 
         "Mu45_eta2p1_PtEtaBins", 1., "trg"));

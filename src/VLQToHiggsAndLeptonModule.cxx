@@ -50,6 +50,30 @@ static bool is_true(const TYPE &, const Event &) {
 }
 
 
+static bool isTlepEvent(const vector<GenParticle> * gps) {
+    for (const auto & gp : *gps) {
+        if (abs(gp.pdgId()) == 6) {
+            auto d1 = gp.daughter(gps, 1);
+            auto d2 = gp.daughter(gps, 2);
+            if (!(d1 && d2)) {
+                return false;
+            }
+            if (abs(d1->pdgId()) == 24 || abs(d2->pdgId()) == 24) {
+                auto w = (abs(d1->pdgId()) == 24) ? d1 : d2;
+                auto w_dau = w->daughter(gps, 1);
+                if (w_dau && abs(w_dau->pdgId()) < 17 && abs(w_dau->pdgId()) > 10) {
+                    return true;
+                }
+            } else {
+                return (abs(d1->pdgId()) < 17 && abs(d1->pdgId()) > 10)
+                    || (abs(d2->pdgId()) < 17 && abs(d2->pdgId()) > 10);
+            }
+        }
+    }
+    return false;
+}
+
+
 /** \brief Basic analysis example of an AnalysisModule in UHH2
  */
 class VLQToHiggsAndLeptonModule: public AnalysisModule {
@@ -145,7 +169,7 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     v_cat_modules.emplace_back(new MCBTagScaleFactor(ctx, CSVBTag::WP_LOOSE, "h_jets"));
     v_cat_modules.emplace_back(new MCMuonScaleFactor(ctx, 
         data_dir_path + "MuonID_Z_RunD_Reco74X_Nov20.root", 
-        "NUM_MediumIDandIPCut_DEN_genTracks_PAR_pt_spliteta_bin1", 1., "id"));
+        "NUM_MediumID_DEN_genTracks_PAR_pt_spliteta_bin1", 1., "id"));
     v_cat_modules.emplace_back(new MCMuonScaleFactor(ctx, 
         data_dir_path + "SingleMuonTrigger_Z_RunD_Reco74X_Nov20.root", 
         "Mu45_eta2p1_PtEtaBins", 1., "trg"));
@@ -281,7 +305,7 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     }
 
     // signal sample gen hists
-    if (version.substr(version.size() - 4, 100) == "Tlep") {
+    if (version.size() > 5 && version.substr(version.size() - 5, 100) == "_Tlep") {
         v_hists_el.emplace_back(new VLQ2HTRecoGenComparison(ctx, "ElChan/GenRecoHists"));
         v_hists_el.emplace_back(new VLQ2HTRecoGenMatchHists(ctx, "ElChan/Chi2SignalMatch"));
         v_hists_after_sel_el.emplace_back(new VLQ2HTRecoGenComparison(ctx, "ElChan/GenRecoHistsAfterSel"));
@@ -304,13 +328,13 @@ bool VLQToHiggsAndLeptonModule::process(Event & event) {
         gen_hists->fill(event);
     }
  
-    // bool tlepEvt = isTlepEvent(event.genparticles);
-    // if (version.substr(version.size() - 5, 100) == "_Tlep" && !tlepEvt) {
-    //     return false;
-    // }
-    // if (version.substr(version.size() - 8, 100) == "_NonTlep" && tlepEvt) {
-    //     return false;
-    // }
+    bool tlepEvt = isTlepEvent(event.genparticles);
+    if (version.size() > 5 && version.substr(version.size() - 5, 100) == "_Tlep" && !tlepEvt) {
+        return false;
+    }
+    if (version.size() > 8 && version.substr(version.size() - 8, 100) == "_NonTlep" && tlepEvt) {
+        return false;
+    }
 
     // pre-selection
     for (auto & mod : v_pre_modules) {

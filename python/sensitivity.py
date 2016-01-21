@@ -33,7 +33,7 @@ def add_region_and_category(wrps):
 def hook_loaded_histos(wrps):
     wrps = common.add_wrp_info(wrps)
     wrps = add_region_and_category(wrps)
-    wrps = sorted(wrps, key=lambda w: '%s__%s' % (w.region, w.sample))
+    wrps = sorted(wrps, key=lambda w: '%s__%s' % (w.region, w.category))
     # wrps = varial.gen.attribute_printer(wrps, 'region')
     # wrps = varial.gen.attribute_printer(wrps, 'sample')
     return wrps
@@ -113,7 +113,10 @@ def hook_sys(wrps):
         )
         mcs = dict((w.region, w) for w in mcs)
         assert len(mcs) == 2, 'need one for SignalRegion and one for SidebandRegion'
-        ratio = varial.op.div((mcs['SignalRegion'], mcs['SidebandRegion']))
+        ratio = varial.op.div((
+            varial.op.norm_to_integral(mcs['SignalRegion']), 
+            varial.op.norm_to_integral(mcs['SidebandRegion'])
+        ))
 
         closure_ncrt_p = varial.op.prod((bkg, ratio))
         closure_ncrt_p.region = 'SidebandRegion'
@@ -141,7 +144,8 @@ def mk_sense_chain(name,
                    cat_tokens, 
                    hook=hook_loaded_histos, 
                    model=get_model, 
-                   sys_pat=None):
+                   sys_pat=None,
+                   asymptotic=False):
     tools = list(
         t for t in
         [
@@ -173,7 +177,7 @@ def mk_sense_chain(name,
                     model_func=model,
                     cat_key=lambda w: w.category,
                     sys_key=lambda w: w.sys_type,
-                    asymptotic=False,
+                    asymptotic=asymptotic,
                 ),
                 ThetaLimits(
                     input_path='../../HistoLoader',
@@ -182,7 +186,7 @@ def mk_sense_chain(name,
                     cat_key=lambda w: w.category,
                     sys_key=lambda w: w.sys_type,
                     filter_keyfunc=lambda w: w.category == 'el',
-                    asymptotic=False,
+                    asymptotic=asymptotic,
                     name='ThetaLimitsEl',
                 ),
                 ThetaLimits(
@@ -192,7 +196,7 @@ def mk_sense_chain(name,
                     cat_key=lambda w: w.category,
                     sys_key=lambda w: w.sys_type,
                     filter_keyfunc=lambda w: w.category == 'mu',
-                    asymptotic=False,
+                    asymptotic=asymptotic,
                     name='ThetaLimitsMu',
                 ),
             ]),
@@ -205,7 +209,7 @@ def mk_sense_chain(name,
 
 tc = varial.tools.ToolChainParallel(
     'Limits', [
-        # mk_sense_chain('SignalRegionOnly', ['SignalRegion']),
+        mk_sense_chain('SignalRegionOnly', ['SignalRegion'], asymptotic=True),
         # mk_sense_chain('SignalRegionAndSideband', ['SignalRegion', 'SidebandRegion']),
         mk_sense_chain(
             'DataBackground', 

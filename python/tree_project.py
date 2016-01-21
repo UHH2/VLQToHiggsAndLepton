@@ -46,6 +46,7 @@ samples = [
     'WJets',
     'Run2015D',
     'TpB_TH_700',
+    'TpB_TH_1200',
     'TpB_TH_1700',
 ] + varial.settings.my_lh_signals  + varial.settings.my_rh_signals
 
@@ -186,8 +187,10 @@ def mk_sys_tps(add_sel=None):
             ('sfmu_id__plus', 'weight_sfmu_id_up/weight_sfmu_id'),
             ('sfmu_trg__minus', 'weight_sfmu_trg_down/weight_sfmu_trg'),
             ('sfmu_trg__plus', 'weight_sfmu_trg_up/weight_sfmu_trg'),
-            ('pu__minus', 'weight_pu_up/weight_pu'),
-            ('pu__plus', 'weight_pu_down/weight_pu'),
+            ('pu__minus', 'weight_pu_down/weight_pu'),
+            ('pu__plus', 'weight_pu_up/weight_pu'),
+            # ('ak4jet__minus', 'weight_ak4jet_up/weight_ak4jet'),
+            # ('ak4jet__plus', 'weight_ak4jet_down/weight_ak4jet'),
         )
     )
     sys_tps += list(

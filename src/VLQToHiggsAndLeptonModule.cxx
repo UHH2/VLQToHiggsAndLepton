@@ -127,8 +127,8 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     if (ctx.get("jecsmear_direction", "nominal") != "nominal") {
         auto ak8_corr = (type == "MC") ? JERFiles::Summer15_25ns_L123_AK8PFchs_MC 
                                        : JERFiles::Summer15_25ns_L123_AK8PFchs_DATA;
-        auto ak4_corr = (type == "MC") ? JERFiles::Summer15_25ns_L123_AK8PFchs_MC 
-                                       : JERFiles::Summer15_25ns_L123_AK8PFchs_DATA;
+        auto ak4_corr = (type == "MC") ? JERFiles::Summer15_25ns_L123_AK4PFchs_MC 
+                                       : JERFiles::Summer15_25ns_L123_AK4PFchs_DATA;
         v_pre_modules.emplace_back(new GenericTopJetCorrector(ctx,
             ak8_corr, "patJetsAk8CHSJetsSoftDropPacked_daughters"));
         v_pre_modules.emplace_back(new GenericSubJetCorrector(ctx,
@@ -173,6 +173,12 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     v_cat_modules.emplace_back(new MCMuonScaleFactor(ctx, 
         data_dir_path + "SingleMuonTrigger_Z_RunD_Reco74X_Nov20.root", 
         "Mu45_eta2p1_PtEtaBins", 1., "trg"));
+    v_cat_modules.emplace_back(new JetPtAndMultFixerWeight<Jet>(ctx, 
+        "jets", 1.09771, -0.000517529, "weight_ak4jet", true));
+    v_cat_modules.emplace_back(new JetPtAndMultFixerWeight<Jet>(ctx, 
+        "jets", 1.13617, -0.000418040, "weight_ak4jet_up"));
+    v_cat_modules.emplace_back(new JetPtAndMultFixerWeight<Jet>(ctx, 
+        "jets", 1.05925, -0.000617018, "weight_ak4jet_down")); 
 
     // leptons
     v_cat_modules.emplace_back(new NLeptonsProducer(ctx, "n_leptons"));
@@ -328,12 +334,14 @@ bool VLQToHiggsAndLeptonModule::process(Event & event) {
         gen_hists->fill(event);
     }
  
-    bool tlepEvt = isTlepEvent(event.genparticles);
-    if (version.size() > 5 && version.substr(version.size() - 5, 100) == "_Tlep" && !tlepEvt) {
-        return false;
-    }
-    if (version.size() > 8 && version.substr(version.size() - 8, 100) == "_NonTlep" && tlepEvt) {
-        return false;
+    if (type == "MC") {
+        bool tlepEvt = isTlepEvent(event.genparticles);
+        if (version.size() > 5 && version.substr(version.size() - 5, 100) == "_Tlep" && !tlepEvt) {
+            return false;
+        }
+        if (version.size() > 8 && version.substr(version.size() - 8, 100) == "_NonTlep" && tlepEvt) {
+            return false;
+        }
     }
 
     // pre-selection

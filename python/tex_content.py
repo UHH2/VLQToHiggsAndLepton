@@ -150,10 +150,47 @@ img_lim = {
     ),
 }
 
+lim_tabs = {
+    'sysrate_tables_el.tex': p_lim+'Theta/ThetaLimits/sysrate_tables_el.tex',
+    'sysrate_tables_mu.tex': p_lim+'Theta/ThetaLimits/sysrate_tables_mu.tex',
+}
+
 AutoContentLimits = varial.extensions.tex.TexContent(
     img_lim,
+    lim_tabs,
     include_str=r'\includegraphics[width=0.49\textwidth]{%s}',
     name='AutoContentLimits',
+)
+
+
+############################################################ AutoContentPAS ###
+pas_block = {
+    'selection_block': (
+        p_base + 'SFramePlots/Stacks/ElChan/SanityCheckEle/pt_lin.pdf',
+        p_base + 'SFramePlots/Stacks/MuChan/SanityCheckMu/pt_lin.pdf',
+        p_base + 'SFramePlots/Stacks/ElChan/Nm1Selection/ST_lin.pdf',
+        p_base + 'SFramePlots/Stacks/MuChan/Nm1Selection/h_mass_lin.pdf',
+    ),   
+}
+
+pas_single = {
+    'tlep_mass_lin.pdf': p_base + 'SFramePlots/Stacks/MuChan/Nm1Selection/tlep_mass_lin.pdf',
+    'tlep_pt_lin.pdf': p_base + 'SFramePlots/Stacks/MuChan/Nm1Selection/tlep_pt_lin.pdf',
+    'SignalRegion__el_lin.pdf': p_base + 'Limits/SignalRegionOnly/Plotter/SignalRegion__el_lin.pdf',
+    'SignalRegion__mu_lin.pdf': p_base + 'Limits/SignalRegionOnly/Plotter/SignalRegion__mu_lin.pdf',
+    'SignalRegion_bkg__el_lin.pdf': p_base + 'Limits/DataBackground/Plotter/SignalRegion__el_lin.pdf',
+    'SignalRegion_bkg__mu_lin.pdf': p_base + 'Limits/DataBackground/Plotter/SignalRegion__mu_lin.pdf',
+    'Sideband__el_lin.pdf': p_base + 'SelectionsEl/Stacks/SidebandRegion/vlq_mass_lin.pdf',
+    'Sideband__mu_lin.pdf': p_base + 'SelectionsMu/Stacks/SidebandRegion/vlq_mass_lin.pdf',
+    'Sideband_vs_SignalRegion__el.pdf': p_base+'SidebandsEl/Plots/AllSamples/SideBandRegion/Plotter/vlq_mass_lin.pdf',
+    'Sideband_vs_SignalRegion__mu.pdf': p_base+'SidebandsMu/Plots/AllSamples/SideBandRegion/Plotter/vlq_mass_lin.pdf',
+    'limits.png': p_lim+'Theta/ThetaLimits/plots/limit_band_plot-log-bayesian.png',
+}.items()
+AutoContentPAS_img = varial.extensions.tex.TexContent(
+    pas_block,
+    dict(pas_single + lim_tabs.items()),
+    include_str=r'\includegraphics[width=0.49\textwidth]{%s}',
+    name='img',
 )
 
 
@@ -169,5 +206,6 @@ tc = varial.tools.ToolChainParallel(
         AutoContentSideband,
         AutoContentSelection,
         AutoContentLimits,
+        AutoContentPAS_img,
     ]
 )

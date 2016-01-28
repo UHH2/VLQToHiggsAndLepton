@@ -1,3 +1,6 @@
+import ctypes
+
+import varial.util
 import varial.tools
 import varial.plotter
 
@@ -36,24 +39,45 @@ def hook_loaded_histos(wrps):
     return wrps
 
 
+def print_bkg_percentages(wrps):
+
+    def calc_percent_and_error(th1_hist, total_int, total_int_err):
+        val, err = varial.util.integral_and_error(th1_hist)
+        return val / total_int, (err**2 + total_int_err**2)**.5 / total_int
+
+    def mk_percentages(grp):
+        h_tot = varial.op.sum(grp)
+        i_tot, i_tot_err = varial.util.integral_and_error(h_tot.obj)
+        return h_tot.in_file_path, list(
+            (w.sample, calc_percent_and_error(w.obj, i_tot, i_tot_err))
+            for w in grp
+        )
+
+    def print_precentages(ifp, grp):
+        print "="*80
+        print ifp
+        for it in grp:
+            print it
+        print "="*80
+        return ifp, grp
+
+    pipe = (w for w in wrps if w.name == 'vlq_mass' and w.is_background)
+    pipe = varial.gen.gen_norm_to_lumi(pipe)
+    pipe = sorted(pipe, key=lambda w: w.sample)
+    pipe = sorted(pipe, key=lambda w: w.in_file_path)
+    pipe = varial.gen.group(pipe, lambda w: w.in_file_path)
+    pipe = (mk_percentages(grp) for grp in pipe)
+    pipe = list(print_precentages(*grp) for grp in pipe)
+
+
 def hook_loaded_histos_squash_mc(wrps):
     key = lambda w: w.in_file_path + '___%s' % w.is_data
 
     wrps = sorted(wrps, key=key)
     wrps = hook_loaded_histos(wrps)
 
-    vlq_masses = list(w for w in wrps if w.name == 'vlq_mass' and w.is_background)
-    categories = set(w.in_file_path for w in vlq_masses)
-    for cat in categories:
-        print '='*20
-        print cat
-        vlq_masses_cat = list(w for w in vlq_masses if w.in_file_path == cat)
-        total_int = sum(1./w.lumi for w in vlq_masses_cat)
-        for w in vlq_masses_cat:
-            inte = 1./w.lumi
-            print 'fraction of %20s: %8.2f / %8.2f = %5.3f' % (
-                                    w.sample, inte, total_int, inte/total_int)
-    
+    print_bkg_percentages(wrps)
+   
     wrps = varial.gen.group(wrps, key)
     wrps = varial.gen.gen_merge(wrps)
     wrps = varial.gen.gen_norm_to_integral(wrps)
@@ -113,22 +137,22 @@ def mk_overlay_chains(samplename):
                 mk_plttr('Plotter'),
             ]
         ),
-        varial.tools.ToolChain(
-            'SideBandRegion3', 
-            [
-                varial.tools.HistoLoader(
-                    input_result_path=input_path,
-                    filter_keyfunc=lambda w: any(
-                        t in w.in_file_path 
-                        for t in [
-                            'SignalRegion', 'SidebandRegion', 
-                            'SidebandNoMTCut', 'SidebandMT175',
-                        ],
-                    ) and 'Run20' not in w.file_path,
-                ),
-                mk_plttr('Plotter'),
-            ]
-        ),
+        #varial.tools.ToolChain(
+        #    'SideBandRegion3', 
+        #    [
+        #        varial.tools.HistoLoader(
+        #            input_result_path=input_path,
+        #            filter_keyfunc=lambda w: any(
+        #                t in w.in_file_path 
+        #                for t in [
+        #                    'SignalRegion', 'SidebandRegion', 
+        #                    'SidebandNoMTCut', 'SidebandMT175',
+        #                ],
+        #            ) and 'Run20' not in w.file_path,
+        #        ),
+        #        mk_plttr('Plotter'),
+        #    ]
+        #),
         #varial.tools.ToolChain(
         #    'MassPlus', 
         #    [

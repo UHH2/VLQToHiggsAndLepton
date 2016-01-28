@@ -45,7 +45,7 @@ samples = [
     'DYJets',
     'WJets',
     'Run2015D',
-    'TpB_TH_700',
+    'TpB_TH_0700',
     'TpB_TH_1200',
     'TpB_TH_1700',
 ] + varial.settings.my_lh_signals  + varial.settings.my_rh_signals
@@ -144,9 +144,14 @@ def mk_sys_tps(add_sel=None):
     jercs = list(
         (
             name.replace('_down', '__minus').replace('_up', '__plus'), 
-            base_path + name + '/workdir/uhh2*.root'
+            base_path + uncrt_pth + '/workdir/uhh2*.root'
         ) 
-        for name in ('jec_down', 'jec_up', 'jer_down', 'jer_up')
+        for name, uncrt_pth in (
+            ('JES__minus', 'jec_down'),
+            ('JES__plus', 'jec_up'),
+            ('JER__minus', 'jer_down'),
+            ('JER__plus', 'jer_up'),
+        )
     )
     nominal_sec_sel_weight = [
         ('SignalRegion', sr_sel, 'weight'),
@@ -179,18 +184,18 @@ def mk_sys_tps(add_sel=None):
             ('SidebandRegion', sb_sel, 'weight*' + w),
         ])
         for name, w in (
-            ('btag_bc__minus', 'weight_btag_bc_down/weight_btag'),
-            ('btag_bc__plus', 'weight_btag_bc_up/weight_btag'),
-            ('btag_udsg__minus', 'weight_btag_udsg_down/weight_btag'),
-            ('btag_udsg__plus', 'weight_btag_udsg_up/weight_btag'),
-            ('sfmu_id__minus', 'weight_sfmu_id_down/weight_sfmu_id'),
-            ('sfmu_id__plus', 'weight_sfmu_id_up/weight_sfmu_id'),
-            ('sfmu_trg__minus', 'weight_sfmu_trg_down/weight_sfmu_trg'),
-            ('sfmu_trg__plus', 'weight_sfmu_trg_up/weight_sfmu_trg'),
-            ('pu__minus', 'weight_pu_down/weight_pu'),
-            ('pu__plus', 'weight_pu_up/weight_pu'),
-            # ('ak4jet__minus', 'weight_ak4jet_up/weight_ak4jet'),
-            # ('ak4jet__plus', 'weight_ak4jet_down/weight_ak4jet'),
+            ('b_tag_bc__minus', 'weight_btag_bc_down/weight_btag'),
+            ('b_tag_bc__plus', 'weight_btag_bc_up/weight_btag'),
+            ('b_tag_udsg__minus', 'weight_btag_udsg_down/weight_btag'),
+            ('b_tag_udsg__plus', 'weight_btag_udsg_up/weight_btag'),
+            ('muon_ID__minus', 'weight_sfmu_id_down/weight_sfmu_id'),
+            ('muon_ID__plus', 'weight_sfmu_id_up/weight_sfmu_id'),
+            ('muon_trigger__minus', 'weight_sfmu_trg_down/weight_sfmu_trg'),
+            ('muon_trigger__plus', 'weight_sfmu_trg_up/weight_sfmu_trg'),
+            ('pileup__minus', 'weight_pu_down/weight_pu'),
+            ('pileup__plus', 'weight_pu_up/weight_pu'),
+            # ('jet_pt__minus', 'weight_ak4jet_up/weight_ak4jet'),
+            # ('jet_pt__plus', 'weight_ak4jet_down/weight_ak4jet'),
         )
     )
     sys_tps += list(

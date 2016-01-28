@@ -135,8 +135,9 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
             ak4_corr, "patJetsAk8CHSJetsSoftDropPacked_daughters"));
         v_pre_modules.emplace_back(new JetCorrector(ctx, ak4_corr));
     }
-    // v_pre_modules.emplace_back(new GenericTopJetCleaner(ctx,
-    //     PtEtaCut(150., 2.4), "patJetsAk8CHSJetsSoftDropPacked_daughters"));
+    v_pre_modules.emplace_back(new TopJetCleaner(ctx,
+        PtEtaCut(200., 2.4),
+            "patJetsAk8CHSJetsSoftDropPacked_daughters"));
     if (type == "MC") {
         v_pre_modules.emplace_back(new JetResolutionSmearer(ctx));    
     }
@@ -169,16 +170,18 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     v_cat_modules.emplace_back(new MCBTagScaleFactor(ctx, CSVBTag::WP_LOOSE, "h_jets"));
     v_cat_modules.emplace_back(new MCMuonScaleFactor(ctx, 
         data_dir_path + "MuonID_Z_RunD_Reco74X_Nov20.root", 
-        "NUM_MediumID_DEN_genTracks_PAR_pt_spliteta_bin1", 1., "id"));
+        "NUM_MediumID_DEN_genTracks_PAR_pt_spliteta_bin1", 1., "id", "nominal", "prim_mu_coll"));
     v_cat_modules.emplace_back(new MCMuonScaleFactor(ctx, 
         data_dir_path + "SingleMuonTrigger_Z_RunD_Reco74X_Nov20.root", 
-        "Mu45_eta2p1_PtEtaBins", 1., "trg"));
-    v_cat_modules.emplace_back(new JetPtAndMultFixerWeight<Jet>(ctx, 
-        "jets", 1.09771, -0.000517529, "weight_ak4jet", true));
-    v_cat_modules.emplace_back(new JetPtAndMultFixerWeight<Jet>(ctx, 
-        "jets", 1.13617, -0.000418040, "weight_ak4jet_up"));
-    v_cat_modules.emplace_back(new JetPtAndMultFixerWeight<Jet>(ctx, 
-        "jets", 1.05925, -0.000617018, "weight_ak4jet_down")); 
+        "Mu45_eta2p1_PtEtaBins", 1., "trg", "nominal", "prim_mu_coll"));
+
+    // ak4 jet weight
+    // v_cat_modules.emplace_back(new JetPtAndMultFixerWeight<Jet>(ctx, 
+    //     "jets", 1.09771, -0.000517529, "weight_ak4jet", true));
+    // v_cat_modules.emplace_back(new JetPtAndMultFixerWeight<Jet>(ctx, 
+    //     "jets", 1.13617, -0.000418040, "weight_ak4jet_up"));
+    // v_cat_modules.emplace_back(new JetPtAndMultFixerWeight<Jet>(ctx, 
+    //     "jets", 1.05925, -0.000617018, "weight_ak4jet_down")); 
 
     // leptons
     v_cat_modules.emplace_back(new NLeptonsProducer(ctx, "n_leptons"));
@@ -201,7 +204,7 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
 
     // jets: b-tags
     v_cat_modules.emplace_back(new CollectionProducer<Jet>(
-        ctx, "jets", "b_jets", JetId(AndId<Jet>(PtEtaCut(30., 2.4), CSVBTag(CSVBTag::WP_LOOSE)))));
+        ctx, "jets", "b_jets", JetId(AndId<Jet>(PtEtaCut(0., 2.4), CSVBTag(CSVBTag::WP_LOOSE)))));
     v_cat_modules.emplace_back(new CollectionSizeProducer<Jet>(
         ctx, "b_jets", "n_btags", JetId(is_true<Jet>)));
     v_cat_modules.emplace_back(new NLeadingBTagProducer(
@@ -259,9 +262,9 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
 
     // insert trigger dependent jet cuts
     sel_module->replace_selection(1, new TriggerAwareHandleSelection<float>(
-        ctx, "leading_jet_pt", "trigger_accept_el", 250, 100)); 
+        ctx, "leading_jet_pt", "trigger_accept_el", 250., 100.));
     sel_module->replace_selection(2, new TriggerAwareHandleSelection<float>(
-        ctx, "subleading_jet_pt", "trigger_accept_el", 65, 10));
+        ctx, "subleading_jet_pt", "trigger_accept_el", 70., 50.));
 
     // insert 2D cut
     unsigned pos_2d_cut = 3;

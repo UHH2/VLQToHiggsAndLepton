@@ -16,13 +16,31 @@ input_pat = '/nfs/dust/cms/user/tholenhe/VLQToHiggsAndLepton/samples/uhh2*.root'
 
 varial.settings.my_lh_signals = [
     'Signal_TpB_TH_LH_M0700',
+    'Signal_TpB_TH_LH_M0800',
+    'Signal_TpB_TH_LH_M0900',
+    'Signal_TpB_TH_LH_M1000',
+    'Signal_TpB_TH_LH_M1100',
     'Signal_TpB_TH_LH_M1200',
+    # 'Signal_TpB_TH_LH_M1300',
+    'Signal_TpB_TH_LH_M1400',
+    'Signal_TpB_TH_LH_M1500',
+    # 'Signal_TpB_TH_LH_M1600',
     'Signal_TpB_TH_LH_M1700',
+    'Signal_TpB_TH_LH_M1800',
 ]
 varial.settings.my_rh_signals = [
     'Signal_TpB_TH_RH_M0700',
+    'Signal_TpB_TH_RH_M0800',
+    'Signal_TpB_TH_RH_M0900',
+    'Signal_TpB_TH_RH_M1000',
+    'Signal_TpB_TH_RH_M1100',
+    'Signal_TpB_TH_RH_M1200',
     'Signal_TpB_TH_RH_M1300',
+    'Signal_TpB_TH_RH_M1400',
+    'Signal_TpB_TH_RH_M1500',
+    'Signal_TpB_TH_RH_M1600',
     'Signal_TpB_TH_RH_M1700',
+    'Signal_TpB_TH_RH_M1800',
 ]
 varial.settings.pretty_names.update({
      'no sel._tex':                 r'no sel.',
@@ -59,7 +77,7 @@ hadd = Hadd(
         'uhh2.AnalysisModuleRunner.MC.DYJets',
         'uhh2.AnalysisModuleRunner.MC.QCD',
         'uhh2.AnalysisModuleRunner.MC.SingleT',
-        'uhh2.AnalysisModuleRunner.MC.TpB_TH_700',
+        'uhh2.AnalysisModuleRunner.MC.TpB_TH_0700',
         'uhh2.AnalysisModuleRunner.MC.TpB_TH_1200',
         'uhh2.AnalysisModuleRunner.MC.TpB_TH_1700',
     ] + list(

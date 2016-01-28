@@ -1,7 +1,17 @@
-from varial.extensions.limits import ThetaLimits, theta_auto
+from varial.extensions.limits import ThetaLimits, theta_auto, tex_table_mod_list
 import UHH2.VLQSemiLepPreSel.common as common
 import varial.tools
 import math
+
+
+tex_table_mod_list.insert(
+    0,
+    ('Signal_TpB_TH_LH_', ' '),  # remove lengthy part of name
+)
+tex_table_mod_list.insert(
+    0,
+    ('process / nuisance parameter', ' '),  # shorten table...
+)
 
 
 ################################################ fitting with MC background ###
@@ -17,8 +27,8 @@ def get_model(hist_dir):
     model.add_lognormal_uncertainty('wjets_rate', math.log(1.25), 'WJets')
     model.add_lognormal_uncertainty('dyjets_rate', math.log(1.50), 'DYJets')
     model.add_lognormal_uncertainty('singlet_rate', math.log(1.50), 'SingleT')
-    for s in varial.settings.my_lh_signals:
-        model.add_lognormal_uncertainty(s+'_rate', math.log(1.15), s)
+    # for s in varial.settings.my_lh_signals:
+    #     model.add_lognormal_uncertainty(s+'_rate', math.log(1.15), s)
     return model
 
 
@@ -48,8 +58,15 @@ def get_model_data_bkg(hist_dir):
     model.fill_histogram_zerobins()
     model.set_signal_processes(varial.settings.my_lh_signals)
     model.add_lognormal_uncertainty('bkg_rate', math.log(2.), 'Bkg')
-    # for s in varial.settings.my_lh_signals:
-    #     model.add_lognormal_uncertainty(s+'_rate', math.log(1.15), s)
+    try:
+        for s in varial.settings.my_lh_signals:
+            model.add_lognormal_uncertainty(
+                'electron_ID_and_trigger', math.log(1.05), s, obsname='el')
+    except RuntimeError:
+        varial.monitor.message(
+            'sensitivity.get_model_data_bkg', 
+            'WARNING Cannot apply lognormal uncert for ele-trg (in mu-chan?).'
+        )
     return model
 
 
@@ -68,7 +85,7 @@ def hook_loaded_histos_data_bkg(wrps):
         scale_factor = sr_.obj.Integral() / sb_.obj.Integral()
         sb_ = varial.op.prod([sb_, varial.wrp.FloatWrapper(scale_factor)])
         sb_.sample = 'Bkg'
-        sb_.legend = 'Sideband'
+        sb_.legend = 'Bkg. estimate'
         sb_.region = 'SignalRegion'
         sb_.is_data = False
         sb_.lumi = sr_.lumi
@@ -89,6 +106,7 @@ def hook_sys(wrps):
         wrps,
         sys_type=lambda w: w.file_path.split('/')[-2],
     )
+    wrps = (w for w in wrps if not (w.category == 'el' and 'muon' in w.sys_type))
 
     # group by sys_type, then apply original hook within every systematic
     keyfunc = lambda w: w.sys_type
@@ -120,10 +138,10 @@ def hook_sys(wrps):
 
         closure_ncrt_p = varial.op.prod((bkg, ratio))
         closure_ncrt_p.region = 'SidebandRegion'
-        closure_ncrt_p.sys_type = 'closure_uncert__plus'
+        closure_ncrt_p.sys_type = 'bkg_shape__plus'
         closure_ncrt_m = varial.op.copy(bkg)
         closure_ncrt_m.region = 'SidebandRegion'
-        closure_ncrt_m.sys_type = 'closure_uncert__minus'
+        closure_ncrt_m.sys_type = 'bkg_shape__minus'
         return [closure_ncrt_p, closure_ncrt_m]
 
     closure_ncrt = list(
@@ -165,10 +183,14 @@ def mk_sense_chain(name,
             ) if sys_pat else None,               ##### NOTICE IF ELSE HERE
             varial.tools.Plotter(
                 input_result_path='../HistoLoader',
+                filter_keyfunc=lambda w: '700' in w.sample 
+                                         or '1200' in w.sample 
+                                         or not w.is_signal,
                 plot_grouper=lambda ws: varial.gen.group(
                     ws, key_func=lambda w: '%s__%s' % (w.region, w.category)),
                 plot_setup=lambda w: varial.gen.mc_stack_n_data_sum(w, None, True),
-                save_name_func=lambda w: '%s__%s' % (w.region, w.category)
+                save_name_func=lambda w: '%s__%s' % (w.region, w.category),
+                hook_canvas_post_build=varial.gen.add_sample_integrals,
             ),
             varial.tools.ToolChainParallel('Theta', [
                 ThetaLimits(

@@ -80,6 +80,7 @@ def mk_tools(input_pattern=None):
             plotter_factory=plotter_factory_stack_sigx10,
             combine_files=True,
             auto_legend=False,
+            hook_canvas_post_build=varial.gen.add_sample_integrals,
         ),
 
         # TODO for norm: set backgrounds line width to 2

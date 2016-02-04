@@ -138,15 +138,18 @@ AutoContentSideband = varial.extensions.tex.TexContent(
 p_lim = p_base + 'Limits/DataBackground/'
 img_lim = {
     'El_limits': (
-        p_lim+'Plotter/SignalRegion__el_lin'+ext,
+        p_lim+'PostFit/SignalRegion__el_lin'+ext,
         p_lim+'Theta/ThetaLimitsEl/plots/limit_band_plot-log-bayesian.png',
     ),
     'Mu_limits': (
-        p_lim+'Plotter/SignalRegion__mu_lin'+ext,
+        p_lim+'PostFit/SignalRegion__mu_lin'+ext,
         p_lim+'Theta/ThetaLimitsMu/plots/limit_band_plot-log-bayesian.png',
     ),
     'Comb_limits': (
         p_lim+'Theta/ThetaLimits/plots/limit_band_plot-log-bayesian.png',
+    ),
+    'pulls': (
+        p_lim+'PostFitPulls/ThetaLimits/cnv_post_fit_Signal_TpB_TH_LH_M1000.pdf',
     ),
 }
 
@@ -176,10 +179,10 @@ pas_block = {
 pas_single = {
     'tlep_mass_lin.pdf': p_base + 'SFramePlots/Stacks/MuChan/Nm1Selection/tlep_mass_lin.pdf',
     'tlep_pt_lin.pdf': p_base + 'SFramePlots/Stacks/MuChan/Nm1Selection/tlep_pt_lin.pdf',
-    'SignalRegion__el_lin.pdf': p_base + 'Limits/SignalRegionOnly/Plotter/SignalRegion__el_lin.pdf',
-    'SignalRegion__mu_lin.pdf': p_base + 'Limits/SignalRegionOnly/Plotter/SignalRegion__mu_lin.pdf',
-    'SignalRegion_bkg__el_lin.pdf': p_base + 'Limits/DataBackground/Plotter/SignalRegion__el_lin.pdf',
-    'SignalRegion_bkg__mu_lin.pdf': p_base + 'Limits/DataBackground/Plotter/SignalRegion__mu_lin.pdf',
+    'SignalRegion__el_lin.pdf': p_base + 'Limits/SignalRegionOnly/PreFit/SignalRegion__el_lin.pdf',
+    'SignalRegion__mu_lin.pdf': p_base + 'Limits/SignalRegionOnly/PreFit/SignalRegion__mu_lin.pdf',
+    'SignalRegion_bkg__el_lin.pdf': p_base + 'Limits/DataBackground/PostFit/SignalRegion__el_lin.pdf',
+    'SignalRegion_bkg__mu_lin.pdf': p_base + 'Limits/DataBackground/PostFit/SignalRegion__mu_lin.pdf',
     'Sideband__el_lin.pdf': p_base + 'SelectionsEl/Stacks/SidebandRegion/vlq_mass_lin.pdf',
     'Sideband__mu_lin.pdf': p_base + 'SelectionsMu/Stacks/SidebandRegion/vlq_mass_lin.pdf',
     'Sideband_vs_SignalRegion__el.pdf': p_base+'SidebandsEl/Plots/AllSamples/SideBandRegion/Plotter/vlq_mass_lin.pdf',

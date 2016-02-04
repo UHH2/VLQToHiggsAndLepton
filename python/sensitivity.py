@@ -1,14 +1,14 @@
-from varial.extensions.limits import ThetaLimits, theta_auto, tex_table_mod_list
+import varial.extensions.limits as limits
 import UHH2.VLQSemiLepPreSel.common as common
 import varial.tools
 import math
 
 
-tex_table_mod_list.insert(
+limits.tex_table_mod_list.insert(
     0,
     ('Signal_TpB_TH_LH_', ' '),  # remove lengthy part of name
 )
-tex_table_mod_list.insert(
+limits.tex_table_mod_list.insert(
     0,
     ('process / nuisance parameter', ' '),  # shorten table...
 )
@@ -16,9 +16,9 @@ tex_table_mod_list.insert(
 
 ################################################ fitting with MC background ###
 def get_model(hist_dir):
-    model = theta_auto.build_model_from_rootfile(
+    model = limits.theta_auto.build_model_from_rootfile(
         hist_dir,
-        include_mc_uncertainties=True
+        include_mc_uncertainties=True,
     )
     model.fill_histogram_zerobins()
     model.set_signal_processes(varial.settings.my_lh_signals)
@@ -51,9 +51,9 @@ def hook_loaded_histos(wrps):
 
 ############################################## fitting with DATA background ###
 def get_model_data_bkg(hist_dir):
-    model = theta_auto.build_model_from_rootfile(
+    model = limits.theta_auto.build_model_from_rootfile(
         hist_dir,
-        include_mc_uncertainties=True
+        include_mc_uncertainties=True,
     )
     model.fill_histogram_zerobins()
     model.set_signal_processes(varial.settings.my_lh_signals)
@@ -157,6 +157,21 @@ def hook_sys(wrps):
     return wrps
 
 
+def scale_bkg_postfit(wrps, theta_res_path):
+    theta_res = varial.ana.lookup_result(theta_res_path)
+    try:
+        r, _ = theta_res.postfit_vals['Signal_TpB_TH_LH_M1000']['bkg_rate'][0]
+    except KeyError:
+        r = 0
+
+    for w in wrps:
+        if w.sample == 'Bkg':
+            w.sample = 'BkgPostFit'
+            w.legend = 'Bkg. post-fit'
+            w.histo.Scale(1+r)
+        yield w
+
+
 ########################################################### make toolchains ###
 def mk_sense_chain(name, 
                    cat_tokens, 
@@ -164,69 +179,97 @@ def mk_sense_chain(name,
                    model=get_model, 
                    sys_pat=None,
                    asymptotic=False):
-    tools = list(
+
+    hl = varial.tools.HistoLoader(
+        filter_keyfunc=lambda w: (
+            w.name == 'vlq_mass'
+            and ('_TH_' not in w.file_path 
+                    or any(s in w.file_path for s in varial.settings.my_lh_signals))
+            and any(t in w.in_file_path for t in cat_tokens)
+        ),
+        hook_loaded_histos=hook,
+    )
+
+    limit_toolchain = varial.tools.ToolChainParallel('Theta', [
+        limits.ThetaLimits(
+            input_path='../../HistoLoader',
+            input_path_sys='../../HistoLoaderSys',
+            model_func=model,
+            cat_key=lambda w: w.category,
+            sys_key=lambda w: w.sys_type,
+            asymptotic=asymptotic,
+        ),
+        limits.ThetaLimits(
+            input_path='../../HistoLoader',
+            input_path_sys='../../HistoLoaderSys',
+            model_func=model,
+            cat_key=lambda w: w.category,
+            sys_key=lambda w: w.sys_type,
+            filter_keyfunc=lambda w: w.category == 'el',
+            asymptotic=asymptotic,
+            name='ThetaLimitsEl',
+        ),
+        limits.ThetaLimits(
+            input_path='../../HistoLoader',
+            input_path_sys='../../HistoLoaderSys',
+            model_func=model,
+            cat_key=lambda w: w.category,
+            sys_key=lambda w: w.sys_type,
+            filter_keyfunc=lambda w: w.category == 'mu',
+            asymptotic=asymptotic,
+            name='ThetaLimitsMu',
+        ),
+    ])
+
+    postfit_toolchain = varial.tools.ToolChainParallel('PostFitPulls', list(
+        limits.ThetaPostFitPlot(
+            '../../%s/%s' % (limit_toolchain.name, t.name), 
+            name=t.name,
+        ) for t in limit_toolchain.tool_chain
+    ))
+
+    plotter_prefit = varial.tools.Plotter(
+        filter_keyfunc=lambda w: '700' in w.sample 
+                                 or '1200' in w.sample 
+                                 or not w.is_signal,
+        plot_grouper=lambda ws: varial.gen.group(
+            ws, key_func=lambda w: '%s__%s' % (w.region, w.category)),
+        plot_setup=lambda w: varial.gen.mc_stack_n_data_sum(w, None, True),
+        save_name_func=lambda w: '%s__%s' % (w.region, w.category),
+        hook_canvas_post_build=varial.gen.add_sample_integrals,
+        name='PreFit',
+    )
+
+    plotter_postfit = varial.tools.Plotter(
+        filter_keyfunc=lambda w: '700' in w.sample 
+                                 or '1200' in w.sample 
+                                 or not w.is_signal,
+        plot_grouper=lambda ws: varial.gen.group(
+            ws, key_func=lambda w: '%s__%s' % (w.region, w.category)),
+        plot_setup=lambda w: varial.gen.mc_stack_n_data_sum(w, None, True),
+        save_name_func=lambda w: '%s__%s' % (w.region, w.category),
+        hook_canvas_post_build=varial.gen.add_sample_integrals,
+        hook_loaded_histos=lambda w: scale_bkg_postfit(
+            w, '../%s/ThetaLimits' % limit_toolchain.name),
+        name='PostFit',
+    )
+
+    return varial.tools.ToolChain(name, list(
         t for t in
         [
-            varial.tools.HistoLoader(
-                filter_keyfunc=lambda w: (
-                    w.name == 'vlq_mass'
-                    and ('_TH_' not in w.file_path 
-                            or any(s in w.file_path for s in varial.settings.my_lh_signals))
-                    and any(t in w.in_file_path for t in cat_tokens)
-                ),
-                hook_loaded_histos=hook,
-            ),
+            hl,
             varial.tools.HistoLoader(
                 pattern=sys_pat,
                 hook_loaded_histos=hook_sys,
                 name='HistoLoaderSys',
             ) if sys_pat else None,               ##### NOTICE IF ELSE HERE
-            varial.tools.Plotter(
-                input_result_path='../HistoLoader',
-                filter_keyfunc=lambda w: '700' in w.sample 
-                                         or '1200' in w.sample 
-                                         or not w.is_signal,
-                plot_grouper=lambda ws: varial.gen.group(
-                    ws, key_func=lambda w: '%s__%s' % (w.region, w.category)),
-                plot_setup=lambda w: varial.gen.mc_stack_n_data_sum(w, None, True),
-                save_name_func=lambda w: '%s__%s' % (w.region, w.category),
-                hook_canvas_post_build=varial.gen.add_sample_integrals,
-            ),
-            varial.tools.ToolChainParallel('Theta', [
-                ThetaLimits(
-                    input_path='../../HistoLoader',
-                    input_path_sys='../../HistoLoaderSys',
-                    model_func=model,
-                    cat_key=lambda w: w.category,
-                    sys_key=lambda w: w.sys_type,
-                    asymptotic=asymptotic,
-                ),
-                ThetaLimits(
-                    input_path='../../HistoLoader',
-                    input_path_sys='../../HistoLoaderSys',
-                    model_func=model,
-                    cat_key=lambda w: w.category,
-                    sys_key=lambda w: w.sys_type,
-                    filter_keyfunc=lambda w: w.category == 'el',
-                    asymptotic=asymptotic,
-                    name='ThetaLimitsEl',
-                ),
-                ThetaLimits(
-                    input_path='../../HistoLoader',
-                    input_path_sys='../../HistoLoaderSys',
-                    model_func=model,
-                    cat_key=lambda w: w.category,
-                    sys_key=lambda w: w.sys_type,
-                    filter_keyfunc=lambda w: w.category == 'mu',
-                    asymptotic=asymptotic,
-                    name='ThetaLimitsMu',
-                ),
-            ]),
+            limit_toolchain,
+            postfit_toolchain,
+            plotter_prefit,
+            plotter_postfit,
         ]
         if t
-    )
-
-    return varial.tools.ToolChain(name, tools)
+    ))
 
 
 tc = varial.tools.ToolChainParallel(

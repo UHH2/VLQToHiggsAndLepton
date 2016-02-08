@@ -116,20 +116,23 @@ tc = ToolChain(dir_name, [
     ]),
 
     ToolChainParallel('Outputs', [
-        plot.mk_toolchain('SelectionsEl', '%s/Inputs/El/TreeProjector/*.root' % dir_name),
-        plot.mk_toolchain('SelectionsMu', '%s/Inputs/Mu/TreeProjector/*.root' % dir_name),
+        plot.mk_toolchain('SelectionsEl', ['%s/Inputs/El/TreeProjector/*.root'%dir_name, 
+                                              '%s/Inputs/El/SysTreeProjectors/*/*.root'%dir_name]),
+        plot.mk_toolchain('SelectionsMu', ['%s/Inputs/Mu/TreeProjector/*.root'%dir_name, 
+                                              '%s/Inputs/Mu/SysTreeProjectors/*/*.root'%dir_name]),
         plot.mk_toolchain('SFramePlots', '%s/Inputs/Hadd/*.root' % dir_name),
         plot.mk_cutflowchain('SFrameCutflowEl', '%s/Inputs/Hadd/*.root' % dir_name, lambda w: 'ElChan/' in w.in_file_path),
         plot.mk_cutflowchain('SFrameCutflowMu', '%s/Inputs/Hadd/*.root' % dir_name, lambda w: 'MuChan/' in w.in_file_path),
         sideband_overlays.get_tc('El'),
         sideband_overlays.get_tc('Mu'),
         # lep_plus_minus.pltr,
-        sensitivity.tc,
+        sensitivity.get_tc('LimitsTpBLH', varial.settings.my_lh_signals),
+        sensitivity.get_tc('LimitsTpBRH', varial.settings.my_rh_signals),
     ]),
 
     # varial.tools.PrintToolTree(),
     varial.tools.WebCreator(),
-    tex_content.tc,
+    # tex_content.tc,
     varial.tools.CopyTool('~/www/auth/VLQ2HT', use_rsync=True),
 ])
 

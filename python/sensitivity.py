@@ -1,5 +1,5 @@
-import varial.extensions.limits as limits
 import UHH2.VLQSemiLepPreSel.common as common
+import varial.extensions.limits as limits
 import varial.tools
 import math
 
@@ -15,19 +15,19 @@ limits.tex_table_mod_list.insert(
 
 
 ################################################ fitting with MC background ###
-def get_model(hist_dir):
+def get_model(hist_dir, signals):
     model = limits.theta_auto.build_model_from_rootfile(
         hist_dir,
         include_mc_uncertainties=True,
     )
     model.fill_histogram_zerobins()
-    model.set_signal_processes(varial.settings.my_lh_signals)
+    model.set_signal_processes(signals)
     model.add_lognormal_uncertainty('ttbar_rate', math.log(1.15), 'TTbar')
     model.add_lognormal_uncertainty('qcd_rate', math.log(1.30), 'QCD')
     model.add_lognormal_uncertainty('wjets_rate', math.log(1.25), 'WJets')
     model.add_lognormal_uncertainty('dyjets_rate', math.log(1.50), 'DYJets')
     model.add_lognormal_uncertainty('singlet_rate', math.log(1.50), 'SingleT')
-    # for s in varial.settings.my_lh_signals:
+    # for s signals:
     #     model.add_lognormal_uncertainty(s+'_rate', math.log(1.15), s)
     return model
 
@@ -50,16 +50,16 @@ def hook_loaded_histos(wrps):
 
 
 ############################################## fitting with DATA background ###
-def get_model_data_bkg(hist_dir):
+def get_model_data_bkg(hist_dir, signals):
     model = limits.theta_auto.build_model_from_rootfile(
         hist_dir,
         include_mc_uncertainties=True,
     )
     model.fill_histogram_zerobins()
-    model.set_signal_processes(varial.settings.my_lh_signals)
+    model.set_signal_processes(signals)
     model.add_lognormal_uncertainty('bkg_rate', math.log(2.), 'Bkg')
     try:
-        for s in varial.settings.my_lh_signals:
+        for s in signals:
             model.add_lognormal_uncertainty(
                 'electron_ID_and_trigger', math.log(1.05), s, obsname='el')
     except RuntimeError:
@@ -174,19 +174,21 @@ def scale_bkg_postfit(wrps, theta_res_path):
 
 ########################################################### make toolchains ###
 def mk_sense_chain(name, 
-                   cat_tokens, 
+                   cat_tokens,
+                   signals,
                    hook=hook_loaded_histos, 
                    model=get_model, 
                    sys_pat=None,
                    asymptotic=False):
 
-    hl = varial.tools.HistoLoader(
-        filter_keyfunc=lambda w: (
-            w.name == 'vlq_mass'
-            and ('_TH_' not in w.file_path 
-                    or any(s in w.file_path for s in varial.settings.my_lh_signals))
+    def loader_keyfunc(w):
+        return (w.name == 'vlq_mass'
+            and ('_TH_' not in w.file_path or any(s in w.file_path for s in signals))
             and any(t in w.in_file_path for t in cat_tokens)
-        ),
+        )
+
+    hl = varial.tools.HistoLoader(
+        filter_keyfunc=loader_keyfunc,
         hook_loaded_histos=hook,
     )
 
@@ -194,7 +196,7 @@ def mk_sense_chain(name,
         limits.ThetaLimits(
             input_path='../../HistoLoader',
             input_path_sys='../../HistoLoaderSys',
-            model_func=model,
+            model_func=lambda d: model(d, signals),
             cat_key=lambda w: w.category,
             sys_key=lambda w: w.sys_type,
             asymptotic=asymptotic,
@@ -202,7 +204,7 @@ def mk_sense_chain(name,
         limits.ThetaLimits(
             input_path='../../HistoLoader',
             input_path_sys='../../HistoLoaderSys',
-            model_func=model,
+            model_func=lambda d: model(d, signals),
             cat_key=lambda w: w.category,
             sys_key=lambda w: w.sys_type,
             filter_keyfunc=lambda w: w.category == 'el',
@@ -212,7 +214,7 @@ def mk_sense_chain(name,
         limits.ThetaLimits(
             input_path='../../HistoLoader',
             input_path_sys='../../HistoLoaderSys',
-            model_func=model,
+            model_func=lambda d: model(d, signals),
             cat_key=lambda w: w.category,
             sys_key=lambda w: w.sys_type,
             filter_keyfunc=lambda w: w.category == 'mu',
@@ -260,6 +262,7 @@ def mk_sense_chain(name,
             hl,
             varial.tools.HistoLoader(
                 pattern=sys_pat,
+                filter_keyfunc=loader_keyfunc,
                 hook_loaded_histos=hook_sys,
                 name='HistoLoaderSys',
             ) if sys_pat else None,               ##### NOTICE IF ELSE HERE
@@ -272,16 +275,24 @@ def mk_sense_chain(name,
     ))
 
 
-tc = varial.tools.ToolChainParallel(
-    'Limits', [
-        mk_sense_chain('SignalRegionOnly', ['SignalRegion'], asymptotic=True),
-        # mk_sense_chain('SignalRegionAndSideband', ['SignalRegion', 'SidebandRegion']),
-        mk_sense_chain(
-            'DataBackground', 
-            ['SignalRegion', 'SidebandRegion'], 
-            hook_loaded_histos_data_bkg, 
-            get_model_data_bkg, 
-            'VLQ2HT/Inputs/*/SysTreeProjectors/*/*.root'
-        ),
-    ]
-)
+def get_tc(name, signals):
+    return varial.tools.ToolChainParallel(
+        name, [
+            mk_sense_chain(
+                'SignalRegionOnly',
+                ['SignalRegion'],
+                signals, 
+                asymptotic=True,
+            ),
+            # mk_sense_chain('SignalRegionAndSideband', ['SignalRegion', 'SidebandRegion']),
+            mk_sense_chain(
+                'DataBackground',
+                ['SignalRegion', 'SidebandRegion'], 
+                signals, 
+                hook_loaded_histos_data_bkg, 
+                get_model_data_bkg, 
+                'VLQ2HT/Inputs/*/SysTreeProjectors/*/*.root',
+                # asymptotic=True,
+            ),
+        ]
+    )

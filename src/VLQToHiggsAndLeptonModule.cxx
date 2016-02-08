@@ -176,12 +176,14 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
         "Mu45_eta2p1_PtEtaBins", 1., "trg", "nominal", "prim_mu_coll"));
 
     // ak4 jet weight
-    // v_cat_modules.emplace_back(new JetPtAndMultFixerWeight<Jet>(ctx, 
-    //     "jets", 1.09771, -0.000517529, "weight_ak4jet", true));
-    // v_cat_modules.emplace_back(new JetPtAndMultFixerWeight<Jet>(ctx, 
-    //     "jets", 1.13617, -0.000418040, "weight_ak4jet_up"));
-    // v_cat_modules.emplace_back(new JetPtAndMultFixerWeight<Jet>(ctx, 
-    //     "jets", 1.05925, -0.000617018, "weight_ak4jet_down")); 
+    float jetsf_p0 = 1.09771;
+    float jetsf_p1 = -0.000517529;
+    float cov_p0_p0 = 0.0014795109823;
+    float cov_p0_p1 = -3.6104869696e-06;
+    float cov_p1_p1 = 9.89815635815e-09;
+    v_cat_modules.emplace_back(new JetPtAndMultFixerWeight<Jet>(ctx,
+        "jets", jetsf_p0, jetsf_p1, cov_p0_p0, cov_p0_p1, cov_p1_p1,
+        "weight_ak4jet", true));
 
     // leptons
     v_cat_modules.emplace_back(new NLeptonsProducer(ctx, "n_leptons"));

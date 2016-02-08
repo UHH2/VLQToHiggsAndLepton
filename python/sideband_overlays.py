@@ -1,5 +1,3 @@
-import ctypes
-
 import varial.util
 import varial.tools
 import varial.plotter
@@ -45,7 +43,7 @@ def print_bkg_percentages(wrps):
         val, err = varial.util.integral_and_error(th1_hist)
         return val / total_int, (err**2 + total_int_err**2)**.5 / total_int
 
-    def mk_percentages(grp):
+    def mk_prcntgs(grp):
         h_tot = varial.op.sum(grp)
         i_tot, i_tot_err = varial.util.integral_and_error(h_tot.obj)
         return h_tot.in_file_path, list(
@@ -53,7 +51,7 @@ def print_bkg_percentages(wrps):
             for w in grp
         )
 
-    def print_precentages(ifp, grp):
+    def print_prcntgs(ifp, grp):
         print "="*80
         print ifp
         for it in grp:
@@ -61,13 +59,13 @@ def print_bkg_percentages(wrps):
         print "="*80
         return ifp, grp
 
-    pipe = (w for w in wrps if w.name == 'vlq_mass' and w.is_background)
-    pipe = varial.gen.gen_norm_to_lumi(pipe)
-    pipe = sorted(pipe, key=lambda w: w.sample)
-    pipe = sorted(pipe, key=lambda w: w.in_file_path)
-    pipe = varial.gen.group(pipe, lambda w: w.in_file_path)
-    pipe = (mk_percentages(grp) for grp in pipe)
-    pipe = list(print_precentages(*grp) for grp in pipe)
+    wrps = (w for w in wrps if w.name == 'vlq_mass' and w.is_background)
+    wrps = varial.gen.gen_norm_to_lumi(wrps)
+    wrps = sorted(wrps, key=lambda w: w.sample)
+    wrps = sorted(wrps, key=lambda w: w.in_file_path)
+    wrps = varial.gen.group(wrps, lambda w: w.in_file_path)
+    wrps = (mk_prcntgs(grp) for grp in wrps)
+    wrps = list(print_prcntgs(*grp) for grp in wrps)
 
 
 def hook_loaded_histos_squash_mc(wrps):
@@ -76,7 +74,7 @@ def hook_loaded_histos_squash_mc(wrps):
     wrps = sorted(wrps, key=key)
     wrps = hook_loaded_histos(wrps)
 
-    print_bkg_percentages(wrps)
+    # print_bkg_percentages(wrps)
    
     wrps = varial.gen.group(wrps, key)
     wrps = varial.gen.gen_merge(wrps)

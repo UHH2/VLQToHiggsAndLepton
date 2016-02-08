@@ -7,15 +7,20 @@ import plot
 import glob
 
 
-selection_histos = {
+core_histos = {
+    'vlq_mass':          (';T mass;events / 80 GeV',                       25, 0, 2000   ),
+    'h_n_subjet_btags':  ('N_{H-jet subjet b-tags}',                       5, -.5, 4.5   ),
+    'n_fwd_jets':        ('N_{ak4 fwd jet}',                               5, -.5, 4.5   ),
+    'abs_largest_jet_eta': ('most forward jet #eta',                       50, 0., 5.    ),
+}
+
+more_histos = {
     'event_chi2':        ('event chi2',                                    100, 0, 200   ),
     'dr_higg_top':       ('#DeltaR(H, t)',                                 50, 0, 5      ),
     'h_pt':              (';Higgs candidate p_{T};events / 40 GeV',        25, 0, 1000   ),
     'tlep_pt':           (';lept. top p_{T};events / 20 GeV',              50, 0, 1000   ),
     'h_mass':            (';Higgs candidate mass;events / 10 GeV',         25, 50, 300   ),
-    'h_n_subjet_btags':  ('N_{H-jet subjet b-tags}',                        5, -.5, 4.5 ),
     'n_leading_btags':   ('N_{b-tag leading}',                             11, -.5, 10.5 ),
-    'abs_largest_jet_eta': ('most forward jet #eta',                       50, 0., 5.    ),
     'n_btags':           ('N_{b-tag}',                                     11, -.5, 10.5 ),
     'leading_jet_pt':    (';leading ak4 jet p_{T};events / 20 GeV',        50, 0., 1000  ),
     'subleading_jet_pt': (';sub-leading ak4 jet p_{T};events / 20 GeV',    50, 0., 1000  ),
@@ -27,7 +32,6 @@ selection_histos = {
     'h_tau32':           ('Higgs candidate #tau_{3}/#tau_{2}',             50, 0, 1      ),
     'n_jets':            ('N_{ak4 jet}',                                   21, -.5, 20.5 ),
     'n_leptons':         ('N_{lepton}',                                    11, -.5, 10.5 ),
-    'n_fwd_jets':        ('N_{ak4 fwd jet}',                               5, -.5, 4.5   ),
     'n_htags':           ('N_{H jet}',                                     5, -.5, 4.5   ),
     'ST':                (';ST;events / 100 GeV',                          25, 0, 2500   ),
     'tlep_eta':          ('lept. top #eta',                                50, -5., 5.   ),
@@ -35,8 +39,8 @@ selection_histos = {
     'h_eta':             ('Higgs candidate #eta',                          50, -5., 5.   ),
     'vlq_pt':            (';T p_{T};events / 20 GeV',                      50, 0, 1000   ),
     'vlq_eta':           ('T #eta',                                        50, -5., 5.   ),
-    'vlq_mass':          (';T mass;events / 80 GeV',                       25, 0, 2000   ),
 }
+more_histos.update(core_histos)
 
 samples = [
     'TTbar',
@@ -53,12 +57,17 @@ samples = [
 sr_selection = [
     # 'primary_lepton_charge  > 0',
     'h_n_subjet_btags       == 2',
-    'abs_largest_jet_eta    > 2.4',
+    'n_fwd_jets             >= 1',
 ]
 
 sb_selection = [
     'h_n_subjet_btags       == 1',
-    'abs_largest_jet_eta    < 2.4',
+    'n_fwd_jets             == 0',
+]
+
+fw_selection = [
+    'h_n_subjet_btags       <= 1',
+    'n_fwd_jets             >= 1',
 ]
 
 
@@ -76,18 +85,7 @@ def get_sec_sel_weight(additional_sel=None):
 
     sr_sel = baseline_selection + sr_selection
     sb_sel = baseline_selection + sb_selection
-
-    sb_175top_selection = baseline_selection + [
-        'h_n_subjet_btags       == 1',
-        'abs_largest_jet_eta    < 2.4',
-        'tlep_mass              > 175',
-    ]
-
-    sb_150top_selection = baseline_selection + [
-        'h_n_subjet_btags       == 1',
-        'abs_largest_jet_eta    < 2.4',
-        'tlep_mass              > 150',
-    ]
+    fw_sel = baseline_selection + fw_selection
 
     lepchargeplus_selection = [
         'primary_lepton_charge  > 0.1',
@@ -99,10 +97,9 @@ def get_sec_sel_weight(additional_sel=None):
 
     sec_sel_weight = [
         ('BaseLineSelection', baseline_selection, 'weight'),
+        ('FwdSelection', fw_sel, 'weight'),
         ('SignalRegion', sr_sel, 'weight'),
         ('SidebandRegion', sb_sel, 'weight'),
-        ('SidebandMT150', sb_150top_selection, 'weight'),
-        ('SidebandMT175', sb_175top_selection, 'weight'),
         ('BaselineLepPlus', baseline_selection + lepchargeplus_selection, 'weight'),
         ('BaselineLepMnus', baseline_selection + lepchargeminus_selection, 'weight'),
         ('SRLepPlus', sr_selection + lepchargeplus_selection, 'weight'),
@@ -120,7 +117,7 @@ def mk_tp(input_pat, add_sel=None):
     )
 
     params = {
-        'histos': selection_histos,
+        'histos': more_histos,
         'treename': 'AnalysisTree',
     }
 
@@ -134,18 +131,18 @@ def mk_sys_tps(add_sel=None):
     # some defs
     base_path = '/nfs/dust/cms/user/tholenhe/VLQToHiggsAndLepton/'
     sys_params = {
-        'histos': {'vlq_mass': selection_histos['vlq_mass']},
+        'histos': core_histos,
         'treename': 'AnalysisTree',
     }
-    sr_sel = sr_selection + (add_sel or [])
-    sb_sel = sb_selection + (add_sel or [])
+    base_sel = (add_sel or [])
+    sr_sel = sr_selection + base_sel
+    sb_sel = sb_selection + base_sel
+    fw_sel = fw_selection + base_sel
+
 
     # first put together jerc uncert with nominal weights
     jercs = list(
-        (
-            name.replace('_down', '__minus').replace('_up', '__plus'), 
-            base_path + uncrt_pth + '/workdir/uhh2*.root'
-        ) 
+        (name, base_path + uncrt_pth + '/workdir/uhh2.AnalysisModuleRunner.MC.*.root') 
         for name, uncrt_pth in (
             ('JES__minus', 'jec_down'),
             ('JES__plus', 'jec_up'),
@@ -156,12 +153,15 @@ def mk_sys_tps(add_sel=None):
     nominal_sec_sel_weight = [
         ('SignalRegion', sr_sel, 'weight'),
         ('SidebandRegion', sb_sel, 'weight'),
+        ('BaseLineSelection', base_sel, 'weight'),
+        ('FwdSelection', fw_sel, 'weight'),
     ]
     sys_tps = list(
         TreeProjector(
             dict(
                 (sample, list(f for f in glob.glob(pat) if sample in f))
                 for sample in samples
+                if 'Run20' not in sample
             ), 
             sys_params, 
             nominal_sec_sel_weight,
@@ -172,16 +172,18 @@ def mk_sys_tps(add_sel=None):
     )
 
     # next put together nominal samples with with weight uncerts.
-    nominal_files = base_path + 'samples/uhh2*.root'
+    nominal_files = base_path + 'samples/uhh2.AnalysisModuleRunner.MC.*.root'
     filenames = dict(
         (sample, list(f for f in glob.glob(nominal_files) if sample in f))
         for sample in samples
-        if 'Run' not in sample
+        if 'Run20' not in sample
     )
     sys_sec_sel_weight = list(
         (name, [
             ('SignalRegion', sr_sel, 'weight*' + w),
             ('SidebandRegion', sb_sel, 'weight*' + w),
+            ('BaseLineSelection', base_sel, 'weight*' + w),
+            ('FwdSelection', fw_sel, 'weight*' + w),
         ])
         for name, w in (
             ('b_tag_bc__minus', 'weight_btag_bc_down/weight_btag'),
@@ -194,8 +196,8 @@ def mk_sys_tps(add_sel=None):
             ('muon_trigger__plus', 'weight_sfmu_trg_up/weight_sfmu_trg'),
             ('pileup__minus', 'weight_pu_down/weight_pu'),
             ('pileup__plus', 'weight_pu_up/weight_pu'),
-            # ('jet_pt__minus', 'weight_ak4jet_up/weight_ak4jet'),
-            # ('jet_pt__plus', 'weight_ak4jet_down/weight_ak4jet'),
+            ('jet_pt__minus', 'weight_ak4jet_up/weight_ak4jet'),
+            ('jet_pt__plus', 'weight_ak4jet_down/weight_ak4jet'),
         )
     )
     sys_tps += list(

@@ -17,13 +17,16 @@ input_pat = './uhh2.*.root'
 
 
 @varial.history.track_history
-def scale_signal(w):
+def vlq2ht_plot_preproc(w):
     if w.legend.endswith('_0'):
         w.legend = w.legend[:-2]
     if w.is_signal:
-        w.lumi /= 20.
-        w.legend += ' (20pb)'
-        w = varial.op.norm_to_lumi(w)
+        if 'SignalRegion' in w.in_file_path:
+            w.legend += ' (1pb)'
+        else:
+            w.lumi /= 20.
+            w.legend += ' (20pb)'
+            w = varial.op.norm_to_lumi(w)
     return w
 
 
@@ -37,7 +40,7 @@ def scale_mc_down_to_1p266invfb(w):
 
 def loader_hook_sig_scale(wrps):
     wrps = loader_hook(wrps)
-    wrps = (scale_signal(w) for w in wrps)
+    wrps = (vlq2ht_plot_preproc(w) for w in wrps)
     # wrps = (scale_mc_down_to_1p266invfb(w) for w in wrps)
 
     # filter signals that are not for plotting
@@ -53,7 +56,7 @@ def plotter_factory_stack_sigx10(**kws):
 
 def loader_hook_cat_merging(wrps):
     wrps = common.add_wrp_info(wrps)
-    wrps = (scale_signal(w) for w in wrps)
+    wrps = (vlq2ht_plot_preproc(w) for w in wrps)
     group_key = lambda w: w.in_file_path + '__' + w.sample
     wrps = sorted(wrps, key=group_key)
     wrps = gen.group(wrps, key_func=group_key)

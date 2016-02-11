@@ -58,15 +58,24 @@ def get_model_data_bkg(hist_dir, signals):
     model.fill_histogram_zerobins()
     model.set_signal_processes(signals)
     model.add_lognormal_uncertainty('bkg_rate', math.log(2.), 'Bkg')
-    try:
-        for s in signals:
-            model.add_lognormal_uncertainty(
-                'electron_ID_and_trigger', math.log(1.05), s, obsname='el')
-    except RuntimeError:
-        varial.monitor.message(
-            'sensitivity.get_model_data_bkg', 
-            'WARNING Cannot apply lognormal uncert for ele-trg (in mu-chan?).'
-        )
+
+    for s in signals:
+        model.add_lognormal_uncertainty('fwd_jet_eff', math.log(1.15), s)
+
+    for s in signals:
+        model.add_lognormal_uncertainty(
+            'lepton_iso_and_trigger', math.log(1.05), s)
+
+    # try:
+    #     for s in signals:
+    #         model.add_lognormal_uncertainty(
+    #             'electron_ID_and_trigger', math.log(1.05), s, obsname='el')
+    # except RuntimeError:
+    #     varial.monitor.message(
+    #         'sensitivity.get_model_data_bkg', 
+    #         'WARNING Cannot apply lognormal uncert for ele-trg (in mu-chan?).'
+    #     )
+
     return model
 
 
@@ -114,46 +123,47 @@ def hook_sys(wrps):
     grps = varial.generators.group(wrps, keyfunc)
     wrps = (w for g in grps for w in hook_loaded_histos_data_bkg(g))
 
-    # create closure-uncertainty
-    mcs = varial.analysis.fs_aliases
-    mcs = add_region_and_category(mcs)
-    mcs = (w for w in mcs if w.region in ['SignalRegion', 'SidebandRegion'])
-    mcs = (w for w in mcs if w.name == 'vlq_mass')
-    mcs = varial.gen.load(mcs)
-    mcs = (w for w in mcs if w.is_background)
-    mcs = list(varial.gen.sort_group_merge(mcs, lambda w: '%s__%s' % (w.region, w.category)))
+    # # create closure-uncertainty
+    # mcs = varial.analysis.fs_aliases
+    # mcs = add_region_and_category(mcs)
+    # mcs = (w for w in mcs if w.region in ['SignalRegion', 'SidebandRegion'])
+    # mcs = (w for w in mcs if w.name == 'vlq_mass')
+    # mcs = varial.gen.load(mcs)
+    # mcs = (w for w in mcs if w.is_background)
+    # mcs = list(varial.gen.sort_group_merge(mcs, lambda w: '%s__%s' % (w.region, w.category)))
 
-    def mk_closure_uncert(mcs):
-        bkg, = list(
-            w
-            for w in varial.ana.lookup_result('../HistoLoader')
-            if w.sample == 'Bkg' and w.category == mcs[0].category
-        )
-        mcs = dict((w.region, w) for w in mcs)
-        assert len(mcs) == 2, 'need one for SignalRegion and one for SidebandRegion'
-        ratio = varial.op.div((
-            varial.op.norm_to_integral(mcs['SignalRegion']), 
-            varial.op.norm_to_integral(mcs['SidebandRegion'])
-        ))
+    # def mk_closure_uncert(mcs):
+    #     bkg, = list(
+    #         w
+    #         for w in varial.ana.lookup_result('../HistoLoader')
+    #         if w.sample == 'Bkg' and w.category == mcs[0].category
+    #     )
+    #     mcs = dict((w.region, w) for w in mcs)
+    #     assert len(mcs) == 2, 'need one for SignalRegion and one for SidebandRegion'
+    #     ratio = varial.op.div((
+    #         varial.op.norm_to_integral(mcs['SignalRegion']), 
+    #         varial.op.norm_to_integral(mcs['SidebandRegion'])
+    #     ))
 
-        closure_ncrt_p = varial.op.prod((bkg, ratio))
-        closure_ncrt_p.region = 'SidebandRegion'
-        closure_ncrt_p.sys_type = 'bkg_shape__plus'
-        closure_ncrt_m = varial.op.copy(bkg)
-        closure_ncrt_m.region = 'SidebandRegion'
-        closure_ncrt_m.sys_type = 'bkg_shape__minus'
-        return [closure_ncrt_p, closure_ncrt_m]
+    #     closure_ncrt_p = varial.op.prod((bkg, ratio))
+    #     closure_ncrt_p.region = 'SidebandRegion'
+    #     closure_ncrt_p.sys_type = 'bkg_shape__plus'
+    #     closure_ncrt_m = varial.op.copy(bkg)
+    #     closure_ncrt_m.region = 'SidebandRegion'
+    #     closure_ncrt_m.sys_type = 'bkg_shape__minus'
+    #     return [closure_ncrt_p, closure_ncrt_m]
 
-    closure_ncrt = list(
-        ncrt
-        for cat in ['el', 'mu']
-        for ncrt in mk_closure_uncert(
-            list(m for m in mcs if cat == m.category)
-        )
-    )
+    # closure_ncrt = list(
+    #     ncrt
+    #     for cat in ['el', 'mu']
+    #     for ncrt in mk_closure_uncert(
+    #         list(m for m in mcs if cat == m.category)
+    #     )
+    # )
 
-    # append closure uncert
-    wrps = (w for grp in (wrps, closure_ncrt) for w in grp)
+    # # append closure uncert
+    # wrps = (w for grp in (wrps, closure_ncrt) for w in grp)
+    
     return wrps
 
 
@@ -172,6 +182,24 @@ def scale_bkg_postfit(wrps, theta_res_path):
         yield w
 
 
+def make_combo(wrps):
+    wrps = list(wrps)
+    copies = (varial.op.copy(w) for w in wrps)
+    copies = varial.gen.sort_group_merge(copies, lambda w: w.sample)
+    copies = varial.gen.gen_add_wrp_info(copies, category=lambda w: 'comb')
+    for coll in (wrps, copies):
+        for w in coll:
+            yield w
+
+
+def put_uncert_title(canvas_builders):
+    for cnv in canvas_builders:
+        for entry in cnv.legend.GetListOfPrimitives():
+            if entry.GetLabel() == 'Stat. uncert. MC':
+                entry.SetLabel('Stat. uncert. Bkg')
+        yield cnv
+
+
 ########################################################### make toolchains ###
 def mk_sense_chain(name, 
                    cat_tokens,
@@ -185,6 +213,7 @@ def mk_sense_chain(name,
         return (w.name == 'vlq_mass'
             and ('_TH_' not in w.file_path or any(s in w.file_path for s in signals))
             and any(t in w.in_file_path for t in cat_tokens)
+            and 'rate' not in w.file_path
         )
 
     hl = varial.tools.HistoLoader(
@@ -238,7 +267,9 @@ def mk_sense_chain(name,
             ws, key_func=lambda w: '%s__%s' % (w.region, w.category)),
         plot_setup=lambda w: varial.gen.mc_stack_n_data_sum(w, None, True),
         save_name_func=lambda w: '%s__%s' % (w.region, w.category),
-        hook_canvas_post_build=varial.gen.add_sample_integrals,
+        hook_canvas_post_build=lambda c: varial.gen.add_sample_integrals(
+                                                        put_uncert_title(c)),
+        hook_loaded_histos=make_combo,
         name='PreFit',
     )
 
@@ -250,9 +281,10 @@ def mk_sense_chain(name,
             ws, key_func=lambda w: '%s__%s' % (w.region, w.category)),
         plot_setup=lambda w: varial.gen.mc_stack_n_data_sum(w, None, True),
         save_name_func=lambda w: '%s__%s' % (w.region, w.category),
-        hook_canvas_post_build=varial.gen.add_sample_integrals,
-        hook_loaded_histos=lambda w: scale_bkg_postfit(
-            w, '../%s/ThetaLimits' % limit_toolchain.name),
+        hook_canvas_post_build=lambda c: varial.gen.add_sample_integrals(
+                                                        put_uncert_title(c)),
+        hook_loaded_histos=lambda ws: make_combo(scale_bkg_postfit(
+            ws, '../%s/ThetaLimits' % limit_toolchain.name)),
         name='PostFit',
     )
 

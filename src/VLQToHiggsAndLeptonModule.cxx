@@ -174,21 +174,18 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     v_cat_modules.emplace_back(new MCMuonScaleFactor(ctx, 
         data_dir_path + "SingleMuonTrigger_Z_RunD_Reco74X_Nov20.root", 
         "Mu45_eta2p1_PtEtaBins", 1., "trg", "nominal", "prim_mu_coll"));
-
-    // ak4 jet weight
-    float jetsf_p0 = 1.09771;
-    float jetsf_p1 = -0.000517529;
-    float cov_p0_p0 = 0.0014795109823;
-    float cov_p0_p1 = -3.6104869696e-06;
-    float cov_p1_p1 = 9.89815635815e-09;
-    v_cat_modules.emplace_back(new JetPtAndMultFixerWeight<Jet>(ctx,
-        "jets", jetsf_p0, jetsf_p1, cov_p0_p0, cov_p0_p1, cov_p1_p1,
-        "weight_ak4jet", true));
+    if (version.size() > 7 && version.substr(0, 7) == "Signal_") {
+        v_cat_modules.emplace_back(new PDFWeightBranchCreator(ctx, 9));
+    }
 
     // leptons
     v_cat_modules.emplace_back(new NLeptonsProducer(ctx, "n_leptons"));
     v_cat_modules.emplace_back(new PrimaryLeptonInfoProducer(ctx, 
         "PrimaryLepton", "primary_lepton_pt", "primary_lepton_eta", "primary_lepton_charge"));
+
+    // jets: final pt threshold after JES/JER
+    v_cat_modules.emplace_back(new CollectionProducer<Jet>(
+        ctx, "jets", "jets", JetId(PtEtaCut(30.0, 7.0))));
 
     // jets: forward
     v_cat_modules.emplace_back(new LargestJetEtaProducer(
@@ -197,6 +194,7 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
         ctx, "jets", "fwd_jets", JetId(VetoId<Jet>(PtEtaCut(0.0, 2.4)))));
     v_cat_modules.emplace_back(new CollectionSizeProducer<Jet>(
         ctx, "fwd_jets", "n_fwd_jets", JetId(is_true<Jet>)));
+    ctx.declare_event_output<vector<Jet>>("fwd_jets");
 
     // jets: central
     v_cat_modules.emplace_back(new CollectionProducer<Jet>(
@@ -211,6 +209,16 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
         ctx, "b_jets", "n_btags", JetId(is_true<Jet>)));
     v_cat_modules.emplace_back(new NLeadingBTagProducer(
         ctx, CSVBTag::WP_LOOSE, "n_leading_btags"));
+
+    // ak4 jet weight
+    float jetsf_p0 = 1.09771;
+    float jetsf_p1 = -0.000517529;
+    float cov_p0_p0 = 0.0014795109823;
+    float cov_p0_p1 = -3.6104869696e-06;
+    float cov_p1_p1 = 9.89815635815e-09;
+    v_cat_modules.emplace_back(new JetPtAndMultFixerWeight<Jet>(ctx,
+        "jets", jetsf_p0, jetsf_p1, cov_p0_p0, cov_p0_p1, cov_p1_p1,
+        "weight_ak4jet", true));
 
     // jets: other producers
     v_cat_modules.emplace_back(new LeadingJetPtProducer(

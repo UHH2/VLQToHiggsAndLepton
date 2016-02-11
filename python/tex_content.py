@@ -120,6 +120,7 @@ def get4sb(chan):
             p_baseline+'n_fwd_jets_lin'+ext,
             p_baseline+'h_n_subjet_btags_lin'+ext,
             p_base+'Sidebands'+chan+'/Plots/AllSamples/SideBandRegion/Plotter/vlq_mass_lin'+ext,
+            p_base+'Sidebands'+chan+'/PlotsWithDataUncert/AllSamples/SideBandRegion/Plotter/vlq_mass_lin'+ext,
         ),
         chan+'_comparison': (
             p_sel+'SidebandRegion/vlq_mass_lin'+ext,
@@ -135,63 +136,93 @@ AutoContentSideband = varial.extensions.tex.TexContent(
 
 
 ######################################################### AutoContentLimits ###
-p_lim = p_base + 'Limits/DataBackground/'
-img_lim = {
-    'El_limits': (
-        p_lim+'PostFit/SignalRegion__el_lin'+ext,
-        p_lim+'Theta/ThetaLimitsEl/plots/limit_band_plot-log-bayesian.png',
-    ),
-    'Mu_limits': (
-        p_lim+'PostFit/SignalRegion__mu_lin'+ext,
-        p_lim+'Theta/ThetaLimitsMu/plots/limit_band_plot-log-bayesian.png',
-    ),
-    'Comb_limits': (
-        p_lim+'Theta/ThetaLimits/plots/limit_band_plot-log-bayesian.png',
-    ),
-    'pulls': (
-        p_lim+'PostFitPulls/ThetaLimits/cnv_post_fit_Signal_TpB_TH_LH_M1000.pdf',
-    ),
-}
+def get_p_lim(sig):
+    return p_base + 'Limits' + sig + '/DataBackground/'
 
-lim_tabs = {
-    'sysrate_tables_el.tex': p_lim+'Theta/ThetaLimits/sysrate_tables_el.tex',
-    'sysrate_tables_mu.tex': p_lim+'Theta/ThetaLimits/sysrate_tables_mu.tex',
-}
+def get4lim(sig):
+    p_lim = get_p_lim(sig)
+    return {
+        sig + 'postfit': (
+            p_lim+'PostFit/SignalRegion__el_lin'+ext,
+            p_lim+'PostFit/SignalRegion__mu_lin'+ext,
+            p_lim+'PostFit/SignalRegion__comb_lin'+ext,
+        ),
+        sig + '_limits': (
+            p_lim+'Theta/ThetaLimitsEl/plots/limit_band_plot-log-bayesian.png',
+            p_lim+'Theta/ThetaLimitsMu/plots/limit_band_plot-log-bayesian.png',
+            p_lim+'Theta/ThetaLimits/plots/limit_band_plot-log-bayesian.png',
+        ),
+        sig + '_pulls': (
+            p_lim+'PostFitPulls/ThetaLimits/cnv_post_fit_Signal_TpB_TH_%s_M1000.pdf' % (
+                'LH' if 'LH' in sig else 'RH'),
+        ),
+    }.items()
+
+
+def get4limtab(sig):
+    p_lim = get_p_lim(sig)
+    return {
+        sig + '_sysrate_tables_el.tex': p_lim+'Theta/ThetaLimits/sysrate_tables_el.tex',
+        sig + '_sysrate_tables_mu.tex': p_lim+'Theta/ThetaLimits/sysrate_tables_mu.tex',
+    }.items()
 
 AutoContentLimits = varial.extensions.tex.TexContent(
-    img_lim,
-    lim_tabs,
+    dict(get4lim('TpBLH') + get4lim('TpBRH')),
+    dict(get4limtab('TpBLH') + get4limtab('TpBRH')),
     include_str=r'\includegraphics[width=0.49\textwidth]{%s}',
     name='AutoContentLimits',
 )
 
 
+############################################################ AutoContentFwd ###
+def get4fwd(chan):
+    p_fwd = p_base + 'Selections' + chan + 'JERC/Stacks/FwdSelection/'
+
+    return {
+        chan+'_fwd_jets': (
+            p_fwd+'n_fwd_jets_lin'+ext,
+            p_fwd+'fwd_jets.m_eta_lin'+ext,
+        ),
+    }.items()
+
+
+AutoContentFwd = varial.extensions.tex.TexContent(
+    dict(get4fwd('Mu') + get4fwd('El')),
+    include_str=r'\includegraphics[width=0.49\textwidth]{%s}',
+    name='AutoContentFwd',
+)
+
+
+
 ############################################################ AutoContentPAS ###
 pas_block = {
     'selection_block': (
-        p_base + 'SFramePlots/Stacks/ElChan/SanityCheckEle/pt_lin.pdf',
-        p_base + 'SFramePlots/Stacks/MuChan/SanityCheckMu/pt_lin.pdf',
-        p_base + 'SFramePlots/Stacks/ElChan/Nm1Selection/ST_lin.pdf',
-        p_base + 'SFramePlots/Stacks/MuChan/Nm1Selection/h_mass_lin.pdf',
-    ),   
+        p_base + 'SelectionsEl/Stacks/BaseLineSelection/primary_lepton_pt_lin.pdf',
+        p_base + 'SelectionsMu/Stacks/BaseLineSelection/primary_lepton_pt_lin.pdf',
+        p_base + 'SelectionsEl/Stacks/BaseLineSelection/ST_lin.pdf',
+        p_base + 'SelectionsMu/Stacks/BaseLineSelection/h_mass_lin.pdf',
+    ),
 }
 
 pas_single = {
-    'tlep_mass_lin.pdf': p_base + 'SFramePlots/Stacks/MuChan/Nm1Selection/tlep_mass_lin.pdf',
-    'tlep_pt_lin.pdf': p_base + 'SFramePlots/Stacks/MuChan/Nm1Selection/tlep_pt_lin.pdf',
-    'SignalRegion__el_lin.pdf': p_base + 'Limits/SignalRegionOnly/PreFit/SignalRegion__el_lin.pdf',
-    'SignalRegion__mu_lin.pdf': p_base + 'Limits/SignalRegionOnly/PreFit/SignalRegion__mu_lin.pdf',
-    'SignalRegion_bkg__el_lin.pdf': p_base + 'Limits/DataBackground/PostFit/SignalRegion__el_lin.pdf',
-    'SignalRegion_bkg__mu_lin.pdf': p_base + 'Limits/DataBackground/PostFit/SignalRegion__mu_lin.pdf',
+    'tlep_mass_lin.pdf': p_base + 'SelectionsMu/Stacks/BaseLineSelection/tlep_mass_lin.pdf',
+    'tlep_pt_lin.pdf': p_base + 'SelectionsMu/Stacks/BaseLineSelection/tlep_pt_lin.pdf',
+    'SignalRegion__el_lin.pdf': p_base + 'SelectionsEl/Stacks/SignalRegion/vlq_mass_lin.pdf',
+    'SignalRegion__mu_lin.pdf': p_base + 'SelectionsMu/Stacks/SignalRegion/vlq_mass_lin.pdf',
+    'SignalRegion_bkg__el_lin.pdf': p_base + 'LimitsTpBLH/DataBackground/PostFit/SignalRegion__el_lin.pdf',
+    'SignalRegion_bkg__mu_lin.pdf': p_base + 'LimitsTpBLH/DataBackground/PostFit/SignalRegion__mu_lin.pdf',
+    'SignalRegion_bkg__comb_lin.pdf': p_base + 'LimitsTpBLH/DataBackground/PostFit/SignalRegion__comb_lin.pdf',
     'Sideband__el_lin.pdf': p_base + 'SelectionsEl/Stacks/SidebandRegion/vlq_mass_lin.pdf',
     'Sideband__mu_lin.pdf': p_base + 'SelectionsMu/Stacks/SidebandRegion/vlq_mass_lin.pdf',
     'Sideband_vs_SignalRegion__el.pdf': p_base+'SidebandsEl/Plots/AllSamples/SideBandRegion/Plotter/vlq_mass_lin.pdf',
     'Sideband_vs_SignalRegion__mu.pdf': p_base+'SidebandsMu/Plots/AllSamples/SideBandRegion/Plotter/vlq_mass_lin.pdf',
-    'limits.png': p_lim+'Theta/ThetaLimits/plots/limit_band_plot-log-bayesian.png',
+    'TpBLH_limits.png': get_p_lim('TpBLH')+'Theta/ThetaLimits/plots/limit_band_plot-log-bayesian.png',
+    'TpBRH_limits.png': get_p_lim('TpBRH')+'Theta/ThetaLimits/plots/limit_band_plot-log-bayesian.png',
 }.items()
+
 AutoContentPAS_img = varial.extensions.tex.TexContent(
     pas_block,
-    dict(pas_single + lim_tabs.items()),
+    dict(pas_single + get4limtab('TpBLH')),
     include_str=r'\includegraphics[width=0.49\textwidth]{%s}',
     name='img',
 )
@@ -209,6 +240,7 @@ tc = varial.tools.ToolChainParallel(
         AutoContentSideband,
         AutoContentSelection,
         AutoContentLimits,
+        AutoContentFwd,
         AutoContentPAS_img,
     ]
 )

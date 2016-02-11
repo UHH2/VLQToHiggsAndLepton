@@ -103,7 +103,7 @@ tc = ToolChain(dir_name, [
     # varial.tools.UserInteraction('Really run sframe? (Kill me otherwise.)'),
     # sframe_tools.sframe_tools,
     
-    ToolChain('Inputs', [
+    ToolChainParallel('Inputs', [
         ToolChain('El', [
             tree_project.mk_tp(input_pat, ['trigger_accept_el > 0.5']),
             tree_project.mk_sys_tps(['trigger_accept_el > 0.5']),
@@ -113,13 +113,27 @@ tc = ToolChain(dir_name, [
             tree_project.mk_sys_tps(['trigger_accept_mu > 0.5']),
         ]),
         hadd,
-    ]),
+    ], n_workers=1),
 
     ToolChainParallel('Outputs', [
+        # plot.mk_toolchain('SelectionsFwdEl', '%s/Inputs/El/TreeProjector/*.root'%dir_name, 
+        #     filter_keyfunc=lambda w: 'FwdSelection' in w.in_file_path),  #, keep_content_as_result=True),
+        # plot.mk_toolchain('SelectionsFwdMu', '%s/Inputs/Mu/TreeProjector/*.root'%dir_name, 
+        #     filter_keyfunc=lambda w: 'FwdSelection' in w.in_file_path),  #, keep_content_as_result=True),
+        # plot.mk_toolchain('SelectionsFwdComb', '%s/Inputs/*/TreeProjector/*.root'%dir_name, 
+        #    filter_keyfunc=lambda w: 'FwdSelection' in w.in_file_path),  #, keep_content_as_result=True),
         plot.mk_toolchain('SelectionsEl', ['%s/Inputs/El/TreeProjector/*.root'%dir_name, 
                                               '%s/Inputs/El/SysTreeProjectors/*/*.root'%dir_name]),
         plot.mk_toolchain('SelectionsMu', ['%s/Inputs/Mu/TreeProjector/*.root'%dir_name, 
                                               '%s/Inputs/Mu/SysTreeProjectors/*/*.root'%dir_name]),
+        plot.mk_toolchain('SelectionsElJetPT', ['%s/Inputs/El/TreeProjector/*.root'%dir_name, 
+                                              '%s/Inputs/El/SysTreeProjectors/jet_pt__*/*.root'%dir_name]),
+        plot.mk_toolchain('SelectionsMuJetPT', ['%s/Inputs/Mu/TreeProjector/*.root'%dir_name, 
+                                              '%s/Inputs/Mu/SysTreeProjectors/jet_pt__*/*.root'%dir_name]),
+        plot.mk_toolchain('SelectionsElJERC', ['%s/Inputs/El/TreeProjector/*.root'%dir_name, 
+                                              '%s/Inputs/El/SysTreeProjectors/JE*/*.root'%dir_name]),
+        plot.mk_toolchain('SelectionsMuJERC', ['%s/Inputs/Mu/TreeProjector/*.root'%dir_name, 
+                                              '%s/Inputs/Mu/SysTreeProjectors/JE*/*.root'%dir_name]),
         plot.mk_toolchain('SFramePlots', '%s/Inputs/Hadd/*.root' % dir_name),
         plot.mk_cutflowchain('SFrameCutflowEl', '%s/Inputs/Hadd/*.root' % dir_name, lambda w: 'ElChan/' in w.in_file_path),
         plot.mk_cutflowchain('SFrameCutflowMu', '%s/Inputs/Hadd/*.root' % dir_name, lambda w: 'MuChan/' in w.in_file_path),
@@ -132,7 +146,7 @@ tc = ToolChain(dir_name, [
 
     # varial.tools.PrintToolTree(),
     varial.tools.WebCreator(),
-    # tex_content.tc,
+    tex_content.tc,
     varial.tools.CopyTool('~/www/auth/VLQ2HT', use_rsync=True),
 ])
 

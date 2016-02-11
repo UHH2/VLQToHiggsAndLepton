@@ -1,10 +1,21 @@
 #!/usr/bin/env python
 
+# from varial_ext.treeprojector import BatchTreeProjector as TreeProjector
 from varial_ext.treeprojector import TreeProjector
+import multiprocessing as mp
 from os.path import join
 import varial.tools
 import plot
 import glob
+import os
+
+
+# from varial_ext.sgeworker import SGESubmitter
+# import varial_ext.treeprojector as tp
+# SGESubmitter(500, tp.jug_work_dir_pat, tp.jug_file_search_pat).submit()
+
+
+iteration = [1]  # non-local variable
 
 
 core_histos = {
@@ -12,32 +23,34 @@ core_histos = {
     'h_n_subjet_btags':  ('N_{H-jet subjet b-tags}',                       5, -.5, 4.5   ),
     'n_fwd_jets':        ('N_{ak4 fwd jet}',                               5, -.5, 4.5   ),
     'abs_largest_jet_eta': ('most forward jet #eta',                       50, 0., 5.    ),
+    'h_mass':            (';Higgs candidate mass;events / 10 GeV',         25, 50, 300   ),
+    'ST':                (';ST;events / 100 GeV',                          25, 0, 2500   ),
+    'tlep_mass':         (';lept. top mass;events / 10 GeV',               25, 100, 350  ),
+    'tlep_pt':           (';lept. top p_{T};events / 40 GeV',              25, 0, 1000   ),
+    'primary_lepton_pt': (';lepton p_{T};events / 40 GeV',                 25, 0., 1000  ),
+    'leading_jet_pt':    (';leading ak4 jet p_{T};events / 40 GeV',        25, 0., 1000  ),
+    'subleading_jet_pt': (';sub-leading ak4 jet p_{T};events / 40 GeV',    25, 0., 1000  ),
+    'fwd_jets.m_eta':    (';fwd jet #eta;events',                          40, -5., 5.   ),
+    'fwd_jets.m_pt':     (';fwd jet p_{T};events / 20 GeV',                25, 0., 500   ),
 }
 
 more_histos = {
     'event_chi2':        ('event chi2',                                    100, 0, 200   ),
     'dr_higg_top':       ('#DeltaR(H, t)',                                 50, 0, 5      ),
     'h_pt':              (';Higgs candidate p_{T};events / 40 GeV',        25, 0, 1000   ),
-    'tlep_pt':           (';lept. top p_{T};events / 20 GeV',              50, 0, 1000   ),
-    'h_mass':            (';Higgs candidate mass;events / 10 GeV',         25, 50, 300   ),
     'n_leading_btags':   ('N_{b-tag leading}',                             11, -.5, 10.5 ),
     'n_btags':           ('N_{b-tag}',                                     11, -.5, 10.5 ),
-    'leading_jet_pt':    (';leading ak4 jet p_{T};events / 20 GeV',        50, 0., 1000  ),
-    'subleading_jet_pt': (';sub-leading ak4 jet p_{T};events / 20 GeV',    50, 0., 1000  ),
     'largest_jet_eta':   ('most forward ak4 jet #eta',                     50, -5., 5.   ),
-    'primary_lepton_pt': (';primary lepton p_{T};events / 20 GeV',         50, 0., 1000  ),
-    'primary_lepton_eta':(';primary lepton #eta;events',                   25, -5., 5.   ),
-    'primary_lepton_charge': (';primary lepton charge;events',             3, -1.5, 1.5  ),
+    'primary_lepton_eta':(';lepton #eta;events',                           25, -5., 5.   ),
+    'primary_lepton_charge': (';lepton charge;events',                     3, -1.5, 1.5  ),
     'h_tau21':           ('Higgs candidate #tau_{2}/#tau_{1}',             50, 0, 1      ),
     'h_tau32':           ('Higgs candidate #tau_{3}/#tau_{2}',             50, 0, 1      ),
     'n_jets':            ('N_{ak4 jet}',                                   21, -.5, 20.5 ),
     'n_leptons':         ('N_{lepton}',                                    11, -.5, 10.5 ),
     'n_htags':           ('N_{H jet}',                                     5, -.5, 4.5   ),
-    'ST':                (';ST;events / 100 GeV',                          25, 0, 2500   ),
     'tlep_eta':          ('lept. top #eta',                                50, -5., 5.   ),
-    'tlep_mass':         (';lept. top mass;events / 10 GeV',               25, 100, 350  ),
     'h_eta':             ('Higgs candidate #eta',                          50, -5., 5.   ),
-    'vlq_pt':            (';T p_{T};events / 20 GeV',                      50, 0, 1000   ),
+    'vlq_pt':            (';T p_{T};events / 40 GeV',                      25, 0, 1000   ),
     'vlq_eta':           ('T #eta',                                        50, -5., 5.   ),
 }
 more_histos.update(core_histos)
@@ -54,6 +67,17 @@ samples = [
     'TpB_TH_1700',
 ] + varial.settings.my_lh_signals  + varial.settings.my_rh_signals
 
+bl_selection = [
+    #    'ST                     > 400',
+    #    'leading_jet_pt         > 100',
+    #    'h_pt                   > 100',
+    #    'tlep_pt                > 100',
+        'h_mass                 > 90',
+        'h_mass                 < 160',
+    #    'dr_higg_top            > 2.',
+    #    '(TwoDCut_ptrel > 40. || TwoDCut_dr > 0.4)',
+]
+
 sr_selection = [
     # 'primary_lepton_charge  > 0',
     'h_n_subjet_btags       == 2',
@@ -66,26 +90,18 @@ sb_selection = [
 ]
 
 fw_selection = [
-    'h_n_subjet_btags       <= 1',
+    'h_n_subjet_btags       == 0',
     'n_fwd_jets             >= 1',
 ]
 
+base_weight = 'weight/weight_ak4jet'
+
 
 def get_sec_sel_weight(additional_sel=None):
-    baseline_selection = [
-    #    'ST                     > 400',
-    #    'leading_jet_pt         > 100',
-    #    'h_pt                   > 100',
-    #    'tlep_pt                > 100',
-    #    'h_mass                 > 90',
-    #    'h_mass                 < 160',
-    #    'dr_higg_top            > 2.',
-    #    '(TwoDCut_ptrel > 40. || TwoDCut_dr > 0.4)',
-    ] + (additional_sel or [])
-
-    sr_sel = baseline_selection + sr_selection
-    sb_sel = baseline_selection + sb_selection
-    fw_sel = baseline_selection + fw_selection
+    bl_sel = bl_selection + (additional_sel or [])
+    sr_sel = bl_sel + sr_selection
+    sb_sel = bl_sel + sb_selection
+    fw_sel = bl_sel + fw_selection
 
     lepchargeplus_selection = [
         'primary_lepton_charge  > 0.1',
@@ -96,14 +112,14 @@ def get_sec_sel_weight(additional_sel=None):
     ]
 
     sec_sel_weight = [
-        ('BaseLineSelection', baseline_selection, 'weight'),
-        ('FwdSelection', fw_sel, 'weight'),
-        ('SignalRegion', sr_sel, 'weight'),
-        ('SidebandRegion', sb_sel, 'weight'),
-        ('BaselineLepPlus', baseline_selection + lepchargeplus_selection, 'weight'),
-        ('BaselineLepMnus', baseline_selection + lepchargeminus_selection, 'weight'),
-        ('SRLepPlus', sr_selection + lepchargeplus_selection, 'weight'),
-        ('SRLepMnus', sr_selection + lepchargeminus_selection, 'weight'),
+        ('BaseLineSelection', bl_sel, base_weight),
+        ('FwdSelection', fw_sel, base_weight),
+        ('SignalRegion', sr_sel, base_weight),
+        ('SidebandRegion', sb_sel, base_weight),
+        ('BaselineLepPlus', bl_sel + lepchargeplus_selection, base_weight),
+        ('BaselineLepMnus', bl_sel + lepchargeminus_selection, base_weight),
+        ('SRLepPlus', sr_selection + lepchargeplus_selection, base_weight),
+        ('SRLepMnus', sr_selection + lepchargeminus_selection, base_weight),
     ]
 
     return sec_sel_weight
@@ -121,10 +137,14 @@ def mk_tp(input_pat, add_sel=None):
         'treename': 'AnalysisTree',
     }
 
-    return TreeProjector(
+    tp = TreeProjector(
         filenames, params, get_sec_sel_weight(add_sel),
         name='TreeProjector',
     )
+
+    iteration[0] += 1
+    tp.iteration = 10 * iteration[0]  # batch tp's should not interfere
+    return tp
 
 
 def mk_sys_tps(add_sel=None):
@@ -134,10 +154,10 @@ def mk_sys_tps(add_sel=None):
         'histos': core_histos,
         'treename': 'AnalysisTree',
     }
-    base_sel = (add_sel or [])
-    sr_sel = sr_selection + base_sel
-    sb_sel = sb_selection + base_sel
-    fw_sel = fw_selection + base_sel
+    bl_sel = bl_selection + (add_sel or [])
+    sr_sel = sr_selection + bl_sel
+    sb_sel = sb_selection + bl_sel
+    fw_sel = fw_selection + bl_sel
 
 
     # first put together jerc uncert with nominal weights
@@ -151,10 +171,10 @@ def mk_sys_tps(add_sel=None):
         )
     )
     nominal_sec_sel_weight = [
-        ('SignalRegion', sr_sel, 'weight'),
-        ('SidebandRegion', sb_sel, 'weight'),
-        ('BaseLineSelection', base_sel, 'weight'),
-        ('FwdSelection', fw_sel, 'weight'),
+        ('SignalRegion', sr_sel, base_weight),
+        ('SidebandRegion', sb_sel, base_weight),
+        ('BaseLineSelection', bl_sel, base_weight),
+        ('FwdSelection', fw_sel, base_weight),
     ]
     sys_tps = list(
         TreeProjector(
@@ -180,24 +200,26 @@ def mk_sys_tps(add_sel=None):
     )
     sys_sec_sel_weight = list(
         (name, [
-            ('SignalRegion', sr_sel, 'weight*' + w),
-            ('SidebandRegion', sb_sel, 'weight*' + w),
-            ('BaseLineSelection', base_sel, 'weight*' + w),
-            ('FwdSelection', fw_sel, 'weight*' + w),
+            ('SignalRegion',        sr_sel, base_weight + '*' + w),
+            ('SidebandRegion',      sb_sel, base_weight + '*' + w),
+            ('BaseLineSelection',   bl_sel, base_weight + '*' + w),
+            ('FwdSelection',        fw_sel, base_weight + '*' + w),
         ])
         for name, w in (
-            ('b_tag_bc__minus', 'weight_btag_bc_down/weight_btag'),
-            ('b_tag_bc__plus', 'weight_btag_bc_up/weight_btag'),
-            ('b_tag_udsg__minus', 'weight_btag_udsg_down/weight_btag'),
-            ('b_tag_udsg__plus', 'weight_btag_udsg_up/weight_btag'),
-            ('muon_ID__minus', 'weight_sfmu_id_down/weight_sfmu_id'),
-            ('muon_ID__plus', 'weight_sfmu_id_up/weight_sfmu_id'),
+            ('b_tag_bc__minus',     'weight_btag_bc_down/weight_btag'),
+            ('b_tag_bc__plus',      'weight_btag_bc_up/weight_btag'),
+            ('b_tag_udsg__minus',   'weight_btag_udsg_down/weight_btag'),
+            ('b_tag_udsg__plus',    'weight_btag_udsg_up/weight_btag'),
+            ('muon_ID__minus',      'weight_sfmu_id_down/weight_sfmu_id'),
+            ('muon_ID__plus',       'weight_sfmu_id_up/weight_sfmu_id'),
             ('muon_trigger__minus', 'weight_sfmu_trg_down/weight_sfmu_trg'),
-            ('muon_trigger__plus', 'weight_sfmu_trg_up/weight_sfmu_trg'),
-            ('pileup__minus', 'weight_pu_down/weight_pu'),
-            ('pileup__plus', 'weight_pu_up/weight_pu'),
-            ('jet_pt__minus', 'weight_ak4jet_up/weight_ak4jet'),
-            ('jet_pt__plus', 'weight_ak4jet_down/weight_ak4jet'),
+            ('muon_trigger__plus',  'weight_sfmu_trg_up/weight_sfmu_trg'),
+            ('pileup__minus',       'weight_pu_down/weight_pu'),
+            ('pileup__plus',        'weight_pu_up/weight_pu'),
+            ('jet_pt__minus',       '1'),
+            ('jet_pt__plus',        'weight_ak4jet'),
+            ('rate__minus',         '0.841886'),  # 1 - (0.05**2 + 0.15**2)**.5
+            ('rate__plus',          '1.158114'),  # 1 + (0.05**2 + 0.15**2)**.5
         )
     )
     sys_tps += list(
@@ -211,10 +233,100 @@ def mk_sys_tps(add_sel=None):
         for name, ssw in sys_sec_sel_weight
     )
 
+    # PDF uncertainty
+    sys_params_pdf = {
+        'histos': {'vlq_mass': core_histos['vlq_mass']},
+        'treename': 'AnalysisTree',
+    }
+    sys_sec_sel_weight_pdf = list(
+        ('pdf_weight_%i'%i, [
+            ('SignalRegion', sr_sel, base_weight + '*' + 'weight_pdf_%i'%i),
+        ])
+        for i in xrange(100)
+    )
+    filenames_pdf = dict(
+        (s, fs)
+        for s, fs in filenames.iteritems()
+        if s in varial.settings.my_lh_signals or s in varial.settings.my_rh_signals
+    )
+    sys_tps_pdf = list(
+        TreeProjector(
+            filenames_pdf, 
+            sys_params_pdf, 
+            ssw,
+            add_aliases_to_analysis=False,
+            name=name,
+        )
+        for name, ssw in sys_sec_sel_weight_pdf
+    )
+    sys_tps_pdf.append(PDFHistoSquash())
+    sys_tps += [
+        varial.tools.ToolChain('SysTreeProjectorsPDF', sys_tps_pdf),
+        PDFUpDown(name='PDF__plus'),
+        PDFUpDown(name='PDF__minus'),
+    ]
+
+    for tp in sys_tps:
+        iteration[0] += 1
+        tp.iteration = 10 * iteration[0]  # batch tp's should not interfere
+
     # make it complete with a tooloolchain!
     return varial.tools.ToolChain(
         'SysTreeProjectors', sys_tps
     )
+
+
+class PDFHistoSquash(varial.tools.Tool):
+    io = varial.pklio
+
+    def run(self):
+        pdf_paths = glob.glob(self.cwd + '../*')
+        pdf_paths.remove(self.cwd + '../PDFHistoSquash')
+        pdf_histos = (
+            w
+            for p in pdf_paths
+            for w in varial.diskio.bulk_load_histograms(
+                        varial.gen.dir_content(p+'/*.root'))
+        )
+        pdf_histos = sorted(pdf_histos, key=lambda w: w.sample)
+        pdf_histos = varial.gen.group(pdf_histos, lambda w: w.sample)
+        pdf_histos = varial.gen.gen_squash_sys_env(pdf_histos)
+        self.result = list(pdf_histos)
+
+
+class PDFUpDown(varial.tools.Tool):
+    io = varial.pklio
+
+    def run(self):
+        factor = 1 if '__plus' in self.name else -1
+
+        def set_values(w):
+            h = w.histo
+            for i in xrange(h.GetNbinsX()+2):
+                h.SetBinContent(i, h.GetBinContent(i) + factor*h.GetBinError(i))
+                h.SetBinError(i, 0.)
+            return w
+
+        def store(w):
+            fsw = varial.wrp.FileServiceWrapper(name='SignalRegion')
+            fsw.vlq_mass = w.histo
+            varial.diskio.write(fsw, w.sample)
+            return w
+
+        histos = self.lookup_result('../SysTreeProjectorsPDF/PDFHistoSquash')
+        assert histos
+
+        histos = (set_values(w) for w in histos)
+        histos = (store(w) for w in histos)
+        histos = list(histos)
+
+        alia = varial.diskio.generate_aliases(self.cwd + '*.root')
+        alia = varial.gen.gen_add_wrp_info(alia, 
+            sample=lambda a: os.path.basename(os.path.splitext(a.file_path)[0]))
+        self.result = list(alia)
+        os.system('touch %s/aliases.in.result' % self.cwd)
+
+        
 
 
 if __name__ == '__main__':

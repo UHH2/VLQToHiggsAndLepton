@@ -72,7 +72,7 @@ def plotter_factory_stack_cat_merging(**kws):
     return varial.tools.Plotter(**kws)
 
 
-def mk_tools(input_pattern=None):
+def mk_tools(input_pattern=None, **args):
     if not input_pattern:
         input_pattern = input_pat
 
@@ -84,6 +84,7 @@ def mk_tools(input_pattern=None):
             combine_files=True,
             auto_legend=False,
             hook_canvas_post_build=varial.gen.add_sample_integrals,
+            **args
         ),
 
         # TODO for norm: set backgrounds line width to 2
@@ -107,10 +108,10 @@ def mk_tools(input_pattern=None):
     ]
 
 
-def mk_toolchain(name, input_pattern):
+def mk_toolchain(name, input_pattern, **args):
     return varial.tools.ToolChainParallel(
         name,
-        lazy_eval_tools_func=lambda: mk_tools(input_pattern)
+        lazy_eval_tools_func=lambda: mk_tools(input_pattern, **args),
     )
 
 

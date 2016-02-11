@@ -94,32 +94,80 @@ def plot_setup(grps):
         grp = list(grp)
         dat, bkg, sig = varial.gen.split_data_bkg_sig(grp)
         dat, bkg, sig = list(dat), list(bkg), list(sig)
-        signal = list(w for w in bkg if w.legend == 'SignalRegion')
-        others = list(w for w in bkg if w.legend != 'SignalRegion')
-        colorize_signal_region(signal[0])
-        signal = [varial.op.stack(signal)]
-        others[0].is_pseudo_data = True
-        if dat:
-            dat = [varial.op.norm_to_integral(varial.op.merge(dat))]
-        yield signal + others + dat
+
+        # signal region: line histo
+        sr_bkg = list(w for w in bkg if w.legend == 'SignalRegion')
+        sr_bkg[0].is_pseudo_data = True
+        sr_bkg[0].draw_option = 'E1' + sr_bkg[0].draw_option
+        sr_bkg[0].histo.SetMarkerSize(0)
+
+        # sideband region: stack
+        sb_bkg = list(w for w in bkg if w.legend != 'SignalRegion')
+        colorize_signal_region(sb_bkg[0])
+        sb_bkg = [varial.op.stack(sb_bkg)]
+
+        # if dat:
+        #     dat = (w for w in dat if 'SignalRegion' not in w.in_file_path)
+        #     dat = varial.gen.gen_norm_to_integral(dat)
+        #     dat = list(dat)
+        #     assert len(dat) == 1, dat
+        # else:
+        #     sb_bkg[0].is_pseudo_data = True
+        yield sr_bkg + sb_bkg
 
 
-def mk_plttr(plot_folder):
+def plot_setup_with_data_uncert(grps):
+    for grp in grps:
+        grp = list(grp)
+        dat, bkg, sig = varial.gen.split_data_bkg_sig(grp)
+        dat, bkg, sig = list(dat), list(bkg), list(sig)
+
+        # signal region: line histo
+        sr_bkg = list(w for w in bkg if w.legend == 'SignalRegion')
+        sr_bkg[0].is_pseudo_data = True
+        sr_bkg[0].draw_option = 'E1' + sr_bkg[0].draw_option
+        sr_bkg[0].histo.SetMarkerSize(0)
+
+        # data: needed for sys uncert
+        dat = (w for w in dat if 'SignalRegion' not in w.in_file_path)
+        dat = varial.gen.gen_norm_to_integral(dat)
+        dat = list(dat)
+
+        # sideband region: stack
+        sb_bkg = list(w for w in bkg if w.legend != 'SignalRegion')
+        colorize_signal_region(sb_bkg[0])
+        sb_bkg = [varial.op.stack(sb_bkg)]
+
+        dat_err = sb_bkg[0].histo.Clone()
+        for i in xrange(dat_err.GetNbinsX()+2):
+            dat_err.SetBinError(i, dat[0].histo.GetBinError(i))
+        sb_bkg[0].histo_sys_err = dat_err
+
+        yield sr_bkg + sb_bkg
+
+
+def put_uncert_title(canvas_builders):
+    for cnv in canvas_builders:
+        for entry in cnv.legend.GetListOfPrimitives():
+            if entry.GetLabel() == 'Sys. uncert. MC':
+                entry.SetLabel('Stat. uncert. Data')
+            elif entry.GetLabel() == 'Tot. uncert. MC':
+                entry.SetLabel('Tot. Stat. uncert.')
+        yield cnv
+
+
+def mk_plttr(plot_folder, add_data_uncert=False):
     return varial.tools.Plotter(
         plot_folder,
-        #filter_keyfunc=lambda w: any(
-        #    t in w.in_file_path for t in [
-        #        'SignalRegion/', 'SidebandTest',
-        #    ]
-        #),
-          input_result_path='../HistoLoader',
+        input_result_path='../HistoLoader',
         plot_grouper=varial.plotter.plot_grouper_by_name,
-        plot_setup=plot_setup,
+        plot_setup=plot_setup_with_data_uncert if add_data_uncert else plot_setup,
+        hook_canvas_post_build=put_uncert_title,
         # canvas_decorators=[varial.rnd.Legend],
     )
 
 
-def mk_overlay_chains(samplename):
+def mk_overlay_chains(samplename, add_data_uncert=False):
     input_path = '../../../../Loaders/%s' % samplename
     return varial.tools.ToolChainParallel(samplename, [
         varial.tools.ToolChain(
@@ -129,83 +177,12 @@ def mk_overlay_chains(samplename):
                     input_result_path=input_path,
                     filter_keyfunc=lambda w: any(
                         t in w.in_file_path 
-                        for t in ['SignalRegion', 'SidebandRegion'],
-                    ) and 'Run20' not in w.file_path,
+                        for t in ['SignalRegion', 'SidebandRegion']
+                    ) and (add_data_uncert or 'Run20' not in w.sample),
                 ),
-                mk_plttr('Plotter'),
+                mk_plttr('Plotter', add_data_uncert),
             ]
         ),
-        #varial.tools.ToolChain(
-        #    'SideBandRegion3', 
-        #    [
-        #        varial.tools.HistoLoader(
-        #            input_result_path=input_path,
-        #            filter_keyfunc=lambda w: any(
-        #                t in w.in_file_path 
-        #                for t in [
-        #                    'SignalRegion', 'SidebandRegion', 
-        #                    'SidebandNoMTCut', 'SidebandMT175',
-        #                ],
-        #            ) and 'Run20' not in w.file_path,
-        #        ),
-        #        mk_plttr('Plotter'),
-        #    ]
-        #),
-        #varial.tools.ToolChain(
-        #    'MassPlus', 
-        #    [
-        #        varial.tools.HistoLoader(
-        #            input_result_path=input_path,
-        #            filter_keyfunc=lambda w: (
-        #                ('MassPlus' in w.file_path 
-        #                        or 'Cat1htag/' in w.file_path)
-        #                and not '.DATA.' in w.file_path
-        #              ),
-        #        ),
-        #        mk_plttr('NoSelection'),
-        #        mk_plttr('Nm1Selection'),
-        #    ]
-        #),
-        #varial.tools.ToolChain(
-        #    'CompareToDataWith0bMassPlus', 
-        #    [
-        #        varial.tools.HistoLoader(
-        #            input_result_path=input_path,
-        #            filter_keyfunc=lambda w: (
-        #                (
-        #                    ('.DATA.' in w.file_path and (
-        #                        'Cat1htagWith0bMassPlus/' in w.file_path
-        #                    ))
-        #                or
-        #                    ('Cat1htag/' in w.file_path)
-        #                )
-        #              ),
-        #        ),
-        #        mk_plttr('NoSelection'),
-        #        mk_plttr('Nm1Selection'),
-        #    ]
-        #),
-        #varial.tools.ToolChain(
-        #    'CompareToDataWith1bMassPlus', 
-        #    [
-        #        varial.tools.HistoLoader(
-        #            input_result_path=input_path,
-        #            filter_keyfunc=lambda w: (
-        #                (
-        #                    ('.DATA.' in w.file_path and (
-        #                        'Cat1htagWith1bMassPlus/' in w.file_path
-        #                    ))
-        #                or
-        #                    ('Cat1htag/' in w.file_path)
-        #                )
-        #                
-        #              ),
-        #              
-        #        ),
-        #        mk_plttr('NoSelection'),
-        #        mk_plttr('Nm1Selection'),
-        #    ]
-        #),
     ])
 
 def get_tc(pat):
@@ -234,6 +211,13 @@ def get_tc(pat):
                     # mk_overlay_chains('WJets'),
                     # mk_overlay_chains('SquashMC'),
                 ]
-            )
+            ),
+            varial.tools.ToolChainParallel(
+                'PlotsWithDataUncert', [
+                    mk_overlay_chains('AllSamples', True),
+                    # mk_overlay_chains('WJets'),
+                    # mk_overlay_chains('SquashMC'),
+                ]
+            ),
         ]
     )

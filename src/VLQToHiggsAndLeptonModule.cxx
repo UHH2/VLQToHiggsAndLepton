@@ -175,7 +175,7 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
         data_dir_path + "SingleMuonTrigger_Z_RunD_Reco74X_Nov20.root", 
         "Mu45_eta2p1_PtEtaBins", 1., "trg", "nominal", "prim_mu_coll"));
     if (version.size() > 7 && version.substr(0, 7) == "Signal_") {
-        v_cat_modules.emplace_back(new PDFWeightBranchCreator(ctx, 9));
+        v_cat_modules.emplace_back(new PDFWeightBranchCreator(ctx, 112));
     }
 
     // leptons

@@ -290,7 +290,7 @@ class PDFHistoSquash(varial.tools.Tool):
         )
         pdf_histos = sorted(pdf_histos, key=lambda w: w.sample)
         pdf_histos = varial.gen.group(pdf_histos, lambda w: w.sample)
-        pdf_histos = varial.gen.gen_squash_sys_env(pdf_histos)
+        pdf_histos = (varial.op.squash_sys_stddev(h) for h in pdf_histos)
         self.result = list(pdf_histos)
 
 
@@ -298,7 +298,9 @@ class PDFUpDown(varial.tools.Tool):
     io = varial.pklio
 
     def run(self):
-        factor = 1 if '__plus' in self.name else -1
+        assert '__plus' in self.name or '__minus' in self.name
+        factor = 1. if '__plus' in self.name else -1.
+        self.message('INFO adding error with factor: %i' % factor)
 
         def set_values(w):
             h = w.histo
@@ -316,6 +318,7 @@ class PDFUpDown(varial.tools.Tool):
         histos = self.lookup_result('../SysTreeProjectorsPDF/PDFHistoSquash')
         assert histos
 
+        histos = (varial.op.copy(w) for w in histos)
         histos = (set_values(w) for w in histos)
         histos = (store(w) for w in histos)
         histos = list(histos)
@@ -325,8 +328,7 @@ class PDFUpDown(varial.tools.Tool):
             sample=lambda a: os.path.basename(os.path.splitext(a.file_path)[0]))
         self.result = list(alia)
         os.system('touch %s/aliases.in.result' % self.cwd)
-
-        
+        os.system('touch %s/webcreate_denial' % self.cwd)
 
 
 if __name__ == '__main__':

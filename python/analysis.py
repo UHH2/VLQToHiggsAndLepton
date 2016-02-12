@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+print 'importing modules.'
+
 import UHH2.VLQSemiLepPreSel.vlq_settings as vlq_settings
 import UHH2.VLQSemiLepPreSel.common as common
 from varial.extensions.hadd import Hadd
@@ -67,7 +69,7 @@ import sensitivity
 import tex_content
 import plot
 
-
+print 'setting up tools.'
 hadd = Hadd(
     input_pat, 
     [
@@ -150,6 +152,7 @@ tc = ToolChain(dir_name, [
     varial.tools.CopyTool('~/www/auth/VLQ2HT', use_rsync=True),
 ])
 
+print 'starting.'
 
 varial.settings.try_reuse_results = True
 import varial.main

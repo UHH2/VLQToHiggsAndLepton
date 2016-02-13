@@ -273,12 +273,20 @@ def mk_sense_chain(name,
         name='PreFit',
     )
 
+    def postfit_grouper(wrps):
+        key = lambda w: '%s__%s' % (w.region, w.category)
+        wrps = sorted(wrps, key=key)
+        wrps = varial.gen.group(wrps, key)
+        return wrps
+
+    postfit_input = ['../HistoLoader', '../HistoLoaderSys'] if sys_pat else '../HistoLoader'
+
     plotter_postfit = varial.tools.Plotter(
+        input_result_path=postfit_input,
         filter_keyfunc=lambda w: '700' in w.sample 
                                  or '1200' in w.sample 
                                  or not w.is_signal,
-        plot_grouper=lambda ws: varial.gen.group(
-            ws, key_func=lambda w: '%s__%s' % (w.region, w.category)),
+        plot_grouper=postfit_grouper,
         plot_setup=lambda w: varial.gen.mc_stack_n_data_sum(w, None, True),
         save_name_func=lambda w: '%s__%s' % (w.region, w.category),
         hook_canvas_post_build=lambda c: varial.gen.add_sample_integrals(
@@ -286,6 +294,15 @@ def mk_sense_chain(name,
         hook_loaded_histos=lambda ws: make_combo(scale_bkg_postfit(
             ws, '../%s/ThetaLimits' % limit_toolchain.name)),
         name='PostFit',
+    )
+
+    limit_graph = limits.LimitGraphs(
+        '../Theta/ThetaLimits', True, True, True
+    )
+
+    limit_graph_plot = varial.tools.Plotter(
+        input_result_path='../LimitGraphs',
+        name='LimitGraphsPlot'
     )
 
     return varial.tools.ToolChain(name, list(
@@ -302,6 +319,8 @@ def mk_sense_chain(name,
             postfit_toolchain,
             plotter_prefit,
             plotter_postfit,
+            limit_graph,
+            limit_graph_plot,
         ]
         if t
     ))

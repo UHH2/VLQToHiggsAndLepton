@@ -218,7 +218,7 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     float cov_p1_p1 = 9.89815635815e-09;
     v_cat_modules.emplace_back(new JetPtAndMultFixerWeight<Jet>(ctx,
         "jets", jetsf_p0, jetsf_p1, cov_p0_p0, cov_p0_p1, cov_p1_p1,
-        "weight_ak4jet", true));
+        "weight_ak4jet", false));
 
     // jets: other producers
     v_cat_modules.emplace_back(new LeadingJetPtProducer(

@@ -44,6 +44,41 @@ varial.settings.my_rh_signals = [
     'Signal_TpB_TH_RH_M1700',
     'Signal_TpB_TH_RH_M1800',
 ]
+varial.settings.tpt_lh_signals = [
+    'Signal_TpT_TH_LH_M0700',
+    'Signal_TpT_TH_LH_M0800',
+    'Signal_TpT_TH_LH_M0900',
+    'Signal_TpT_TH_LH_M1000',
+    'Signal_TpT_TH_LH_M1100',
+    'Signal_TpT_TH_LH_M1200',
+    'Signal_TpT_TH_LH_M1300',
+    'Signal_TpT_TH_LH_M1500',
+    'Signal_TpT_TH_LH_M1600',
+    'Signal_TpT_TH_LH_M1700',
+    'Signal_TpT_TH_LH_M1800',
+]
+varial.settings.tpt_rh_signals = [
+    'Signal_TpT_TH_RH_M0700',
+    'Signal_TpT_TH_RH_M0800',
+    'Signal_TpT_TH_RH_M0900',
+    'Signal_TpT_TH_RH_M1000',
+    'Signal_TpT_TH_RH_M1100',
+    'Signal_TpT_TH_RH_M1200',
+    'Signal_TpT_TH_RH_M1300',
+    'Signal_TpT_TH_RH_M1400',
+    'Signal_TpT_TH_RH_M1500',
+    'Signal_TpT_TH_RH_M1600',
+    'Signal_TpT_TH_RH_M1700',
+    'Signal_TpT_TH_RH_M1800',
+]
+varial.settings.all_signals = (
+    varial.settings.my_lh_signals + 
+    varial.settings.my_rh_signals + 
+    varial.settings.tpt_lh_signals + 
+    varial.settings.tpt_rh_signals
+)
+
+
 varial.settings.pretty_names.update({
      'no sel._tex':                 r'no sel.',
      'trigger_accept_tex':          r'trigger',
@@ -144,6 +179,8 @@ tc = ToolChain(dir_name, [
         # lep_plus_minus.pltr,
         sensitivity.get_tc('LimitsTpBLH', varial.settings.my_lh_signals),
         sensitivity.get_tc('LimitsTpBRH', varial.settings.my_rh_signals),
+        sensitivity.get_tc('LimitsTpTLH', varial.settings.tpt_lh_signals),
+        sensitivity.get_tc('LimitsTpTRH', varial.settings.tpt_rh_signals),
     ]),
 
     # varial.tools.PrintToolTree(),

@@ -66,7 +66,7 @@ samples = [
     'TpB_TH_0700',
     'TpB_TH_1200',
     'TpB_TH_1700',
-] + varial.settings.my_lh_signals  + varial.settings.my_rh_signals
+] + varial.settings.all_signals
 
 bl_selection = [
     #    'ST                     > 400',
@@ -163,7 +163,7 @@ def mk_sys_tps(add_sel=None):
 
     # first put together jerc uncert with nominal weights
     jercs = list(
-        (name, base_path + uncrt_pth + '/workdir/uhh2.AnalysisModuleRunner.MC.*.root') 
+        (name, base_path + uncrt_pth + '/workdir/uhh2.AnalysisModuleRunner.MC.*.root')
         for name, uncrt_pth in (
             ('JES__minus', 'jec_down'),
             ('JES__plus', 'jec_up'),
@@ -235,8 +235,10 @@ def mk_sys_tps(add_sel=None):
     )
 
     # PDF uncertainty
-    with open('weight_dict') as f:
+    with open('weight_dict_TpB') as f:
         weight_dict = ast.literal_eval(f.read())
+    with open('weight_dict_TpT') as f:
+        weight_dict.update(ast.literal_eval(f.read()))
     sys_params_pdf = {
         'histos': {'vlq_mass': core_histos['vlq_mass']},
         'treename': 'AnalysisTree',
@@ -247,7 +249,7 @@ def mk_sys_tps(add_sel=None):
                 'SignalRegion',
                 sr_sel,
                 dict(
-                    (smpl, base_weight+'*weight_pdf_%i/%f'%(i, weight_list[i]))
+                    (smpl, base_weight+'*weight_pdf_%i/%s'%(i, weight_list[i]))
                     for smpl, weight_list in weight_dict.iteritems()
                 )
             ),
@@ -257,7 +259,7 @@ def mk_sys_tps(add_sel=None):
     filenames_pdf = dict(
         (s, fs)
         for s, fs in filenames.iteritems()
-        if s in varial.settings.my_lh_signals or s in varial.settings.my_rh_signals
+        if s in varial.settings.all_signals
     )
     sys_tps_pdf = list(
         TreeProjector(

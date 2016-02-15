@@ -185,7 +185,7 @@ def scale_bkg_postfit(wrps, theta_res_path):
 def make_combo(wrps):
     wrps = list(wrps)
     copies = (varial.op.copy(w) for w in wrps)
-    copies = varial.gen.sort_group_merge(copies, lambda w: w.sample)
+    copies = varial.gen.sort_group_merge(copies, lambda w: w.sample + '__' + w.sys_info)
     copies = varial.gen.gen_add_wrp_info(copies, category=lambda w: 'comb')
     for coll in (wrps, copies):
         for w in coll:
@@ -198,6 +198,28 @@ def put_uncert_title(canvas_builders):
             if entry.GetLabel() == 'Stat. uncert. MC':
                 entry.SetLabel('Stat. uncert. Bkg')
         yield cnv
+
+
+def canvas_hook_integrals(cnvs):
+    cnvs = varial.gen.add_sample_integrals(cnvs)
+    cnvs = put_uncert_title(cnvs)
+
+    ntgrls = varial.wrp.Wrapper(name='integrals')
+    for c in cnvs:
+        cat = c.renderers[0].category
+        ints = list((k.replace('(700', '(0700'), v) 
+                    for k, v in c.renderers[0].all_info().iteritems() 
+                    if 'Integral___' in k and 'rightarrow' in k)
+        for k, v in ints:
+            if len(v) == 4:
+                vals = v[0], v[1], v[3]
+            else:
+                vals = v[0], v[1], 0.
+            setattr(ntgrls, cat + k, 
+                r'& $%5.1f\;\pm%5.1f$(stat.)$\;\pm%5.1f$(syst.)' % vals)
+        yield c
+
+    varial.diskio.write(ntgrls)
 
 
 ########################################################### make toolchains ###
@@ -267,8 +289,7 @@ def mk_sense_chain(name,
             ws, key_func=lambda w: '%s__%s' % (w.region, w.category)),
         plot_setup=lambda w: varial.gen.mc_stack_n_data_sum(w, None, True),
         save_name_func=lambda w: '%s__%s' % (w.region, w.category),
-        hook_canvas_post_build=lambda c: varial.gen.add_sample_integrals(
-                                                        put_uncert_title(c)),
+        hook_canvas_post_build=canvas_hook_integrals,
         hook_loaded_histos=make_combo,
         name='PreFit',
     )
@@ -289,20 +310,22 @@ def mk_sense_chain(name,
         plot_grouper=postfit_grouper,
         plot_setup=lambda w: varial.gen.mc_stack_n_data_sum(w, None, True),
         save_name_func=lambda w: '%s__%s' % (w.region, w.category),
-        hook_canvas_post_build=lambda c: varial.gen.add_sample_integrals(
-                                                        put_uncert_title(c)),
+        hook_canvas_post_build=canvas_hook_integrals,
         hook_loaded_histos=lambda ws: make_combo(scale_bkg_postfit(
             ws, '../%s/ThetaLimits' % limit_toolchain.name)),
         name='PostFit',
     )
 
     limit_graph = limits.LimitGraphs(
-        '../Theta/ThetaLimits', True, True, True
+        '../Theta/ThetaLimits', True, True, True,
+        axis_labels = ('T mass / GeV', '#sigma #times BR')
     )
 
     limit_graph_plot = varial.tools.Plotter(
         input_result_path='../LimitGraphs',
-        name='LimitGraphsPlot'
+        name='LimitGraphsPlot',
+        plot_grouper=lambda ws: [ws],
+        plot_setup=lambda ws: ws,
     )
 
     return varial.tools.ToolChain(name, list(

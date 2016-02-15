@@ -150,11 +150,11 @@ def get4lim(sig):
         sig + '_limits': (
             p_lim+'Theta/ThetaLimitsEl/plots/limit_band_plot-log-bayesian.png',
             p_lim+'Theta/ThetaLimitsMu/plots/limit_band_plot-log-bayesian.png',
-            p_lim+'Theta/ThetaLimits/plots/limit_band_plot-log-bayesian.png',
+            p_lim+'/LimitGraphsPlot/Graph_log'+ext,
         ),
         sig + '_pulls': (
-            p_lim+'PostFitPulls/ThetaLimits/cnv_post_fit_Signal_TpB_TH_%s_M1000.pdf' % (
-                'LH' if 'LH' in sig else 'RH'),
+            p_lim+'PostFitPulls/ThetaLimits/cnv_post_fit_Signal_Tp%s_TH_%s_M1000.pdf' % (
+                'T' if 'TpT' in sig else 'B', 'LH' if 'LH' in sig else 'RH'),
         ),
     }.items()
 
@@ -166,9 +166,10 @@ def get4limtab(sig):
         sig + '_sysrate_tables_mu.tex': p_lim+'Theta/ThetaLimits/sysrate_tables_mu.tex',
     }.items()
 
+
 AutoContentLimits = varial.extensions.tex.TexContent(
-    dict(get4lim('TpBLH') + get4lim('TpBRH')),
-    dict(get4limtab('TpBLH') + get4limtab('TpBRH')),
+    dict(get4lim('TpBLH') + get4lim('TpBRH') + get4lim('TpTLH') + get4lim('TpTRH')),
+    dict(get4limtab('TpBLH') + get4limtab('TpBRH') + get4limtab('TpTLH') + get4limtab('TpTRH')),
     include_str=r'\includegraphics[width=0.49\textwidth]{%s}',
     name='AutoContentLimits',
 )
@@ -216,8 +217,10 @@ pas_single = {
     'Sideband__mu_lin.pdf': p_base + 'SelectionsMu/Stacks/SidebandRegion/vlq_mass_lin.pdf',
     'Sideband_vs_SignalRegion__el.pdf': p_base+'SidebandsEl/Plots/AllSamples/SideBandRegion/Plotter/vlq_mass_lin.pdf',
     'Sideband_vs_SignalRegion__mu.pdf': p_base+'SidebandsMu/Plots/AllSamples/SideBandRegion/Plotter/vlq_mass_lin.pdf',
-    'TpBLH_limits.png': get_p_lim('TpBLH')+'Theta/ThetaLimits/plots/limit_band_plot-log-bayesian.png',
-    'TpBRH_limits.png': get_p_lim('TpBRH')+'Theta/ThetaLimits/plots/limit_band_plot-log-bayesian.png',
+    'TpBLH_limits.pdf': get_p_lim('TpBLH')+'/LimitGraphsPlot/Graph_log'+ext,
+    'TpBRH_limits.pdf': get_p_lim('TpBRH')+'/LimitGraphsPlot/Graph_log'+ext,
+    'TpTLH_limits.pdf': get_p_lim('TpTLH')+'/LimitGraphsPlot/Graph_log'+ext,
+    'TpTRH_limits.pdf': get_p_lim('TpTRH')+'/LimitGraphsPlot/Graph_log'+ext,
 }.items()
 
 AutoContentPAS_img = varial.extensions.tex.TexContent(

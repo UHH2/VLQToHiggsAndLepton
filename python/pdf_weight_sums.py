@@ -6,11 +6,11 @@ import glob
 import os
 
 
-# smpls = glob.glob('/pnfs/desy.de/cms/tier2/store/user/htholen/TpB_20151125/TprimeBToTH_M-*_TuneCUETP8M1_13TeV-madgraph-pythia8/crab_TprimeBToTH_M-*H_25ns/*/*/Ntuple_*.root')
-# out_name = 'weight_dict_TpB'
+smpls = glob.glob('/pnfs/desy.de/cms/tier2/store/user/htholen/TpB_20151125/TprimeBToTH_M-*_TuneCUETP8M1_13TeV-madgraph-pythia8/crab_TprimeBToTH_M-*H_25ns/*/*/Ntuple_*.root')
+out_name = 'weight_dict_TpB'
 
-smpls = glob.glob('/nfs/dust/cms/user/tholenhe/grid_control_new/gc-output/RunII-ntuple-25ns-v1.2/signals/MC_TpT_TH_*_Ntuple.root')
-out_name = 'weight_dict_TpT'
+# smpls = glob.glob('/nfs/dust/cms/user/tholenhe/grid_control_new/gc-output/RunII-ntuple-25ns-v1.2/signals/MC_TpT_TH_*_Ntuple.root')
+# out_name = 'weight_dict_TpT'
 
 def get_name_pnfs(name):
     name = name.replace('crab_', '').replace('_25ns', '')  # TprimeBToTH_M-700_LH
@@ -74,7 +74,7 @@ def handle_sample(smpl_grp):
         sum_events += 1
         scale_pdf = e.genInfo.pdf_scalePDF()
         for i in xrange(100):
-            sum_weight[i] += e.genInfo.systweights()[112 + i]/scale_pdf
+            sum_weight[i] += e.genInfo.systweights()[110 + i]/scale_pdf
 
     sum_weight = list(w / sum_events for w in sum_weight)
     print '='*15, 'TOTAL EVENTS:', sum_events, name

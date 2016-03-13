@@ -17,9 +17,9 @@ def hook_loaded_histos(wrps):
     wrps = common.add_wrp_info(wrps)
     wrps = common.label_axes(wrps)
     wrps = varial.generators.gen_add_wrp_info(
-        wrps, 
+        wrps,
         legend=lambda w: w.in_file_path.split('/')[0],
-        draw_option=lambda w: 'hist' if not w.is_data else 'E1X0',
+        draw_option=lambda w: 'hist' if not w.is_data else 'E0X0',
     )
     wrps = varial.gen.touch_legend_color(wrps)
     # wrps = sorted(wrps, key=lambda w: '%s__%s' % (w.category, w.sample))
@@ -75,7 +75,7 @@ def hook_loaded_histos_squash_mc(wrps):
     wrps = hook_loaded_histos(wrps)
 
     # print_bkg_percentages(wrps)
-   
+
     wrps = varial.gen.group(wrps, key)
     wrps = varial.gen.gen_merge(wrps)
     wrps = varial.gen.gen_norm_to_integral(wrps)
@@ -139,8 +139,14 @@ def plot_setup_with_data_uncert(grps):
         sb_bkg = [varial.op.stack(sb_bkg)]
 
         dat_err = sb_bkg[0].histo.Clone()
+        print '='*80
+        print 'data uncerts:'
         for i in xrange(dat_err.GetNbinsX()+2):
-            dat_err.SetBinError(i, dat[0].histo.GetBinError(i))
+            d_val = dat[0].histo.GetBinContent(i) or 1e10
+            d_err = dat[0].histo.GetBinError(i)
+            print 'i, d_val, d_err, d_err/d_val:', i, d_val, d_err, d_err/d_val
+            dat_err.SetBinError(i, d_err)
+        print '='*80
         sb_bkg[0].histo_sys_err = dat_err
 
         yield sr_bkg + sb_bkg
@@ -156,31 +162,82 @@ def put_uncert_title(canvas_builders):
         yield cnv
 
 
-def mk_plttr(plot_folder, add_data_uncert=False):
-    return varial.tools.Plotter(
-        plot_folder,
+def multi_region_hook_sample(wrps):
+    for w in wrps:
+        w.legend = w.sample
+        w.draw_option = 'histE0'
+        w.histo.SetMarkerSize(0.)
+        yield w
+
+
+def multi_region_hook_region(wrps):
+    for w in wrps:
+        w.legend = w.in_file_path.split('/')[0]
+        w.draw_option = 'histE0'
+        w.histo.SetMarkerSize(0.)
+        yield w
+
+
+def mk_overlay_chains(loadername, add_data_uncert=False, do_standard_plotter=True):
+    input_path = '../../../../Loaders/%s' % loadername
+
+    standard_plotter = varial.tools.Plotter(
+        'Plotter',
         input_result_path='../HistoLoader',
         plot_grouper=varial.plotter.plot_grouper_by_name,
         plot_setup=plot_setup_with_data_uncert if add_data_uncert else plot_setup,
         hook_canvas_post_build=put_uncert_title,
-        # canvas_decorators=[varial.rnd.Legend],
     )
-
-
-def mk_overlay_chains(samplename, add_data_uncert=False):
-    input_path = '../../../../Loaders/%s' % samplename
-    return varial.tools.ToolChainParallel(samplename, [
+    return varial.tools.ToolChainParallel(loadername, [
         varial.tools.ToolChain(
-            'SideBandRegion', 
+            'SideBandRegion',
             [
                 varial.tools.HistoLoader(
                     input_result_path=input_path,
                     filter_keyfunc=lambda w: any(
-                        t in w.in_file_path 
+                        t in w.in_file_path
                         for t in ['SignalRegion', 'SidebandRegion']
                     ) and (add_data_uncert or 'Run20' not in w.sample),
                 ),
-                mk_plttr('Plotter', add_data_uncert),
+                varial.tools.Plotter(
+                    'PlotterIndividualSamples',
+                    input_result_path='../HistoLoader',
+                    filter_keyfunc=lambda w: not w.is_data,
+                    hook_loaded_histos=lambda ws: varial.gen.gen_add_wrp_info(
+                        varial.gen.gen_copy(ws),
+                        legend=lambda w: w.sample+'/'+w.in_file_path.split('/')[0]),
+                    plot_grouper=varial.plotter.plot_grouper_by_name,
+                ),
+            ] + ([standard_plotter] if do_standard_plotter else [])
+        ),
+        varial.tools.ToolChain(
+            'MultiRegion',
+            [
+                varial.tools.HistoLoader(
+                    input_result_path=input_path,
+                    filter_keyfunc=lambda w: any(
+                        t in w.in_file_path
+                        for t in ['SignalRegion', 'SidebandRegion',
+                                  'Fw1B0Selection', 'Fw0B0Selection']
+                    ) and 'Run20' not in w.sample,
+                ),
+                varial.tools.Plotter(
+                    'Plotter',
+                    input_result_path='../HistoLoader',
+                    plot_setup=lambda ws: varial.plotter.default_plot_colorizer(
+                        ws, [633, 601, 417, 617]),
+                    plot_grouper=varial.plotter.plot_grouper_by_in_file_path,
+                    hook_loaded_histos=multi_region_hook_sample,
+                    save_name_func=lambda w: w.in_file_path.replace('/', '_'),
+                ),
+                varial.tools.Plotter(
+                    'PlotterCombineRegions',
+                    input_result_path='../HistoLoader',
+                    plot_setup=lambda ws: varial.plotter.default_plot_colorizer(
+                        ws, [633, 601, 417, 617]),
+                    plot_grouper=varial.plotter.plot_grouper_by_name,
+                    hook_loaded_histos=multi_region_hook_region,
+                ),
             ]
         ),
     ])
@@ -203,11 +260,18 @@ def get_tc(pat):
                         hook_loaded_histos=hook_loaded_histos_squash_mc,
                         name='AllSamples',
                     ),
+                    varial.tools.HistoLoader(
+                        filter_keyfunc=lambda w: w.sample in ('WJets', 'TTbar')
+                                                 and good_hist(w),
+                        hook_loaded_histos=hook_loaded_histos,
+                        name='WJetsTTbar',
+                    ),
                 ]
             ),
             varial.tools.ToolChainParallel(
                 'Plots', [
                     mk_overlay_chains('AllSamples'),
+                    mk_overlay_chains('WJetsTTbar', do_standard_plotter=False),
                     # mk_overlay_chains('WJets'),
                     # mk_overlay_chains('SquashMC'),
                 ]
@@ -215,8 +279,6 @@ def get_tc(pat):
             varial.tools.ToolChainParallel(
                 'PlotsWithDataUncert', [
                     mk_overlay_chains('AllSamples', True),
-                    # mk_overlay_chains('WJets'),
-                    # mk_overlay_chains('SquashMC'),
                 ]
             ),
         ]

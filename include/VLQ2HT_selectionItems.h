@@ -29,9 +29,11 @@ static vector<shared_ptr<SelectionItem>> SEL_ITEMS_VLQ2HT {
     shared_ptr<SelectionItem>(new SelDatF("h_pt",              ";Higgs candidate p_{T};events / 40 GeV",        25, 0, 1000                 )),
     shared_ptr<SelectionItem>(new SelDatI("n_leading_btags",   "N_{b-tag leading}",                             11, -.5, 10.5               )),
     shared_ptr<SelectionItem>(new SelDatF("abs_largest_jet_eta", "most forward jet #eta",                       50, 0., 5.                  )),
+    shared_ptr<SelectionItem>(new SelDatD("HT",                ";HT;events / 100 GeV",                          30, 0, 3000                 )),
 
     // shared_ptr<SelectionItem>(new SelDatF("abs_vlq_eta",       "T #eta",                            50, 0., 5.                  )),
     shared_ptr<SelectionItem>(new SelDatI("n_btags",           "N_{b-tag}",                                     11, -.5, 10.5               )),
+    shared_ptr<SelectionItem>(new SelDatI("n_btags_tight",           "N_{b-tag}",                                     11, -.5, 10.5               )),
     
     shared_ptr<SelectionItem>(new SelDatF("largest_jet_eta",   "most forward ak4 jet #eta",                     50, -5., 5.                 )),
     

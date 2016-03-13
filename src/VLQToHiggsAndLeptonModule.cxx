@@ -74,11 +74,109 @@ static bool isTlepEvent(const vector<GenParticle> * gps) {
 }
 
 
+class HiggsJetBuilder: public AnalysisModule {
+public:
+    explicit HiggsJetBuilder(Context & ctx):
+        h_topjets       (ctx.get_handle<vector<TopJet>>("topjets")),
+        h_softdrop_jets (ctx.get_handle<vector<TopJet>>("patJetsAk8CHSJetsSoftDropPacked_daughters")),
+        h_output        (ctx.get_handle<vector<TopJet>>("combined_ak8_jets")) {}
+
+    virtual bool process(Event & event) override {
+        const auto & topjets = event.get(h_topjets);
+        const auto & sd_jets = event.get(h_softdrop_jets);
+
+        vector<TopJet> comb_jets;
+        for (auto top_j : topjets) {  // making a copy here
+            for (const auto & sd_j : sd_jets) {
+                if (deltaR(top_j.v4(), sd_j.v4()) < 0.5) {
+                    auto tj_P2 = top_j.v4().P2();
+                    auto sd_mass = sd_j.v4().mass();
+                    auto nrg = sqrt(sd_mass*sd_mass + tj_P2);
+                    top_j.set_energy(nrg);  // set mass through energy
+                    comb_jets.push_back(top_j);
+                }
+            }
+        }
+        event.set(h_output, comb_jets);
+        return true;
+    }
+
+private:
+    Event::Handle<vector<TopJet>> h_topjets;
+    Event::Handle<vector<TopJet>> h_softdrop_jets;
+    Event::Handle<vector<TopJet>> h_output;
+};  // HiggsJetBuilder
+
+
+class HiggsMassSmear: public AnalysisModule {
+public:
+    explicit HiggsMassSmear(Context & ctx):
+        h_jet    (ctx.get_handle<vector<TopJet>>("h_jet")),
+        h_genjets(ctx.get_handle<vector<GenTopJet>>("gentopjets")),
+        h_mass   (ctx.get_handle<float>("h_mass")),
+        h_mass_gen(ctx.declare_event_output<float>("h_mass_gen")),
+        h_mass_gen_sd(ctx.declare_event_output<float>("h_mass_gen_sd")),
+        h_mass_diff(ctx.declare_event_output<float>("h_mass_diff")),
+        h_mass_10(ctx.declare_event_output<float>("h_mass_10")),
+        h_mass_20(ctx.declare_event_output<float>("h_mass_20")) {}
+
+    virtual bool process(Event & e) override {
+        if (!e.is_valid(h_mass)) {
+            return false;
+        }
+
+        auto hm = e.get(h_mass);
+        if (e.isRealData) {
+            e.set(h_mass_10, hm);
+            e.set(h_mass_20, hm);
+            e.set(h_mass_diff, 0.f);
+            e.set(h_mass_gen, 0.f);
+            e.set(h_mass_gen_sd, 0.f);
+            return true;
+        }
+
+        const TopJet & hj = e.get(h_jet).at(0);  // hj is a jet, not vector
+        auto closest_genjet = closestParticle(hj, e.get(h_genjets));
+        if (closest_genjet == nullptr || deltaR(*closest_genjet, hj) > 0.3) {
+            e.set(h_mass_10, hm);
+            e.set(h_mass_20, hm);
+            e.set(h_mass_diff, 0.f);
+            e.set(h_mass_gen, 0.f);
+            e.set(h_mass_gen_sd, 0.f);
+            return true;
+        }
+
+        const auto & gen_sj = closest_genjet->subjets();
+        float gen_mass = (gen_sj.size() > 1) ?
+                            (gen_sj[0].v4() + gen_sj[1].v4()).mass() : hm;
+
+        auto mass_10 = max(0.0f, gen_mass + 1.1f * (hm - gen_mass));  // - 9.1998f
+        auto mass_20 = max(0.0f, gen_mass + 1.2f * (hm - gen_mass));  // - 9.1998f
+        e.set(h_mass_gen_sd, gen_mass);
+        e.set(h_mass_gen, closest_genjet->v4().mass());
+        e.set(h_mass_diff, gen_mass - hm);
+        e.set(h_mass_10, mass_10);
+        e.set(h_mass_20, mass_20);
+        return true;
+    }
+
+    Event::Handle<vector<TopJet>> h_jet;
+    Event::Handle<vector<GenTopJet>> h_genjets;
+    Event::Handle<float> h_mass;
+    Event::Handle<float> h_mass_gen;
+    Event::Handle<float> h_mass_gen_sd;
+    Event::Handle<float> h_mass_diff;
+    Event::Handle<float> h_mass_10;
+    Event::Handle<float> h_mass_20;
+};
+
+
+
 /** \brief Basic analysis example of an AnalysisModule in UHH2
  */
 class VLQToHiggsAndLeptonModule: public AnalysisModule {
 public:
-    
+
     explicit VLQToHiggsAndLeptonModule(Context & ctx);
     virtual bool process(Event & event) override;
 
@@ -125,22 +223,28 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
 
     // jet correction (if nominal, the corrections were already applied in the preselection)
     if (ctx.get("jecsmear_direction", "nominal") != "nominal") {
-        auto ak8_corr = (type == "MC") ? JERFiles::Summer15_25ns_L123_AK8PFchs_MC 
-                                       : JERFiles::Summer15_25ns_L123_AK8PFchs_DATA;
-        auto ak4_corr = (type == "MC") ? JERFiles::Summer15_25ns_L123_AK4PFchs_MC 
+        auto ak8_corr = (type == "MC") ? JERFiles::Summer15_25ns_L23_AK8PFchs_MC
+                                       : JERFiles::Summer15_25ns_L23_AK8PFchs_DATA;
+        auto ak4_corr = (type == "MC") ? JERFiles::Summer15_25ns_L123_AK4PFchs_MC
                                        : JERFiles::Summer15_25ns_L123_AK4PFchs_DATA;
         v_pre_modules.emplace_back(new GenericTopJetCorrector(ctx,
             ak8_corr, "patJetsAk8CHSJetsSoftDropPacked_daughters"));
         v_pre_modules.emplace_back(new GenericSubJetCorrector(ctx,
             ak4_corr, "patJetsAk8CHSJetsSoftDropPacked_daughters"));
+        v_pre_modules.emplace_back(new GenericTopJetCorrector(ctx,
+            ak8_corr, "topjets"));
+        v_pre_modules.emplace_back(new GenericSubJetCorrector(ctx,
+            ak4_corr, "topjets"));
         v_pre_modules.emplace_back(new JetCorrector(ctx, ak4_corr));
     }
+    if (type == "MC") {
+        v_pre_modules.emplace_back(new JetResolutionSmearer(ctx));
+        v_pre_modules.emplace_back(new GenericJetResolutionSmearer(ctx, "topjets", "slimmedGenJetsAK8", false));
+    }
+    v_pre_modules.emplace_back(new HiggsJetBuilder(ctx));
     v_pre_modules.emplace_back(new TopJetCleaner(ctx,
         PtEtaCut(200., 2.4),
-            "patJetsAk8CHSJetsSoftDropPacked_daughters"));
-    if (type == "MC") {
-        v_pre_modules.emplace_back(new JetResolutionSmearer(ctx));    
-    }
+            "combined_ak8_jets"));
 
     // first event content modules
     auto n_htags_all = TopJetId(AndId<TopJet>(
@@ -154,33 +258,38 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     v_pre_modules.emplace_back(new TriggerAwarePrimaryLepton(
         ctx, "PrimaryLepton", "trigger_accept_el", "trigger_accept_mu", 50., 47.));
     v_pre_modules.emplace_back(new CollectionProducer<TopJet>(
-        ctx, "patJetsAk8CHSJetsSoftDropPacked_daughters", "h_jets", n_htags_all));
+        ctx, "combined_ak8_jets", "h_jets", n_htags_all));
     v_pre_modules.emplace_back(new CollectionSizeProducer<TopJet>(
         ctx, "h_jets", "n_htags"));
-    
+
     // cat_check_module.reset(new HandleSelection<int>(ctx, "n_htags", 1.)); want to have the full thing over presel in the cutflow.
 
     // setup modules to prepare the event.
     // weights
     if (type == "MC") {
-        v_cat_modules.emplace_back(new TriggerAwareEventWeight(ctx, "trigger_accept_el", (target_lumi - 90.)/target_lumi));
+        v_cat_modules.emplace_back(new TriggerAwareEventWeight(ctx, "trigger_accept_el", (target_lumi - 93.)/target_lumi));
+        v_cat_modules.emplace_back(new MCLumiWeight(ctx));
+        v_cat_modules.emplace_back(new MCPileupReweight(ctx));
+        v_cat_modules.emplace_back(new MCBTagScaleFactor(ctx, CSVBTag::WP_LOOSE, "h_jets"));
+        v_cat_modules.emplace_back(new MCMuonScaleFactor(ctx,
+            data_dir_path + "MuonID_Z_RunD_Reco74X_Nov20.root",
+            "NUM_MediumID_DEN_genTracks_PAR_pt_spliteta_bin1", 1., "id", "nominal", "prim_mu_coll"));
+        v_cat_modules.emplace_back(new MCMuonScaleFactor(ctx,
+            data_dir_path + "SingleMuonTrigger_Z_RunD_Reco74X_Nov20.root",
+            "Mu45_eta2p1_PtEtaBins", 1., "trg", "nominal", "prim_mu_coll"));
+        if (version.size() > 7 && version.substr(0, 7) == "Signal_") {
+            v_cat_modules.emplace_back(new PDFWeightBranchCreator(ctx, 110));
+        }
     }
-    v_cat_modules.emplace_back(new MCLumiWeight(ctx));
-    v_cat_modules.emplace_back(new MCPileupReweight(ctx));
-    v_cat_modules.emplace_back(new MCBTagScaleFactor(ctx, CSVBTag::WP_LOOSE, "h_jets"));
-    v_cat_modules.emplace_back(new MCMuonScaleFactor(ctx, 
-        data_dir_path + "MuonID_Z_RunD_Reco74X_Nov20.root", 
-        "NUM_MediumID_DEN_genTracks_PAR_pt_spliteta_bin1", 1., "id", "nominal", "prim_mu_coll"));
-    v_cat_modules.emplace_back(new MCMuonScaleFactor(ctx, 
-        data_dir_path + "SingleMuonTrigger_Z_RunD_Reco74X_Nov20.root", 
-        "Mu45_eta2p1_PtEtaBins", 1., "trg", "nominal", "prim_mu_coll"));
-    if (version.size() > 7 && version.substr(0, 7) == "Signal_") {
-        v_cat_modules.emplace_back(new PDFWeightBranchCreator(ctx, 112));
+
+    if (version == "TTbar") {
+        v_cat_modules.emplace_back(new TTbarGenProducer(ctx, "ttbargen", false));
+        v_cat_modules.emplace_back(new TopPtWeight(ctx, "ttbargen", 0.156, -0.00137, "weight_ttbar", true));
     }
 
     // leptons
     v_cat_modules.emplace_back(new NLeptonsProducer(ctx, "n_leptons"));
-    v_cat_modules.emplace_back(new PrimaryLeptonInfoProducer(ctx, 
+    v_cat_modules.emplace_back(new PrimaryLeptonInfoProducer(ctx,
         "PrimaryLepton", "primary_lepton_pt", "primary_lepton_eta", "primary_lepton_charge"));
 
     // jets: final pt threshold after JES/JER
@@ -207,6 +316,8 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
         ctx, "jets", "b_jets", JetId(AndId<Jet>(PtEtaCut(0., 2.4), CSVBTag(CSVBTag::WP_LOOSE)))));
     v_cat_modules.emplace_back(new CollectionSizeProducer<Jet>(
         ctx, "b_jets", "n_btags", JetId(is_true<Jet>)));
+    v_cat_modules.emplace_back(new CollectionSizeProducer<Jet>(
+        ctx, "b_jets", "n_btags_tight", JetId(CSVBTag(CSVBTag::WP_TIGHT))));
     v_cat_modules.emplace_back(new NLeadingBTagProducer(
         ctx, CSVBTag::WP_LOOSE, "n_leading_btags"));
 
@@ -250,6 +361,7 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     v_cat_modules.emplace_back(new AbsValueProducer<float>(ctx, "largest_jet_eta"));
     v_cat_modules.emplace_back(new TwoDCutProducer(ctx, "PrimaryLepton", "TwoDCut_dr", "TwoDCut_ptrel", true));
     v_cat_modules.emplace_back(new TriggerXOR(ctx, "trigger_accept_el", "trigger_accept_mu", "trigger_accept"));
+    v_cat_modules.emplace_back(new HiggsMassSmear(ctx));
 
     // Selection Producer
     SelItemsHelper sel_helper(SEL_ITEMS_VLQ2HT, ctx);
@@ -283,7 +395,7 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     nm1_hists_el->insert_hists(pos_2d_cut, new TwoDCutHist(ctx, "ElChan/Nm1Selection"));
     cf_hists_el->insert_step(pos_2d_cut, "2D cut");
     v_hists_el.insert(v_hists_el.begin() + pos_2d_cut, move(unique_ptr<Hists>(new TwoDCutHist(ctx, "ElChan/NoSelection"))));
-    
+
     nm1_hists_mu->insert_hists(pos_2d_cut, new TwoDCutHist(ctx, "MuChan/Nm1Selection"));
     cf_hists_mu->insert_step(pos_2d_cut, "2D cut");
     v_hists_mu.insert(v_hists_mu.begin() + pos_2d_cut, move(unique_ptr<Hists>(new TwoDCutHist(ctx, "MuChan/NoSelection"))));
@@ -346,7 +458,7 @@ bool VLQToHiggsAndLeptonModule::process(Event & event) {
     if (gen_hists) {
         gen_hists->fill(event);
     }
- 
+
     if (type == "MC") {
         bool tlepEvt = isTlepEvent(event.genparticles);
         if (version.size() > 5 && version.substr(version.size() - 5, 100) == "_Tlep" && !tlepEvt) {

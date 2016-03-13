@@ -76,6 +76,19 @@ def mk_tools(input_pattern=None, **args):
     if not input_pattern:
         input_pattern = input_pat
 
+    rm_uncerts = ('HT__', 'jet_pt__')
+
+    if 'filter_keyfunc' in args:
+        fk = args['filter_keyfunc']
+        args['filter_keyfunc'] = lambda w: (
+            not any(t in w.file_path for t in rm_uncerts)
+            and fk(w)
+        )
+    else:
+        args['filter_keyfunc'] = lambda w: (
+            not any(t in w.file_path for t in rm_uncerts)
+        )
+
     return [
         varial.tools.mk_rootfile_plotter(
             pattern=input_pattern,

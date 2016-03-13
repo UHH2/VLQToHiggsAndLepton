@@ -47,7 +47,7 @@
     <Library Name="libSUHH2VLQToHiggsAndLepton"/>
     <Package Name="SUHH2VLQToHiggsAndLepton.par" />
 
-   <Cycle Name="uhh2::AnalysisModuleRunner" OutputDirectory="/nfs/dust/cms/user/tholenhe/VLQToHiggsAndLepton/" PostFix="" TargetLumi="2215." >
+   <Cycle Name="uhh2::AnalysisModuleRunner" OutputDirectory="/nfs/dust/cms/user/tholenhe/VLQToHiggsAndLepton/" PostFix="" TargetLumi="2318." >
 <!--
    <Cycle Name="uhh2::AnalysisModuleRunner"  RunMode="PROOF" ProofServer="lite://"  ProofWorkDir="/nfs/dust/cms/user/tholenhe/proof-wd/" ProofNodes="22" OutputDirectory="./" PostFix="" TargetLumi="552.67" >
    <Cycle Name="uhh2::AnalysisModuleRunner"  RunMode="PROOF" ProofServer="tholenhe@naf-uhhcms04.desy.de:21001"  ProofWorkDir="/nfs/dust/cms/user/tholenhe/proof-wd/" ProofNodes="30" OutputDirectory="./" PostFix="" TargetLumi="552.67" >
@@ -56,7 +56,14 @@
 
 <!--
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-data
+         88
+         88              ,d
+         88              88
+ ,adPPYb,88 ,adPPYYba, MM88MMM ,adPPYYba,
+a8"    `Y88 ""     `Y8   88    ""     `Y8
+8b       88 ,adPPPPP88   88    ,adPPPPP88
+"8a,   ,d88 88,    ,88   88,   88,    ,88
+ `"8bbdP"Y8 `"8bbdP"Y8   "Y888 `"8bbdP"Y8
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 -->
 
@@ -76,12 +83,20 @@ data
 
 <!--
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-signal samples
+          88                                    88
+          ""                                    88
+                                                88
+,adPPYba, 88  ,adPPYb,d8 8b,dPPYba,  ,adPPYYba, 88
+I8[    "" 88 a8"    `Y88 88P'   `"8a ""     `Y8 88
+ `"Y8ba,  88 8b       88 88       88 ,adPPPPP88 88
+aa    ]8I 88 "8a,   ,d88 88       88 88,    ,88 88
+`"YbbdP"' 88  `"YbbdP"Y8 88       88 `"8bbdP"Y8 88
+              aa,    ,88
+               "Y8bbdP"
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 -->
 
-<!--
--->
+
 <InputData Lumi="100000" NEventsMax="-1" Type="MC" Version="Signal_TpB_TH_LH_M0700" Cacheable="False">
     <In FileName="/nfs/dust/cms/user/tholenhe/VLQSemiLepPreSel/Run2-ntuple-split/uhh2.AnalysisModuleRunner.MC.MC_TpB_TH_LH_M0700*.root" Lumi="0.0"/>
     <InputTree Name="AnalysisTree" />
@@ -401,21 +416,21 @@ signal samples
 
 
 
+
 <!--
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-backgrounds
+88          88
+88          88
+88          88
+88,dPPYba,  88   ,d8  ,adPPYb,d8
+88P'    "8a 88 ,a8"  a8"    `Y88
+88       d8 8888[    8b       88
+88b,   ,a8" 88`"Yba, "8a,   ,d88
+8Y"Ybbd8"'  88   `Y8a `"YbbdP"Y8
+                      aa,    ,88
+                       "Y8bbdP"
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 -->
-
-
-<InputData Lumi="116421" NEventsMax="-1" NEventsSkip="0" Type="MC" Version="TTbar" Cacheable="False">
-    <In FileName="/nfs/dust/cms/user/tholenhe/VLQSemiLepPreSel/Run2-ntuple-split/uhh2.AnalysisModuleRunner.MC.TTbar*.root" Lumi="0.0"/>
-    <InputTree Name="AnalysisTree" />
-    <OutputTree Name="AnalysisTree" />
-</InputData>
-
-
-
 
 
 <InputData Lumi="6238.42" NEventsMax="-1" Type="MC" Version="WJets_LNu_HT100To200" Cacheable="False">
@@ -615,6 +630,16 @@ backgrounds
 
 
 
+<InputData Lumi="117278" NEventsMax="-1" NEventsSkip="0" Type="MC" Version="TTbar" Cacheable="False">
+    <In FileName="/nfs/dust/cms/user/tholenhe/VLQSemiLepPreSel/Run2-ntuple-split/uhh2.AnalysisModuleRunner.MC.TTbar*.root" Lumi="0.0"/>
+    <InputTree Name="AnalysisTree" />
+    <OutputTree Name="AnalysisTree" />
+</InputData>
+
+
+
+
+
         <UserConfig>
             <Item Name="PrimaryVertexCollection" Value="offlineSlimmedPrimaryVertices" />
             <Item Name="ElectronCollection" Value="slimmedElectronsUSER" />
@@ -622,10 +647,11 @@ backgrounds
             <Item Name="TauCollection" Value="slimmedTaus" />
             <Item Name="JetCollection" Value="slimmedJets" />
             <Item Name="GenJetCollection" Value="slimmedGenJets" />
+            <Item Name="GenTopJetCollection" Value="ak8GenJetsSoftDrop" />
             <Item Name="TopJetCollection" Value="slimmedJetsAK8_SoftDrop" />
             <Item Name="METName" Value="slimmedMETs" />
             <Item Name="GenParticleCollection" Value="GenParticles" />
-            <Item Name="additionalBranches" Value="triggerNames triggerResults patJetsAk8CHSJetsSoftDropPacked_daughters" />
+            <Item Name="additionalBranches" Value="triggerNames triggerResults patJetsAk8CHSJetsSoftDropPacked_daughters slimmedGenJetsAK8" />
 
             <!-- <Item Name="lumi_file" Value="set in main AnalysisModule" /> -->
             <Item Name="lumihists_lumi_per_bin" Value="50"/>
@@ -644,10 +670,10 @@ backgrounds
             <!-- specific to analysis -->
             <!-- "jecsmear_direction": either "nominal", "up", or "down" -->
             <!-- "jersmear_direction": either "nominal", "up", or "down" -->
-            <Item Name="jecsmear_direction" Value="nominal" /> 
-            <Item Name="jersmear_direction" Value="nominal" /> 
-            <Item Name="jersmear_smear_met" Value="true" /> 
-            <Item Name="AnalysisModule" Value="VLQToHiggsAndLeptonModule" /> 
+            <Item Name="jecsmear_direction" Value="nominal" />
+            <Item Name="jersmear_direction" Value="nominal" />
+            <Item Name="jersmear_smear_met" Value="true" />
+            <Item Name="AnalysisModule" Value="VLQToHiggsAndLeptonModule" />
             <Item Name="TestKey" Value="VLQToHiggsAndLeptonModule" />
             <Item Name="use_sframe_weight" Value="false" />
         </UserConfig>

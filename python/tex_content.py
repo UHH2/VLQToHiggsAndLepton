@@ -19,10 +19,10 @@ def get4obj(chan):
         chan+'_fwd_jets'  : map((p+'SanityCheckFwdJets/{}'+ext).format, jet_histos),
         chan+'_ak8_jets'  : map((p+'SanityCheckAK8Jets/{}'+ext).format, histos),
         chan+'_higg_jets' : map((p+'HiggsJetsAfterSel/{}'+ext).format, histos),
-        chan+'_jet_pts'   : map((p+'SanityCheckJets/{}'+ext).format, 
+        chan+'_jet_pts'   : map((p+'SanityCheckJets/{}'+ext).format,
             ('pt_1_lin', 'pt_2_lin', 'pt_3_lin', 'pt_4_lin', )
         ),
-        chan+'_event'     : map((p+'SanityCheckEvent/{}'+ext).format, 
+        chan+'_event'     : map((p+'SanityCheckEvent/{}'+ext).format,
             ('N_PrimVertices_lin', 'N_TrueInteractions_lin', 'ST_lin', 'MET_lin', )
         ),
     }.items()
@@ -72,7 +72,7 @@ def get4sel(chan):
             p + 'TwoDCut_QCD_lin' + ext,
             p + 'TwoDCut_TpB_TH_1200_lin' + ext,
         ),
-        chan+'_firstblock': (            
+        chan+'_firstblock': (
             p + 'leading_jet_pt_lin' + ext,
             p + 'subleading_jet_pt_lin' + ext,
             p + 'primary_lepton_pt_lin' + ext,
@@ -86,10 +86,14 @@ def get4sel(chan):
         ),
     }.items()
 
-img_2d_px = {
+sel_single_items = {
     'twoDeeCut_px': (
         (p_nm1 % 'El') + 'TwoDCut_px_log' + ext,
         (p_nm1 % 'Mu') + 'TwoDCut_px_log' + ext,
+    ),
+    'm_jet_scale': (
+        p_base + 'SelectionsMu/Stacks/TTbar2Selection/h_jet.m_prunedmass_lin' + ext,
+        p_base + 'SelectionsMu/Stacks/TTbar2Selection/h_mass-.00001_lin' + ext,
     ),
 }.items()
 
@@ -103,7 +107,7 @@ def get4cf(chan):
     }.items()
 
 AutoContentSelection = varial.extensions.tex.TexContent(
-    dict(get4sel('Mu') + get4sel('El') + img_2d_px),
+    dict(get4sel('Mu') + get4sel('El') + sel_single_items),
     dict(get4cf('Mu') + get4cf('El')),
     include_str=r'\includegraphics[width=0.49\textwidth]{%s}',
     name='AutoContentSelection',
@@ -114,7 +118,7 @@ AutoContentSelection = varial.extensions.tex.TexContent(
 def get4sb(chan):
     p_sel = p_base + 'Selections' + chan + '/Stacks/'
     p_baseline = p_sel + 'BaseLineSelection/'
-
+    p_baseline_ht = p_sel + 'BaseLineSelectionHTWeight/'
     return {
         chan+'_variables': (
             p_baseline+'n_fwd_jets_lin'+ext,
@@ -125,6 +129,16 @@ def get4sb(chan):
         chan+'_comparison': (
             p_sel+'SidebandRegion/vlq_mass_lin'+ext,
             p_sel+'SignalRegion/vlq_mass_lin'+ext,
+        ),
+        chan+'_multiregion': (
+            p_base+'Sidebands'+chan+'/Plots/AllSamples/MultiRegion/PlotterCombineRegions/vlq_mass_lin'+ext,
+            p_sel+'Fw0B0Selection/vlq_mass_lin'+ext,
+        ),
+        chan+'_ht_check': (
+            p_baseline_ht+'leading_jet_pt_lin'+ext,
+            p_baseline_ht+'subleading_jet_pt_lin'+ext,
+            p_baseline_ht+'n_jets_lin'+ext,
+            p_baseline_ht+'ST_lin'+ext,
         ),
     }.items()
 
@@ -141,11 +155,23 @@ def get_p_lim(sig):
 
 def get4lim(sig):
     p_lim = get_p_lim(sig)
+    p_lim_jet_rw = p_lim.replace('ckground/', 'ckgroundWithJetPtSys/')
+    p_lim_ht = p_lim.replace('ckground/', 'ckgroundWithHTSys/')
     return {
         sig + 'postfit': (
             p_lim+'PostFit/SignalRegion__el_lin'+ext,
             p_lim+'PostFit/SignalRegion__mu_lin'+ext,
             p_lim+'PostFit/SignalRegion__comb_lin'+ext,
+        ),
+        sig + '_limits_jet_rw': (
+            p_lim_jet_rw+'Theta/ThetaLimitsEl/plots/limit_band_plot-log-bayesian.png',
+            p_lim_jet_rw+'Theta/ThetaLimitsMu/plots/limit_band_plot-log-bayesian.png',
+            p_lim_jet_rw+'/LimitGraphsPlot/Graph_log'+ext,
+        ),
+        sig + '_limits_ht': (
+            p_lim_ht+'Theta/ThetaLimitsEl/plots/limit_band_plot-log-bayesian.png',
+            p_lim_ht+'Theta/ThetaLimitsMu/plots/limit_band_plot-log-bayesian.png',
+            p_lim_ht+'/LimitGraphsPlot/Graph_log'+ext,
         ),
         sig + '_limits': (
             p_lim+'Theta/ThetaLimitsEl/plots/limit_band_plot-log-bayesian.png',
@@ -158,6 +184,12 @@ def get4lim(sig):
         ),
     }.items()
 
+lim_sig_inj = {
+    'lim_sig_inj': tuple(
+        (p_base+'/LimitsTpBLH/DataBackgroundSigInjSignal_TpB_TH_LH_M%s00/LimitGraphsPlot/Graph_log' % m)+ext
+        for m in ('07', '08', '09', '10', '11', '12', '15', '18')
+    )
+}.items()
 
 def get4limtab(sig):
     p_lim = get_p_lim(sig)
@@ -168,7 +200,7 @@ def get4limtab(sig):
 
 
 AutoContentLimits = varial.extensions.tex.TexContent(
-    dict(get4lim('TpBLH') + get4lim('TpBRH') + get4lim('TpTLH') + get4lim('TpTRH')),
+    dict(get4lim('TpBLH') + get4lim('TpBRH') + get4lim('TpTLH') + get4lim('TpTRH') + lim_sig_inj),
     dict(get4limtab('TpBLH') + get4limtab('TpBRH') + get4limtab('TpTLH') + get4limtab('TpTRH')),
     include_str=r'\includegraphics[width=0.49\textwidth]{%s}',
     name='AutoContentLimits',
@@ -177,7 +209,7 @@ AutoContentLimits = varial.extensions.tex.TexContent(
 
 ############################################################ AutoContentFwd ###
 def get4fwd(chan):
-    p_fwd = p_base + 'Selections' + chan + 'JERC/Stacks/FwdSelection/'
+    p_fwd = p_base + 'Selections' + chan + 'JERC/Stacks/Fw1B0Selection/'
 
     return {
         chan+'_fwd_jets': (
@@ -208,8 +240,8 @@ pas_block = {
 pas_single = {
     'tlep_mass_lin.pdf': p_base + 'SelectionsMu/Stacks/BaseLineSelection/tlep_mass_lin.pdf',
     'tlep_pt_lin.pdf': p_base + 'SelectionsMu/Stacks/BaseLineSelection/tlep_pt_lin.pdf',
-    'SignalRegion__el_lin.pdf': p_base + 'SelectionsEl/Stacks/SignalRegion/vlq_mass_lin.pdf',
-    'SignalRegion__mu_lin.pdf': p_base + 'SelectionsMu/Stacks/SignalRegion/vlq_mass_lin.pdf',
+    'SignalRegion__el_lin.pdf': p_base + 'SelectionsElNoData/Stacks/SignalRegion/vlq_mass_lin.pdf',
+    'SignalRegion__mu_lin.pdf': p_base + 'SelectionsMuNoData/Stacks/SignalRegion/vlq_mass_lin.pdf',
     'SignalRegion_bkg__el_lin.pdf': p_base + 'LimitsTpBLH/DataBackground/PostFit/SignalRegion__el_lin.pdf',
     'SignalRegion_bkg__mu_lin.pdf': p_base + 'LimitsTpBLH/DataBackground/PostFit/SignalRegion__mu_lin.pdf',
     'SignalRegion_bkg__comb_lin.pdf': p_base + 'LimitsTpBLH/DataBackground/PostFit/SignalRegion__comb_lin.pdf',
@@ -236,7 +268,7 @@ AutoContentPAS_img = varial.extensions.tex.TexContent(
 
 ################################################################# toolchain ###
 tc = varial.tools.ToolChainParallel(
-    'Tex', 
+    'Tex',
     [
         AutoContentTopHiggVlq,
         AutoContentObjects,

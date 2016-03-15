@@ -18,9 +18,11 @@ theory_masses = [700, 800, 900, 1000, 1100, 1200,
 
 theory_xsec_tpb = [5.820, 3.860, 2.720, 1.950, 1.350, 0.982,
                    0.716, 0.540, 0.408, 0.305, 0.230, 0.174,]
+theory_xsec_tpb = list(v/4. for v in theory_xsec_tpb)  # branching to tH in 50/25/25
 
 theory_xsec_tpt = [0.745, 0.532, 0.388, 0.285, 0.212, 0.159,
                    0.120, 0.0917, 0.0706, 0.0541, 0.0420, 0.0324,]
+theory_xsec_tpt = list(v/2. for v in theory_xsec_tpt)  # branching to tH in 0/50/50
 
 
 def add_th_curve(grps):
@@ -76,12 +78,12 @@ def hook_loaded_histos(wrps):
     return wrps
 
 
-def rebin_for_bb(wrps):
+def rebin_for_bb(wrps, norm_by_bin_width=False):
     for w in wrps:
         if w.category == 'el':
-            w = varial.op.rebin(w, ele_bins)
+            w = varial.op.rebin(w, ele_bins, norm_by_bin_width)
         elif w.category == 'mu':
-            w = varial.op.rebin(w, mu_bins)
+            w = varial.op.rebin(w, mu_bins, norm_by_bin_width)
         yield w
 
 
@@ -414,7 +416,7 @@ class CouplingLimit(varial.tools.Tool):
                 th_y = th_vals[theory_masses.index(int(x))]
                 g.SetPoint(i, x, (y/th_y)**.5)
 
-            if '#sigma' in wrp.legend:
+            if 'std. deviation' in wrp.legend:
                 for i in xrange(n_points):
                     j = i + n_points
                     g.GetPoint(j, x, y)
@@ -429,13 +431,15 @@ class CouplingLimit(varial.tools.Tool):
             # g.SetMinimum(0.1)
             # g.SetMaximum()
             wrp.val_y_min = 0.1
-            wrp.val_y_max = 2.5 if is_tpb else 5.0
+            wrp.val_y_max = 4.5 if is_tpb else 7.0
 
             return wrp
 
         is_tpb = 'LimitsTpB' in self.cwd
-        x_title = 'T mass / GeV'
-        y_title = '|c^{bW} c^{tH}|' if is_tpb else '|c^{tZ} c^{tH}|'
+        x_title = 'T quark mass / GeV'
+        prodchan = 'bW' if is_tpb else 'tZ'
+        handness = 'L' if 'LH/Dat' in self.cwd else 'R'
+        y_title = '|c^{%s}_{%s}|' % (prodchan, handness)
         th_vals = theory_xsec_tpb if is_tpb else theory_xsec_tpt
         gs = self.lookup_result('../LimitGraphs')
         gs = (mk_coupling_graph(g) for g in gs)
@@ -556,6 +560,20 @@ def mk_sense_chain(name,
         name='PostFit',
     )
 
+    plotter_postfit_bins = varial.tools.Plotter(
+        input_result_path=postfit_input,
+        filter_keyfunc=lambda w: '700' in w.sample
+                                 or '1200' in w.sample
+                                 or not w.is_signal,
+        plot_grouper=postfit_grouper,
+        plot_setup=lambda w: varial.gen.mc_stack_n_data_sum(w, None, True),
+        save_name_func=lambda w: '%s__%s' % (w.region, w.category),
+        hook_canvas_post_build=canvas_hook_integrals,
+        hook_loaded_histos=lambda ws: rebin_for_bb(make_combo(scale_bkg_postfit(
+            ws, '../%s/ThetaLimits' % limit_toolchain.name)), True),
+        name='PostFitBins',
+    )
+
     limit_graph = limits.LimitGraphs(
         '../Theta/ThetaLimits', True, True, True,
         axis_labels = ('T mass / GeV', '#sigma #times BR(T->tH) / pb')
@@ -599,6 +617,7 @@ def mk_sense_chain(name,
             postfit_toolchain,
             plotter_prefit,
             plotter_postfit,
+            plotter_postfit_bins,
             limit_graph,
             limit_graph_plot,
             limit_graph_plot_exp,

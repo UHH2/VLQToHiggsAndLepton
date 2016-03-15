@@ -228,16 +228,11 @@ AutoContentFwd = varial.extensions.tex.TexContent(
 
 
 ############################################################ AutoContentPAS ###
-pas_block = {
-    'selection_block': (
-        p_base + 'SelectionsEl/Stacks/BaseLineSelection/primary_lepton_pt_lin.pdf',
-        p_base + 'SelectionsMu/Stacks/BaseLineSelection/primary_lepton_pt_lin.pdf',
-        p_base + 'SelectionsEl/Stacks/BaseLineSelection/ST_lin.pdf',
-        p_base + 'SelectionsMu/Stacks/BaseLineSelection/h_mass_lin.pdf',
-    ),
-}
-
 pas_single = {
+    'selblock_primary_el_pt_lin.pdf': p_base + 'SelectionsEl/Stacks/BaseLineSelection/primary_lepton_pt_lin.pdf',
+    'selblock_primary_mu_pt_lin.pdf': p_base + 'SelectionsMu/Stacks/BaseLineSelection/primary_lepton_pt_lin.pdf',
+    'selblock_ST_lin.pdf':                p_base + 'SelectionsEl/Stacks/BaseLineSelection/ST_lin.pdf',
+    'selblock_h_mass_lin.pdf':            p_base + 'SelectionsMu/Stacks/BaseLineSelection/h_mass_lin.pdf',
     'tlep_mass_lin.pdf': p_base + 'SelectionsMu/Stacks/BaseLineSelection/tlep_mass_lin.pdf',
     'tlep_pt_lin.pdf': p_base + 'SelectionsMu/Stacks/BaseLineSelection/tlep_pt_lin.pdf',
     'SignalRegion__el_lin.pdf': p_base + 'SelectionsElNoData/Stacks/SignalRegion/vlq_mass_lin.pdf',
@@ -253,11 +248,15 @@ pas_single = {
     'TpBRH_limits.pdf': get_p_lim('TpBRH')+'/LimitGraphsPlot/Graph_log'+ext,
     'TpTLH_limits.pdf': get_p_lim('TpTLH')+'/LimitGraphsPlot/Graph_log'+ext,
     'TpTRH_limits.pdf': get_p_lim('TpTRH')+'/LimitGraphsPlot/Graph_log'+ext,
-}.items()
+    'TpBLH_coupling_limits.pdf': get_p_lim('TpBLH')+'/CouplingLimitPlot/Graph_lin'+ext,
+    'TpBRH_coupling_limits.pdf': get_p_lim('TpBRH')+'/CouplingLimitPlot/Graph_lin'+ext,
+    'TpTLH_coupling_limits.pdf': get_p_lim('TpTLH')+'/CouplingLimitPlot/Graph_lin'+ext,
+    'TpTRH_coupling_limits.pdf': get_p_lim('TpTRH')+'/CouplingLimitPlot/Graph_lin'+ext,
+}
 
 AutoContentPAS_img = varial.extensions.tex.TexContent(
-    pas_block,
-    dict(pas_single + get4limtab('TpBLH')),
+    {},
+    dict(pas_single.items() + get4limtab('TpBLH')),
     include_str=r'\includegraphics[width=0.49\textwidth]{%s}',
     name='img',
 )

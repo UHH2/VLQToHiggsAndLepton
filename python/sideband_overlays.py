@@ -6,6 +6,7 @@ import UHH2.VLQSemiLepPreSel.common as common
 
 
 plots = ['vlq_mass', 'vlq_pt', 'h_mass', 'h_pt', 'tlep_pt', 'tlep_mass']
+varial.settings.colors['SignalRegion'] = 617
 
 
 def rename_y_axis(wrp):
@@ -181,13 +182,20 @@ def multi_region_hook_region(wrps):
 def mk_overlay_chains(loadername, add_data_uncert=False, do_standard_plotter=True):
     input_path = '../../../../Loaders/%s' % loadername
 
+    canvas_decorators = [
+        varial.rnd.BottomPlotRatioSplitErr(poisson_errs=False),
+        varial.rnd.Legend,
+    ]
+
     standard_plotter = varial.tools.Plotter(
         'Plotter',
         input_result_path='../HistoLoader',
         plot_grouper=varial.plotter.plot_grouper_by_name,
         plot_setup=plot_setup_with_data_uncert if add_data_uncert else plot_setup,
         hook_canvas_post_build=put_uncert_title,
+        canvas_decorators=canvas_decorators,
     )
+
     return varial.tools.ToolChainParallel(loadername, [
         varial.tools.ToolChain(
             'SideBandRegion',
@@ -207,6 +215,7 @@ def mk_overlay_chains(loadername, add_data_uncert=False, do_standard_plotter=Tru
                         varial.gen.gen_copy(ws),
                         legend=lambda w: w.sample+'/'+w.in_file_path.split('/')[0]),
                     plot_grouper=varial.plotter.plot_grouper_by_name,
+                    canvas_decorators=canvas_decorators,
                 ),
             ] + ([standard_plotter] if do_standard_plotter else [])
         ),
@@ -229,6 +238,7 @@ def mk_overlay_chains(loadername, add_data_uncert=False, do_standard_plotter=Tru
                     plot_grouper=varial.plotter.plot_grouper_by_in_file_path,
                     hook_loaded_histos=multi_region_hook_sample,
                     save_name_func=lambda w: w.in_file_path.replace('/', '_'),
+                    canvas_decorators=canvas_decorators,
                 ),
                 varial.tools.Plotter(
                     'PlotterCombineRegions',
@@ -237,6 +247,7 @@ def mk_overlay_chains(loadername, add_data_uncert=False, do_standard_plotter=Tru
                         ws, [633, 601, 417, 617]),
                     plot_grouper=varial.plotter.plot_grouper_by_name,
                     hook_loaded_histos=multi_region_hook_region,
+                    canvas_decorators=canvas_decorators,
                 ),
             ]
         ),

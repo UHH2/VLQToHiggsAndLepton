@@ -109,6 +109,7 @@ import sideband_overlays
 import lep_plus_minus
 # import sframe_tools
 import tree_project
+import yields_n_eff
 import sensitivity
 import tex_content
 import fit_w_peak
@@ -207,7 +208,9 @@ tc = ToolChain(dir_name, [
     ]),
     sensitivity.PValueCollector(),
     sensitivity.BetaSignalCollector(),
-    sensitivity.EffNumTable(),
+    yields_n_eff.EffNumTable(),
+    yields_n_eff.SigEffGraph(),
+    yields_n_eff.sig_eff_grph_pltr,
     # varial.tools.PrintToolTree(),
     varial.tools.WebCreator(),
     tex_content.tc,

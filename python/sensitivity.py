@@ -26,10 +26,13 @@ theory_xsec_tpt = list(v/2. for v in theory_xsec_tpt)  # branching to tH in 0/50
 
 
 def add_th_curve(grps):
+    is_tpb = 'LimitsTpB' in varial.analysis.cwd
+    hand = 'L' if 'LH/DataBac' in varial.analysis.cwd else 'R'
     return limits.add_th_curve(
         grps,
         theory_masses,
-        theory_xsec_tpb if 'LimitsTpB' in varial.analysis.cwd else theory_xsec_tpt
+        theory_xsec_tpb if is_tpb else theory_xsec_tpt,
+        'Tb, c^{bW}_{%s}=1.0, BR(tH)=BR(bW)/2' if is_tpb else 'Tt, c^{tZ}_{%s}=1.0, BR(tH)=BR(tZ)',
     )
 
 
@@ -350,56 +353,6 @@ class BetaSignalCollector(varial.tools.Tool):
         for signalname, beta_signal in res:
             setattr(wrp, signalname, beta_signal)
         self.result = wrp
-
-
-class EffNumTable(varial.tools.Tool):
-    def run(self):
-        def get_line_info(info):
-            return sorted(
-                (k.replace('(700', '(0700'), v)
-                for k, v in info.iteritems()
-                if k.startswith('Integral___T_')
-            )
-
-        def get_fmt(line_tuple, f):
-            f /= 100.
-            name, nums = line_tuple
-            if len(nums) == 4:
-                i, st, _, sy = nums
-                st, sy = max(st, 0.01), max(sy, 0.01)
-            else:
-                (i, st), sy = nums, 0.
-            num = r'& $%5.1f \pm %4.1f \pm %4.1f$ ' % (i, st, sy)
-            eff = r'& $%2.2f \pm %2.2f \pm %2.2f$ ' % (i/f, st/f, sy/f)
-            return ('%50s'%name) + num + eff
-
-        res = ['TpBLH', 'TpBRH', 'TpTLH', 'TpTRH']
-        res = (
-            './VLQ2HT/Outputs/Limits%s/DataBackground/PostFit/_varial_infodata.pkl' % tok
-            for tok in res
-        )
-        res = (cPickle.load(open(fname)) for fname in res)
-        res = (
-            sorted(
-                (name, info)
-                for name, info in pkldata.iteritems()
-                if name.endswith('el') or name.endswith('mu')
-            )
-            for pkldata in res
-        )
-        res = ((item[0][1], item[1][1]) for item in res)  # drop name
-        res = (                                    # pull integrals out of wrps
-            line_tuple
-            for w_el, w_mu in res
-            for line_tuple in zip(get_line_info(w_el), get_line_info(w_mu))
-        )
-        res = (
-            get_fmt(line_el, 2318.-93.) + get_fmt(line_mu, 2318.)
-            for line_el, line_mu in res
-        )
-        res = '\n'.join(res)
-        with open(self.cwd+'table_content.tex', 'w') as f:
-            f.write(res)
 
 
 class CouplingLimit(varial.tools.Tool):

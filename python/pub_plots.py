@@ -40,43 +40,43 @@ pas_single = {
 }
 
 
-plot_config = {  #                       lumi legend x1 x2 y1 y2        CMS pos       y_max
-    'SignalRegion_bkg__el_lin.pdf':     (2.2, (0.70, 0.90, 0.55, 0.85), (0.2, 0.8),  11.0),
-    'SignalRegion_bkg__mu_lin.pdf':     (2.3, (0.70, 0.90, 0.55, 0.85), (0.2, 0.8),  35.0),
-    'SignalRegion_bkg__comb_lin.pdf':   (2.3, (0.70, 0.90, 0.55, 0.85), (0.2, 0.8),  39.0),
+plot_config = {  #                       lumi legend x1 x2 y1 y2    CMS pos   chan pos    y_max
+    'SignalRegion_bkg__el_lin.pdf':     (2.2, (.65, .85, .50, .85), (.2, .8), (.2, .6, 1),  11.0),
+    'SignalRegion_bkg__mu_lin.pdf':     (2.3, (.65, .85, .50, .85), (.2, .8), (.2, .6, 2),  35.0),
+    'SignalRegion_bkg__comb_lin.pdf':   (2.3, (.65, .85, .50, .85), (.2, .8), (.2, .6, 3),  39.0),
 
-    'SignalRegion__el_lin.pdf':         (2.2, (0.20, 0.40, 0.46, 0.85), (0.9, 0.8),  13.5),
-    'SignalRegion__mu_lin.pdf':         (2.3, (0.60, 0.80, 0.46, 0.85), (0.2, 0.8),  50.0),
+    'SignalRegion__el_lin.pdf':         (2.2, (.20, .40, .46, .85), (.9, .8), (.9, .6, 1),  13.5),
+    'SignalRegion__mu_lin.pdf':         (2.3, (.60, .80, .46, .85), (.2, .8), (.2, .6, 2),  50.0),
 
-    'selblock_primary_el_pt_lin.pdf':   (2.2, (0.65, 0.85, 0.16, 0.65), (0.9, 0.8),  1100),
-    'selblock_primary_mu_pt_lin.pdf':   (2.3, (0.65, 0.85, 0.16, 0.65), (0.9, 0.8),  6000),
-    'selblock_ST_lin.pdf':              (2.2, (0.65, 0.85, 0.36, 0.85), (0.2, 0.8),  1050),
-    'selblock_h_mass_lin.pdf':          (2.3, (0.65, 0.85, 0.16, 0.65), (0.9, 0.8),  5500),
+    'selblock_primary_el_pt_lin.pdf':   (2.2, (.65, .85, .16, .65), (.9, .8), (.65,.8, 1),  1100),
+    'selblock_primary_mu_pt_lin.pdf':   (2.3, (.65, .85, .16, .65), (.9, .8), (.65,.8, 2),  6000),
+    'selblock_ST_lin.pdf':              (2.2, (.65, .85, .36, .85), (.2, .8), (.2, .6, 1),  1050),
+    'selblock_h_mass_lin.pdf':          (2.3, (.65, .85, .16, .65), (.9, .8), (.65,.8, 2),  5500),
 
-    'tlep_mass_lin.pdf':                (2.3, (0.65, 0.85, 0.16, 0.65), (0.9, 0.8),  2000),
-    'tlep_pt_lin.pdf':                  (2.3, (0.65, 0.85, 0.16, 0.65), (0.9, 0.8),  2700),
+    'tlep_mass_lin.pdf':                (2.3, (.65, .85, .16, .65), (.9, .8), (.65,.8, 2),  2000),
+    'tlep_pt_lin.pdf':                  (2.3, (.65, .85, .16, .65), (.9, .8), (.65,.8, 2),  2700),
 
-    'Sideband__el_lin.pdf':             (2.2, (0.65, 0.85, 0.36, 0.85), (0.2, 0.8),   150),
-    'Sideband__mu_lin.pdf':             (2.3, (0.65, 0.85, 0.36, 0.85), (0.2, 0.8),   800),
+    'Sideband__el_lin.pdf':             (2.2, (.65, .85, .36, .85), (.2, .8), (.2, .6, 1),   150),
+    'Sideband__mu_lin.pdf':             (2.3, (.65, .85, .36, .85), (.2, .8), (.2, .6, 2),   800),
 
-    'Sideband_vs_SignalRegion__el.pdf': (0,   (0.70, 0.90, 0.67, 0.85), (0.2, 0.8),  0.19),
-    'Sideband_vs_SignalRegion__mu.pdf': (0,   (0.70, 0.90, 0.67, 0.85), (0.2, 0.8),   0.0),
+    'Sideband_vs_SignalRegion__el.pdf': (0,   (.70, .90, .67, .85), (.2, .8), (.2, .6, 1),  0.19),
+    'Sideband_vs_SignalRegion__mu.pdf': (0,   (.70, .90, .67, .85), (.2, .8), (.2, .6, 2),   0.0),
 
-    'TpBLH_limits.pdf':                 (2.3, (0.40, 0.60, 0.63, 0.85), (0.9, 0.8),   0.0),
-    'TpBRH_limits.pdf':                 (2.3, (0.40, 0.60, 0.63, 0.85), (0.9, 0.8),   0.0),
-    'TpTLH_limits.pdf':                 (2.3, (0.40, 0.60, 0.63, 0.85), (0.9, 0.8),   0.0),
-    'TpTRH_limits.pdf':                 (2.3, (0.40, 0.60, 0.63, 0.85), (0.9, 0.8),   0.0),
+    'TpBLH_limits.pdf':                 (2.3, (.40, .60, .63, .85), (.9, .8), (.9, .6, 0),   99.),
+    'TpBRH_limits.pdf':                 (2.3, (.40, .60, .63, .85), (.9, .8), (.9, .6, 0),   99.),
+    'TpTLH_limits.pdf':                 (2.3, (.40, .60, .63, .85), (.9, .8), (.9, .6, 0),   99.),
+    'TpTRH_limits.pdf':                 (2.3, (.40, .60, .63, .85), (.9, .8), (.9, .6, 0),   99.),
 
-    'TpBLH_coupling_limits.pdf':        (2.3, (0.50, 0.70, 0.68, 0.85), (0.2, 0.8),   0.0),
-    'TpBRH_coupling_limits.pdf':        (2.3, (0.50, 0.70, 0.68, 0.85), (0.2, 0.8),   0.0),
-    'TpTLH_coupling_limits.pdf':        (2.3, (0.50, 0.70, 0.68, 0.85), (0.2, 0.8),   0.0),
-    'TpTRH_coupling_limits.pdf':        (2.3, (0.50, 0.70, 0.68, 0.85), (0.2, 0.8),   0.0),
+    'TpBLH_coupling_limits.pdf':        (2.3, (.50, .70, .68, .85), (.2, .8), (.2, .6, 0),   0.0),
+    'TpBRH_coupling_limits.pdf':        (2.3, (.50, .70, .68, .85), (.2, .8), (.2, .6, 0),   0.0),
+    'TpTLH_coupling_limits.pdf':        (2.3, (.50, .70, .68, .85), (.2, .8), (.2, .6, 0),   0.0),
+    'TpTRH_coupling_limits.pdf':        (2.3, (.50, .70, .68, .85), (.2, .8), (.2, .6, 0),   0.0),
 }
 
 
 def handle_plot(name):
     # get parameters
-    lumi, (x1, x2, y1, y2), (pos_x, pos_y), y_scale_max = plot_config[name]
+    lumi, (x1, x2, y1, y2), (cms_x, cms_y), (chan_x, chan_y, chan), y_scale_max = plot_config[name]
     save_name = name.replace('.pdf', '')
 
     # get some info and fetch canvas
@@ -133,13 +133,29 @@ def handle_plot(name):
 
     latex.SetTextFont(61)
     latex.SetTextSize(cmsTextSize)
-    latex.SetTextAlign(31 if pos_x > 0.5 else 11)
-    latex.DrawLatex(pos_x, pos_y, 'CMS')
+    latex.SetTextAlign(31 if cms_x > 0.5 else 11)
+    latex.DrawLatex(cms_x, cms_y, 'CMS')
 
     latex.SetTextFont(52)
-    latex.SetTextAlign(31 if pos_x > 0.5 else 11)
+    latex.SetTextAlign(31 if cms_x > 0.5 else 11)
     latex.SetTextSize(0.76 * cmsTextSize)
-    latex.DrawLatex(pos_x, pos_y - 1.0*cmsTextSize, 'Preliminary')
+    latex.DrawLatex(cms_x, cms_y - 1.0*cmsTextSize, 'Preliminary')
+
+    if chan:
+        chan_txts = {1: 'electron', 2: 'muon', 3: 'electron+muon'}
+        chan_txt2 = 'channel'
+        latex.SetTextFont(42)
+        latex.SetTextAlign(31 if chan_x > 0.5 else 11)
+        latex.SetTextSize(0.76 * cmsTextSize)
+        latex.DrawLatex(chan_x, chan_y, chan_txts[chan])
+        latex.DrawLatex(chan_x, chan_y - 0.6*cmsTextSize, chan_txt2)
+
+    # if name.startswith('SignalRegion_bkg__'):
+    #     second_pad.GetListOfPrimitives()[1].GetYaxis().SetRangeUser(-0.9, 0.9)
+
+    if name.startswith('SignalRegion_bkg__'):
+        second_pad.GetListOfPrimitives()[1].GetYaxis().SetRangeUser(-0.9, 1.7)
+        legend.SetTextSize(0.55*cmsTextSize)
 
     # y axis
     first_obj = main_hists[0]

@@ -18,6 +18,8 @@ ToolChainParallel = varial.tools.ToolChainParallel
 varial.settings.defaults_BottomPlot['poisson_errs'] = True
 varial.settings.defaults_Legend['text_size'] = 0.035
 varial.ROOT.gStyle.SetPadTopMargin(0.1)
+varial.settings.canvas_size_x = 600
+varial.settings.canvas_size_y = 500
 
 dir_name = 'VLQ2HT'
 uhh_base = os.getenv('CMSSW_BASE') + '/src/UHH2/'

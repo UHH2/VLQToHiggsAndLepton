@@ -28,11 +28,16 @@ theory_xsec_tpt = list(v/2. for v in theory_xsec_tpt)  # branching to tH in 0/50
 def add_th_curve(grps):
     is_tpb = 'LimitsTpB' in varial.analysis.cwd
     hand = 'L' if 'LH/DataBac' in varial.analysis.cwd else 'R'
+    if is_tpb:
+        legend = 'Tb, c^{bW}_{%s}=1.0, BR(tH)=BR(bW)/2' % hand
+    else:
+        legend = 'Tt, c^{tZ}_{%s}=1.0, BR(tH)=BR(tZ)' % hand
+
     return limits.add_th_curve(
         grps,
         theory_masses,
         theory_xsec_tpb if is_tpb else theory_xsec_tpt,
-        'Tb, c^{bW}_{%s}=1.0, BR(tH)=BR(bW)/2' if is_tpb else 'Tt, c^{tZ}_{%s}=1.0, BR(tH)=BR(tZ)',
+        legend,
     )
 
 
@@ -529,7 +534,7 @@ def mk_sense_chain(name,
 
     limit_graph = limits.LimitGraphs(
         '../Theta/ThetaLimits', True, True, True,
-        axis_labels = ('T mass / GeV', '#sigma #times BR(T->tH) / pb')
+        axis_labels = ('T quark mass / GeV', '#sigma #times BR(T#rightarrowtH) (pb)')
     )
 
     limit_graph_plot = varial.tools.Plotter(

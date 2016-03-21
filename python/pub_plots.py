@@ -37,40 +37,45 @@ pas_single = {
     'TpBRH_coupling_limits.pdf': get_p_lim('TpBRH')+'/CouplingLimitPlot/Graph_lin'+ext,
     'TpTLH_coupling_limits.pdf': get_p_lim('TpTLH')+'/CouplingLimitPlot/Graph_lin'+ext,
     'TpTRH_coupling_limits.pdf': get_p_lim('TpTRH')+'/CouplingLimitPlot/Graph_lin'+ext,
+    'sel_eff_el.pdf': 'VLQ2HT/SigEffGraphPlot/el_lin'+ext,
+    'sel_eff_mu.pdf': 'VLQ2HT/SigEffGraphPlot/mu_lin'+ext,
 }
 
 
-plot_config = {  #                       lumi legend x1 x2 y1 y2    CMS pos   chan pos    y_max
-    'SignalRegion_bkg__el_lin.pdf':     (2.2, (.65, .85, .50, .85), (.2, .8), (.2, .6, 1),  11.0),
-    'SignalRegion_bkg__mu_lin.pdf':     (2.3, (.65, .85, .50, .85), (.2, .8), (.2, .6, 2),  35.0),
-    'SignalRegion_bkg__comb_lin.pdf':   (2.3, (.65, .85, .50, .85), (.2, .8), (.2, .6, 3),  39.0),
+plot_config = {  #                   lumi legend x1 x2 y1 y2    CMS pos   chan pos    y_max
+'sel_eff_el.pdf':                   (0,   (.70, .90, .20, .40), (.2, .8), (.2,.63, 1),  .014),
+'sel_eff_mu.pdf':                   (0,   (.70, .90, .20, .40), (.2, .8), (.2,.63, 2),  .019),
 
-    'SignalRegion__el_lin.pdf':         (2.2, (.20, .40, .46, .85), (.9, .8), (.9, .6, 1),  13.5),
-    'SignalRegion__mu_lin.pdf':         (2.3, (.60, .80, .46, .85), (.2, .8), (.2, .6, 2),  50.0),
+'SignalRegion_bkg__el_lin.pdf':     (2.2, (.65, .85, .50, .85), (.2, .8), (.2, .6, 1),  11.0),
+'SignalRegion_bkg__mu_lin.pdf':     (2.3, (.65, .85, .50, .85), (.2, .8), (.2, .6, 2),  35.0),
+'SignalRegion_bkg__comb_lin.pdf':   (2.3, (.65, .85, .50, .85), (.2, .8), (.2, .6, 3),  39.0),
 
-    'selblock_primary_el_pt_lin.pdf':   (2.2, (.65, .85, .16, .65), (.9, .8), (.65,.8, 1),  1100),
-    'selblock_primary_mu_pt_lin.pdf':   (2.3, (.65, .85, .16, .65), (.9, .8), (.65,.8, 2),  6000),
-    'selblock_ST_lin.pdf':              (2.2, (.65, .85, .36, .85), (.2, .8), (.2, .6, 1),  1050),
-    'selblock_h_mass_lin.pdf':          (2.3, (.65, .85, .16, .65), (.9, .8), (.65,.8, 2),  5500),
+'SignalRegion__el_lin.pdf':         (0,   (.20, .40, .46, .85), (.9, .8), (.2,.38, 1),  13.5),
+'SignalRegion__mu_lin.pdf':         (0,   (.60, .80, .46, .85), (.2, .8), (.2, .6, 2),  50.0),
 
-    'tlep_mass_lin.pdf':                (2.3, (.65, .85, .16, .65), (.9, .8), (.65,.8, 2),  2000),
-    'tlep_pt_lin.pdf':                  (2.3, (.65, .85, .16, .65), (.9, .8), (.65,.8, 2),  2700),
+'selblock_primary_el_pt_lin.pdf':   (2.2, (.65, .85, .16, .65), (.9, .8), (.65,.8, 1),  1100),
+'selblock_primary_mu_pt_lin.pdf':   (2.3, (.65, .85, .16, .65), (.9, .8), (.65,.8, 2),  6000),
+'selblock_ST_lin.pdf':              (2.2, (.65, .85, .36, .85), (.2, .8), (.2, .6, 1),  1050),
+'selblock_h_mass_lin.pdf':          (2.3, (.65, .85, .16, .65), (.9, .8), (.65,.8, 2),  5500),
 
-    'Sideband__el_lin.pdf':             (2.2, (.65, .85, .36, .85), (.2, .8), (.2, .6, 1),   150),
-    'Sideband__mu_lin.pdf':             (2.3, (.65, .85, .36, .85), (.2, .8), (.2, .6, 2),   800),
+'tlep_mass_lin.pdf':                (2.3, (.65, .85, .16, .65), (.9, .8), (.65,.8, 2),  2000),
+'tlep_pt_lin.pdf':                  (2.3, (.65, .85, .16, .65), (.9, .8), (.65,.8, 2),  2700),
 
-    'Sideband_vs_SignalRegion__el.pdf': (0,   (.70, .90, .67, .85), (.2, .8), (.2, .6, 1),  0.19),
-    'Sideband_vs_SignalRegion__mu.pdf': (0,   (.70, .90, .67, .85), (.2, .8), (.2, .6, 2),   0.0),
+'Sideband__el_lin.pdf':             (2.2, (.65, .85, .36, .85), (.2, .8), (.2, .6, 1),   150),
+'Sideband__mu_lin.pdf':             (2.3, (.65, .85, .36, .85), (.2, .8), (.2, .6, 2),   800),
 
-    'TpBLH_limits.pdf':                 (2.3, (.40, .60, .63, .85), (.9, .8), (.9, .6, 0),   99.),
-    'TpBRH_limits.pdf':                 (2.3, (.40, .60, .63, .85), (.9, .8), (.9, .6, 0),   99.),
-    'TpTLH_limits.pdf':                 (2.3, (.40, .60, .63, .85), (.9, .8), (.9, .6, 0),   99.),
-    'TpTRH_limits.pdf':                 (2.3, (.40, .60, .63, .85), (.9, .8), (.9, .6, 0),   99.),
+'Sideband_vs_SignalRegion__el.pdf': (0,   (.70, .90, .67, .85), (.2, .8), (.2, .6, 1),  0.19),
+'Sideband_vs_SignalRegion__mu.pdf': (0,   (.70, .90, .67, .85), (.2, .8), (.2, .6, 2),   0.0),
 
-    'TpBLH_coupling_limits.pdf':        (2.3, (.50, .70, .68, .85), (.2, .8), (.2, .6, 0),   0.0),
-    'TpBRH_coupling_limits.pdf':        (2.3, (.50, .70, .68, .85), (.2, .8), (.2, .6, 0),   0.0),
-    'TpTLH_coupling_limits.pdf':        (2.3, (.50, .70, .68, .85), (.2, .8), (.2, .6, 0),   0.0),
-    'TpTRH_coupling_limits.pdf':        (2.3, (.50, .70, .68, .85), (.2, .8), (.2, .6, 0),   0.0),
+'TpBLH_limits.pdf':                 (2.3, (.30, .50, .63, .85), (.9, .8), (.9, .6, 0),   99.),
+'TpBRH_limits.pdf':                 (2.3, (.30, .50, .63, .85), (.9, .8), (.9, .6, 0),   99.),
+'TpTLH_limits.pdf':                 (2.3, (.30, .50, .63, .85), (.9, .8), (.9, .6, 0),   99.),
+'TpTRH_limits.pdf':                 (2.3, (.30, .50, .63, .85), (.9, .8), (.9, .6, 0),   99.),
+
+'TpBLH_coupling_limits.pdf':        (2.3, (.50, .70, .68, .85), (.2, .8), (.2, .6, 0),   0.0),
+'TpBRH_coupling_limits.pdf':        (2.3, (.50, .70, .68, .85), (.2, .8), (.2, .6, 0),   0.0),
+'TpTLH_coupling_limits.pdf':        (2.3, (.50, .70, .68, .85), (.2, .8), (.2, .6, 0),   0.0),
+'TpTRH_coupling_limits.pdf':        (2.3, (.50, .70, .68, .85), (.2, .8), (.2, .6, 0),   0.0),
 }
 
 
@@ -115,7 +120,7 @@ def handle_plot(name):
     c.cd()
 
     # lumi / sqrt s text
-    lumi_line = ('%.1f fb^{-1} (13 TeV)' % lumi) if lumi else '(13 TeV)'
+    lumi_line = ('%.1f fb^{-1} (13 TeV)' % lumi) if lumi else '(simulation 13 TeV)'
     lumi_txt = ROOT.TPaveText(0.5, 0.87, 0.975, 1.0, 'brNDC')
     lumi_txt.AddText(lumi_line)
     lumi_txt.SetTextColor(ROOT.kBlack)
@@ -141,35 +146,50 @@ def handle_plot(name):
     latex.SetTextSize(0.76 * cmsTextSize)
     latex.DrawLatex(cms_x, cms_y - 1.0*cmsTextSize, 'Preliminary')
 
+    # electron / muon channel
     if chan:
         chan_txts = {1: 'electron', 2: 'muon', 3: 'electron+muon'}
         chan_txt2 = 'channel'
         latex.SetTextFont(42)
         latex.SetTextAlign(31 if chan_x > 0.5 else 11)
-        latex.SetTextSize(0.76 * cmsTextSize)
+        latex.SetTextSize(0.65 * cmsTextSize)
         latex.DrawLatex(chan_x, chan_y, chan_txts[chan])
         latex.DrawLatex(chan_x, chan_y - 0.6*cmsTextSize, chan_txt2)
 
-    # if name.startswith('SignalRegion_bkg__'):
-    #     second_pad.GetListOfPrimitives()[1].GetYaxis().SetRangeUser(-0.9, 0.9)
+    # darker shade on uncertainties
+    for obj in main_hists:
+        if 'uncert.' in obj.GetTitle():
+            obj.SetFillColor(ROOT.kBlack)
 
-    if name.startswith('SignalRegion_bkg__'):
-        second_pad.GetListOfPrimitives()[1].GetYaxis().SetRangeUser(-0.9, 1.7)
-        legend.SetTextSize(0.55*cmsTextSize)
+    if main_pad != second_pad:
+        second_pad.GetListOfPrimitives()[-2].SetFillColor(ROOT.kBlack)
 
-    # y axis
+    # x and y axes
     first_obj = main_hists[0]
+    x_axis = second_pad.GetListOfPrimitives()[1].GetXaxis()
     y_axis = first_obj.GetYaxis()
     y_axis.SetTitleOffset(1.25)
     y_axis.CenterTitle(0)
+    y_axis.SetNoExponent()
+
+    x_axis.SetTitle(x_axis.GetTitle().replace('/ GeV', '(GeV)'))
+
     if y_scale_max:
         first_obj.SetMaximum(y_scale_max)
+
     if save_name.endswith('_log'):
         main_pad.SetLogy()
 
+    # more detail fixings...
     if save_name.endswith('H_limits'):
         main_pad.SetLogy()
-        first_obj.SetMinimum(0.075)
+        first_obj.SetMinimum(0.05)
+        y_axis.SetTitle(y_axis.GetTitle().replace('->', '#rightarrow').replace('/ pb', '(pb)'))
+
+    if name.startswith('SignalRegion_bkg__'):
+        second_pad.GetListOfPrimitives()[1].GetYaxis().SetRangeUser(-0.9, 1.7)
+        # legend.SetTextSize(0.55*cmsTextSize)
+
 
     c.Modified()
     c.Update()

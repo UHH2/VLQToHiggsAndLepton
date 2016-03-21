@@ -87,7 +87,7 @@ class SigEffGraph(varial.tools.Tool):
             i, sys = varial.util.integral_and_error(w.histo_sys_err)
             return i, (stat**2 + sys**2)**.5
         mass = lambda w: float(w.sample[-4:])
-        norm = {'el': 23.18-.93, 'mu': 23.18}  # lumi in percent
+        norm = {'el': 2318.-93., 'mu': 2318.}
 
         vals = ((mass(w),) + ntgrl_err(w) + (w,)  # tuple of (m, eff, eff_err, wrp)
                 for w in wrps)
@@ -103,7 +103,7 @@ class SigEffGraph(varial.tools.Tool):
         graph = ROOT.TGraph(len(x), x, y)  # , xe, ye)
         graph.SetLineWidth(2)
         graph.GetXaxis().SetTitle('T quark mass / GeV')
-        graph.GetYaxis().SetTitle('#epsilon_{sel.} / %')
+        graph.GetYaxis().SetTitle('#epsilon_{sel.}')
         graph.SetMarkerStyle(20)
 
         return varial.wrp.GraphWrapper(

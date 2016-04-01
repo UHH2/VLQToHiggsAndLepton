@@ -43,15 +43,15 @@ pas_single = {
 
 
 plot_config = {  #                   lumi legend x1 x2 y1 y2    CMS pos   chan pos    y_max
-'sel_eff_el.pdf':                   (0,   (.70, .90, .20, .40), (.2, .8), (.2,.63, 1),  .014),
-'sel_eff_mu.pdf':                   (0,   (.70, .90, .20, .40), (.2, .8), (.2,.63, 2),  .019),
+'sel_eff_el.pdf':                   (0,   (.70, .90, .65, .85), (.2, .8), (.2, .55,1),   1.9),
+'sel_eff_mu.pdf':                   (0,   (.70, .90, .20, .40), (.2, .8), (.65,.255,2),  1.9),
 
 'SignalRegion_bkg__el_lin.pdf':     (2.2, (.65, .85, .50, .85), (.2, .8), (.2, .6, 1),  11.0),
 'SignalRegion_bkg__mu_lin.pdf':     (2.3, (.65, .85, .50, .85), (.2, .8), (.2, .6, 2),  35.0),
 'SignalRegion_bkg__comb_lin.pdf':   (2.3, (.65, .85, .50, .85), (.2, .8), (.2, .6, 3),  39.0),
 
 'SignalRegion__el_lin.pdf':         (0,   (.20, .40, .46, .85), (.9, .8), (.2,.38, 1),  13.5),
-'SignalRegion__mu_lin.pdf':         (0,   (.60, .80, .46, .85), (.2, .8), (.2, .6, 2),  50.0),
+'SignalRegion__mu_lin.pdf':         (0,   (.60, .80, .46, .85), (.2, .8), (.2,.55, 2),  50.0),
 
 'selblock_primary_el_pt_lin.pdf':   (2.2, (.65, .85, .16, .65), (.9, .8), (.65,.8, 1),  1100),
 'selblock_primary_mu_pt_lin.pdf':   (2.3, (.65, .85, .16, .65), (.9, .8), (.65,.8, 2),  6000),
@@ -64,8 +64,8 @@ plot_config = {  #                   lumi legend x1 x2 y1 y2    CMS pos   chan p
 'Sideband__el_lin.pdf':             (2.2, (.67, .87, .36, .85), (.2, .8), (.2, .6, 1),   150),
 'Sideband__mu_lin.pdf':             (2.3, (.67, .87, .36, .85), (.2, .8), (.2, .6, 2),   800),
 
-'Sideband_vs_SignalRegion__el.pdf': (0,   (.70, .90, .67, .85), (.2, .8), (.2, .6, 1),  0.19),
-'Sideband_vs_SignalRegion__mu.pdf': (0,   (.70, .90, .67, .85), (.2, .8), (.2, .6, 2),   0.0),
+'Sideband_vs_SignalRegion__el.pdf': (0,   (.70, .90, .67, .85), (.2, .8), (.2,.55, 1),  0.19),
+'Sideband_vs_SignalRegion__mu.pdf': (0,   (.70, .90, .67, .85), (.2, .8), (.2,.55, 2),   0.0),
 
 'TpBLH_limits.pdf':                 (2.3, (.30, .50, .63, .85), (.9, .8), (.9, .6, 0),   99.),
 'TpBRH_limits.pdf':                 (2.3, (.30, .50, .63, .85), (.9, .8), (.9, .6, 0),   99.),
@@ -120,7 +120,7 @@ def handle_plot(name):
     c.cd()
 
     # lumi / sqrt s text
-    lumi_line = ('%.1f fb^{-1} (13 TeV)' % lumi) if lumi else '(simulation 13 TeV)'
+    lumi_line = ('%.1f fb^{-1} (13 TeV)' % lumi) if lumi else '(13 TeV)'
     lumi_txt = ROOT.TPaveText(0.5, 0.87, 0.975, 1.0, 'brNDC')
     lumi_txt.AddText(lumi_line)
     lumi_txt.SetTextColor(ROOT.kBlack)
@@ -144,7 +144,11 @@ def handle_plot(name):
     latex.SetTextFont(52)
     latex.SetTextAlign(31 if cms_x > 0.5 else 11)
     latex.SetTextSize(0.76 * cmsTextSize)
-    latex.DrawLatex(cms_x, cms_y - 1.0*cmsTextSize, 'Preliminary')
+    if lumi:
+        latex.DrawLatex(cms_x, cms_y - 1.0*cmsTextSize, 'Preliminary')
+    else:
+        latex.DrawLatex(cms_x, cms_y - 1.0*cmsTextSize, 'Simulation')
+        latex.DrawLatex(cms_x, cms_y - 1.76*cmsTextSize, 'Preliminary')
 
     # electron / muon channel
     if chan:
@@ -190,6 +194,9 @@ def handle_plot(name):
         second_pad.GetListOfPrimitives()[1].GetYaxis().SetRangeUser(-0.9, 1.7)
         # legend.SetTextSize(0.55*cmsTextSize)
 
+    if name.startswith('sel_eff_'):
+        legend.SetTextSize(1.2 * legend.GetTextSize())
+        y_axis.SetTitleSize(1.2 * y_axis.GetTitleSize())
 
     c.Modified()
     c.Update()

@@ -104,6 +104,8 @@ def get_model_data_bkg(hist_dir, signals):
     model.fill_histogram_zerobins()
     model.set_signal_processes(signals)
     model.add_lognormal_uncertainty('bkg_rate', math.log(2.), 'Bkg')
+    # model.add_lognormal_uncertainty('bkg_rate', math.log(100.), 'Bkg')
+    # model.add_lognormal_uncertainty('bkg_rate', limits.theta_auto.inf, 'Bkg')
 
     for s in signals:
         model.add_lognormal_uncertainty('fwd_jet_eff', math.log(1.15), s)

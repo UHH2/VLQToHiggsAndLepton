@@ -74,8 +74,8 @@ plot_config = {  #                   lumi legend x1 x2 y1 y2    CMS pos   chan p
 
 'TpBLH_coupling_limits.pdf':        (2.3, (.50, .70, .68, .85), (.2, .8), (.2, .6, 0),   0.0),
 'TpBRH_coupling_limits.pdf':        (2.3, (.50, .70, .68, .85), (.2, .8), (.2, .6, 0),   0.0),
-'TpTLH_coupling_limits.pdf':        (2.3, (.50, .70, .68, .85), (.2, .8), (.2, .6, 0),   0.0),
-'TpTRH_coupling_limits.pdf':        (2.3, (.50, .70, .68, .85), (.2, .8), (.2, .6, 0),   0.0),
+'TpTLH_coupling_limits.pdf':        (2.3, (.50, .70, .68, .85), (.2, .8), (.2, .6, 0),   9.9),
+'TpTRH_coupling_limits.pdf':        (2.3, (.50, .70, .68, .85), (.2, .8), (.2, .6, 0),   9.9),
 }
 
 

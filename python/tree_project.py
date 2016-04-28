@@ -238,18 +238,46 @@ def mk_sys_tps(add_sel=None):
     )
 
     ############ next put together nominal samples with with weight uncerts ###
-    nominal_files = base_path + 'samples/uhh2.AnalysisModuleRunner.MC.*.root'
+    nominal_files = base_path + 'samples_74X/uhh2.AnalysisModuleRunner.MC.*.root'
     filenames = dict(
         (sample, list(f for f in glob.glob(nominal_files) if sample in f))
         for sample in samples
         if 'Run20' not in sample
     )
+    rate_minus_dict = dict(
+        (
+            ('TTbar',       base_weight + '*0.84'),
+            ('SingleT',     base_weight + '*0.8'),
+            ('QCD',         base_weight + '*0.8'),
+            ('DYJets',      base_weight + '*0.8'),
+            ('WJets',       base_weight + '*0.88'),  # should only be 8%, but fwd jet + lep
+            ('TpB_TH_0700', base_weight + '*0.841886'),
+            ('TpB_TH_1200', base_weight + '*0.841886'),
+            ('TpB_TH_1700', base_weight + '*0.841886'),
+        ) + tuple(
+            (s, base_weight + '*0.841886') for s in varial.settings.all_signals
+        )
+    )
+    rate_plus_dict = dict(
+        (
+            ('TTbar',       base_weight + '*1.16'),
+            ('SingleT',     base_weight + '*1.2'),
+            ('QCD',         base_weight + '*1.2'),
+            ('DYJets',      base_weight + '*1.2'),
+            ('WJets',       base_weight + '*1.12'), # should only be 8%, but fwd jet + lep
+            ('TpB_TH_0700', base_weight + '*1.158114'),
+            ('TpB_TH_1200', base_weight + '*1.158114'),
+            ('TpB_TH_1700', base_weight + '*1.158114'),
+        ) + tuple(
+            (s, base_weight + '*1.158114') for s in varial.settings.all_signals
+        )
+    )
     sys_sec_sel_weight = list(
         (name, [
-            ('SignalRegion',        sr_sel, base_weight + '*' + w),
-            ('SidebandRegion',      sb_sel, base_weight + '*' + w),
-            ('BaseLineSelection',   bl_sel, base_weight + '*' + w),
-            ('Fw1B0Selection',      fw1_b0_sel, base_weight + '*' + w),
+            ('SignalRegion',        sr_sel, w if isinstance(w, dict) else base_weight+'*'+w),
+            ('SidebandRegion',      sb_sel, w if isinstance(w, dict) else base_weight+'*'+w),
+            ('BaseLineSelection',   bl_sel, w if isinstance(w, dict) else base_weight+'*'+w),
+            ('Fw1B0Selection',      fw1_b0_sel, w if isinstance(w, dict) else base_weight+'*'+w),
         ])
         for name, w in (
             ('b_tag_bc__minus',     'weight_btag_bc_down/weight_btag'),
@@ -266,8 +294,8 @@ def mk_sys_tps(add_sel=None):
             ('jet_pt__plus',        'weight_ak4jet'),
             ('HT__minus',           '1'),
             ('HT__plus',            'ht_weight'),
-            ('rate__minus',         '0.841886'),  # 1 - (0.05**2 + 0.15**2)**.5
-            ('rate__plus',          '1.158114'),  # 1 + (0.05**2 + 0.15**2)**.5
+            ('rate__minus',         rate_minus_dict),  # 1 - (0.05**2 + 0.15**2)**.5
+            ('rate__plus',          rate_plus_dict),  # 1 + (0.05**2 + 0.15**2)**.5
         )
     )
     sys_tps += list(

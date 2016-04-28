@@ -23,7 +23,7 @@ varial.settings.canvas_size_y = 500
 
 dir_name = 'VLQ2HT'
 uhh_base = os.getenv('CMSSW_BASE') + '/src/UHH2/'
-input_pat = '/nfs/dust/cms/user/tholenhe/VLQToHiggsAndLepton/samples/uhh2*.root'
+input_pat = '/nfs/dust/cms/user/tholenhe/VLQToHiggsAndLepton/samples_74X/uhh2*.root'
 
 varial.settings.my_lh_signals = [
     'Signal_TpB_TH_LH_M0700',

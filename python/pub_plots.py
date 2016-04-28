@@ -43,29 +43,29 @@ pas_single = {
 
 
 plot_config = {  #                   lumi legend x1 x2 y1 y2    CMS pos   chan pos    y_max
-'sel_eff_el.pdf':                   (0,   (.70, .90, .65, .85), (.2, .8), (.2, .55,1),   1.9),
+'sel_eff_el.pdf':                   (0,   (.70, .90, .65, .85), (.2, .8), (.2, .6, 1),   1.9),
 'sel_eff_mu.pdf':                   (0,   (.70, .90, .20, .40), (.2, .8), (.65,.255,2),  1.9),
 
-'SignalRegion_bkg__el_lin.pdf':     (2.2, (.65, .85, .50, .85), (.2, .8), (.2, .6, 1),  11.0),
-'SignalRegion_bkg__mu_lin.pdf':     (2.3, (.65, .85, .50, .85), (.2, .8), (.2, .6, 2),  35.0),
-'SignalRegion_bkg__comb_lin.pdf':   (2.3, (.65, .85, .50, .85), (.2, .8), (.2, .6, 3),  39.0),
-
-'SignalRegion__el_lin.pdf':         (0,   (.20, .40, .46, .85), (.9, .8), (.2,.38, 1),  13.5),
-'SignalRegion__mu_lin.pdf':         (0,   (.60, .80, .46, .85), (.2, .8), (.2,.55, 2),  50.0),
-
+'selblock_h_mass_lin.pdf':          (2.3, (.65, .85, .16, .65), (.9, .8), (.65,.8, 2),  5500),
 'selblock_primary_el_pt_lin.pdf':   (2.2, (.65, .85, .16, .65), (.9, .8), (.65,.8, 1),  1100),
 'selblock_primary_mu_pt_lin.pdf':   (2.3, (.65, .85, .16, .65), (.9, .8), (.65,.8, 2),  6000),
-'selblock_ST_lin.pdf':              (2.2, (.65, .85, .36, .85), (.2, .8), (.2, .6, 1),  1050),
-'selblock_h_mass_lin.pdf':          (2.3, (.65, .85, .16, .65), (.9, .8), (.65,.8, 2),  5500),
+'selblock_ST_lin.pdf':              (2.2, (.65, .85, .36, .85), (.2, .8), (.2, .7, 1),  1050),
+
+'Sideband__el_lin.pdf':             (2.2, (.67, .87, .36, .85), (.2, .8), (.2, .7, 1),   150),
+'Sideband__mu_lin.pdf':             (2.3, (.67, .87, .36, .85), (.2, .8), (.2, .7, 2),   800),
+
+'Sideband_vs_SignalRegion__el.pdf': (0,   (.70, .90, .67, .85), (.2, .8), (.2,.62, 1),  0.19),
+'Sideband_vs_SignalRegion__mu.pdf': (0,   (.70, .90, .67, .85), (.2, .8), (.2,.62 , 2),   0.0),
+
+'SignalRegion__el_lin.pdf':         (0,   (.20, .40, .46, .85), (.9, .8), (.2,.38, 1),  13.5),
+'SignalRegion__mu_lin.pdf':         (0,   (.60, .80, .46, .85), (.2, .8), (.2,.62, 2),  50.0),
+
+'SignalRegion_bkg__el_lin.pdf':     (2.2, (.65, .85, .50, .85), (.2, .8), (.2, .7, 1),  11.0),
+'SignalRegion_bkg__mu_lin.pdf':     (2.3, (.65, .85, .50, .85), (.2, .8), (.2, .7, 2),  35.0),
+'SignalRegion_bkg__comb_lin.pdf':   (2.3, (.65, .85, .50, .85), (.2, .8), (.2, .7, 3),  39.0),
 
 'tlep_mass_lin.pdf':                (2.3, (.65, .85, .16, .65), (.9, .8), (.65,.8, 2),  2000),
 'tlep_pt_lin.pdf':                  (2.3, (.65, .85, .16, .65), (.9, .8), (.65,.8, 2),  2700),
-
-'Sideband__el_lin.pdf':             (2.2, (.67, .87, .36, .85), (.2, .8), (.2, .6, 1),   150),
-'Sideband__mu_lin.pdf':             (2.3, (.67, .87, .36, .85), (.2, .8), (.2, .6, 2),   800),
-
-'Sideband_vs_SignalRegion__el.pdf': (0,   (.70, .90, .67, .85), (.2, .8), (.2,.55, 1),  0.19),
-'Sideband_vs_SignalRegion__mu.pdf': (0,   (.70, .90, .67, .85), (.2, .8), (.2,.55, 2),   0.0),
 
 'TpBLH_limits.pdf':                 (2.3, (.30, .50, .63, .85), (.9, .8), (.9, .6, 0),   99.),
 'TpBRH_limits.pdf':                 (2.3, (.30, .50, .63, .85), (.9, .8), (.9, .6, 0),   99.),
@@ -145,10 +145,10 @@ def handle_plot(name):
     latex.SetTextAlign(31 if cms_x > 0.5 else 11)
     latex.SetTextSize(0.76 * cmsTextSize)
     if lumi:
-        latex.DrawLatex(cms_x, cms_y - 1.0*cmsTextSize, 'Preliminary')
+        pass  # latex.DrawLatex(cms_x, cms_y - 1.0*cmsTextSize, 'Preliminary')
     else:
         latex.DrawLatex(cms_x, cms_y - 1.0*cmsTextSize, 'Simulation')
-        latex.DrawLatex(cms_x, cms_y - 1.76*cmsTextSize, 'Preliminary')
+        # latex.DrawLatex(cms_x, cms_y - 1.76*cmsTextSize, 'Preliminary')
 
     # electron / muon channel
     if chan:

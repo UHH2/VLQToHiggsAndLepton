@@ -1,6 +1,7 @@
 import UHH2.VLQSemiLepPreSel.common as common
 import varial.plotter
 import varial.tools
+import itertools
 import cPickle
 import array
 import ROOT
@@ -128,10 +129,21 @@ class SigEffGraph(varial.tools.Tool):
         wrps = sorted(wrps, key=lambda w: w.category)
         self.result = wrps
 
+
+def plot_setup(grps):
+    def set_line_style(wrps):
+        line_styles = [1, 2, 3, 4]
+        for wrp, style in itertools.izip(wrps,line_styles):
+            wrp.obj.SetLineStyle(style)
+            wrp.obj.SetLineWidth(2)
+            yield wrp
+    return (set_line_style(grp) for grp in grps)
+
+
 sig_eff_grph_pltr = varial.tools.Plotter(
     input_result_path='../SigEffGraph',
     plot_grouper=lambda ws: varial.gen.group(ws, lambda w: w.category),
-    plot_setup=varial.plotter.default_plot_colorizer,
+    plot_setup=plot_setup,
     save_name_func=lambda c: c._renderers[0].category,
     name='SigEffGraphPlot',
 )

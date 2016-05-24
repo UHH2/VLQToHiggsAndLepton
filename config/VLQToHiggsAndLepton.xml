@@ -97,19 +97,19 @@ aa    ]8I 88 "8a,   ,d88 88       88 88,    ,88 88
 -->
 
 
-<InputData Lumi="100000" NEventsMax="-1" Type="MC" Version="Signal_TpB_TH_LH_M0700" Cacheable="False">
+<InputData Lumi="894500" NEventsMax="-1" Type="MC" Version="Signal_TpB_TH_LH_M0700" Cacheable="False">
     <In FileName="/nfs/dust/cms/user/tholenhe/VLQSemiLepPreSel/Run2-ntuple-split/uhh2.AnalysisModuleRunner.MC.MC_TpB_TH_LH_M0700*.root" Lumi="0.0"/>
     <InputTree Name="AnalysisTree" />
     <OutputTree Name="AnalysisTree" />
 </InputData>
 
-<InputData Lumi="100000" NEventsMax="-1" Type="MC" Version="Signal_TpB_TH_LH_M0800" Cacheable="False">
+<InputData Lumi="394000" NEventsMax="-1" Type="MC" Version="Signal_TpB_TH_LH_M0800" Cacheable="False">
     <In FileName="/nfs/dust/cms/user/tholenhe/VLQSemiLepPreSel/Run2-ntuple-split/uhh2.AnalysisModuleRunner.MC.MC_TpB_TH_LH_M0800*.root" Lumi="0.0"/>
     <InputTree Name="AnalysisTree" />
     <OutputTree Name="AnalysisTree" />
 </InputData>
 
-<InputData Lumi="100000" NEventsMax="-1" Type="MC" Version="Signal_TpB_TH_LH_M0900" Cacheable="False">
+<InputData Lumi="200000" NEventsMax="-1" Type="MC" Version="Signal_TpB_TH_LH_M0900" Cacheable="False">
     <In FileName="/nfs/dust/cms/user/tholenhe/VLQSemiLepPreSel/Run2-ntuple-split/uhh2.AnalysisModuleRunner.MC.MC_TpB_TH_LH_M0900*.root" Lumi="0.0"/>
     <InputTree Name="AnalysisTree" />
     <OutputTree Name="AnalysisTree" />
@@ -159,19 +159,19 @@ aa    ]8I 88 "8a,   ,d88 88       88 88,    ,88 88
 
 
 
-<InputData Lumi="100000" NEventsMax="-1" Type="MC" Version="Signal_TpB_TH_RH_M0700" Cacheable="False">
+<InputData Lumi="795000" NEventsMax="-1" Type="MC" Version="Signal_TpB_TH_RH_M0700" Cacheable="False">
     <In FileName="/nfs/dust/cms/user/tholenhe/VLQSemiLepPreSel/Run2-ntuple-split/uhh2.AnalysisModuleRunner.MC.MC_TpB_TH_RH_M0700*.root" Lumi="0.0"/>
     <InputTree Name="AnalysisTree" />
     <OutputTree Name="AnalysisTree" />
 </InputData>
 
-<InputData Lumi="100000" NEventsMax="-1" Type="MC" Version="Signal_TpB_TH_RH_M0800" Cacheable="False">
+<InputData Lumi="397000" NEventsMax="-1" Type="MC" Version="Signal_TpB_TH_RH_M0800" Cacheable="False">
     <In FileName="/nfs/dust/cms/user/tholenhe/VLQSemiLepPreSel/Run2-ntuple-split/uhh2.AnalysisModuleRunner.MC.MC_TpB_TH_RH_M0800*.root" Lumi="0.0"/>
     <InputTree Name="AnalysisTree" />
     <OutputTree Name="AnalysisTree" />
 </InputData>
 
-<InputData Lumi="100000" NEventsMax="-1" Type="MC" Version="Signal_TpB_TH_RH_M0900" Cacheable="False">
+<InputData Lumi="199000" NEventsMax="-1" Type="MC" Version="Signal_TpB_TH_RH_M0900" Cacheable="False">
     <In FileName="/nfs/dust/cms/user/tholenhe/VLQSemiLepPreSel/Run2-ntuple-split/uhh2.AnalysisModuleRunner.MC.MC_TpB_TH_RH_M0900*.root" Lumi="0.0"/>
     <InputTree Name="AnalysisTree" />
     <OutputTree Name="AnalysisTree" />
@@ -376,7 +376,7 @@ aa    ]8I 88 "8a,   ,d88 88       88 88,    ,88 88
 
 
 
-<InputData Lumi="100000" NEventsMax="-1" Type="MC" Version="TpB_TH_0700" Cacheable="False">
+<InputData Lumi="894500" NEventsMax="-1" Type="MC" Version="TpB_TH_0700" Cacheable="False">
     <In FileName="/nfs/dust/cms/user/tholenhe/VLQSemiLepPreSel/Run2-ntuple-split/uhh2.AnalysisModuleRunner.MC.MC_TpB_TH_LH_M0700*.root" Lumi="0.0"/>
     <InputTree Name="AnalysisTree" />
     <OutputTree Name="AnalysisTree" />
@@ -396,7 +396,7 @@ aa    ]8I 88 "8a,   ,d88 88       88 88,    ,88 88
 
 
 
-<InputData Lumi="100000" NEventsMax="-1" Type="MC" Version="TpB_TH_0700_Tlep" Cacheable="False">
+<InputData Lumi="894500" NEventsMax="-1" Type="MC" Version="TpB_TH_0700_Tlep" Cacheable="False">
     <In FileName="/nfs/dust/cms/user/tholenhe/VLQSemiLepPreSel/Run2-ntuple-split/uhh2.AnalysisModuleRunner.MC.MC_TpB_TH_LH_M0700*.root" Lumi="0.0"/>
     <InputTree Name="AnalysisTree" />
     <OutputTree Name="AnalysisTree" />

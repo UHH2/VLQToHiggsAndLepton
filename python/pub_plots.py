@@ -54,15 +54,15 @@ plot_config = {  #                   lumi legend x1 x2 y1 y2    CMS pos   chan p
 'Sideband__el_lin.pdf':             (2.2, (.67, .87, .36, .85), (.2, .8), (.2, .7, 1),   150),
 'Sideband__mu_lin.pdf':             (2.3, (.67, .87, .36, .85), (.2, .8), (.2, .7, 2),   800),
 
-'Sideband_vs_SignalRegion__el.pdf': (0,   (.70, .90, .67, .85), (.2, .8), (.2,.62, 1),  0.19),
-'Sideband_vs_SignalRegion__mu.pdf': (0,   (.70, .90, .67, .85), (.2, .8), (.2,.62 , 2),   0.0),
+'Sideband_vs_SignalRegion__el.pdf': (0,   (.65, .90, .62, .85), (.2, .8), (.2,.62, 1),  0.19),
+'Sideband_vs_SignalRegion__mu.pdf': (0,   (.65, .90, .62, .85), (.2, .8), (.2,.62, 2),   0.0),
 
 'SignalRegion__el_lin.pdf':         (0,   (.20, .40, .46, .85), (.9, .8), (.2,.38, 1),  13.5),
 'SignalRegion__mu_lin.pdf':         (0,   (.60, .80, .46, .85), (.2, .8), (.2,.62, 2),  50.0),
 
-'SignalRegion_bkg__el_lin.pdf':     (2.2, (.65, .85, .50, .85), (.2, .8), (.2, .7, 1),  11.0),
-'SignalRegion_bkg__mu_lin.pdf':     (2.3, (.65, .85, .50, .85), (.2, .8), (.2, .7, 2),  35.0),
-'SignalRegion_bkg__comb_lin.pdf':   (2.3, (.65, .85, .50, .85), (.2, .8), (.2, .7, 3),  39.0),
+'SignalRegion_bkg__el_lin.pdf':     (2.2, (.65, .85, .55, .85), (.2, .8), (.2, .7, 1),  11.0),
+'SignalRegion_bkg__mu_lin.pdf':     (2.3, (.65, .85, .55, .85), (.2, .8), (.2, .7, 2),  35.0),
+'SignalRegion_bkg__comb_lin.pdf':   (2.3, (.65, .85, .55, .85), (.2, .8), (.2, .7, 3),  45.0),
 
 'tlep_mass_lin.pdf':                (2.3, (.65, .85, .16, .65), (.9, .8), (.65,.8, 2),  2000),
 'tlep_pt_lin.pdf':                  (2.3, (.65, .85, .16, .65), (.9, .8), (.65,.8, 2),  2700),
@@ -72,10 +72,10 @@ plot_config = {  #                   lumi legend x1 x2 y1 y2    CMS pos   chan p
 'TpTLH_limits.pdf':                 (2.3, (.30, .50, .63, .85), (.9, .8), (.9, .6, 0),   99.),
 'TpTRH_limits.pdf':                 (2.3, (.30, .50, .63, .85), (.9, .8), (.9, .6, 0),   99.),
 
-'TpBLH_coupling_limits.pdf':        (2.3, (.50, .70, .68, .85), (.2, .8), (.2, .6, 0),   0.0),
-'TpBRH_coupling_limits.pdf':        (2.3, (.50, .70, .68, .85), (.2, .8), (.2, .6, 0),   0.0),
-'TpTLH_coupling_limits.pdf':        (2.3, (.50, .70, .68, .85), (.2, .8), (.2, .6, 0),   9.9),
-'TpTRH_coupling_limits.pdf':        (2.3, (.50, .70, .68, .85), (.2, .8), (.2, .6, 0),   9.9),
+'TpBLH_coupling_limits.pdf':        (2.3, (.50, .79, .68, .85), (.2, .8), (.2, .6, 0),   0.0),
+'TpBRH_coupling_limits.pdf':        (2.3, (.50, .79, .68, .85), (.2, .8), (.2, .6, 0),   0.0),
+'TpTLH_coupling_limits.pdf':        (2.3, (.50, .79, .68, .85), (.2, .8), (.2, .6, 0),   9.9),
+'TpTRH_coupling_limits.pdf':        (2.3, (.50, .79, .68, .85), (.2, .8), (.2, .6, 0),   9.9),
 }
 
 
@@ -111,11 +111,29 @@ def handle_plot(name):
     main_pad.SetRightMargin(0.05)
     second_pad.SetRightMargin(0.05)
 
+    # area in coupling plots
+    if '_coupling_' in save_name:
+        obs_lim = main_hists[-1]
+        n = obs_lim.GetN()
+        obs_lim.SetPoint(n, 1800, 40)
+        obs_lim.SetPoint(n+1, 700, 40)
+        obs_lim.SetFillStyle(3344)
+        obs_lim.SetFillColor(ROOT.kGray + 1)
+        obs_lim.SetLineColor(ROOT.kGray + 1)
+        obs_lim.SetLineWidth(2)
+        obs_lim.Draw('F')
+        legend_entry = legend.GetListOfPrimitives()[0]
+        legend_entry.SetObject(obs_lim)
+        legend_entry.SetOption('F')
+        # legend_entry.SetFillColor(ROOT.kGray + 1)
+        # legend_entry.SetFillStyle(3244)
+
     # move legend
     legend.SetX1NDC(x1)
     legend.SetX2NDC(x2)
     legend.SetY1NDC(y1)
     legend.SetY2NDC(y2)
+    #  legend.Draw()
 
     c.cd()
 
@@ -184,6 +202,16 @@ def handle_plot(name):
     if save_name.endswith('_log'):
         main_pad.SetLogy()
 
+    if save_name.endswith('_limits'):
+        x_axis = first_obj.GetXaxis()
+        x_axis.SetRangeUser(700, 1700)
+
+    if name.startswith('sel_eff_'):
+        legend.SetTextSize(1.4 * legend.GetTextSize())
+        y_axis.SetTitleSize(1.2 * y_axis.GetTitleSize())
+    else:
+        legend.SetTextSize(1.1 * legend.GetTextSize())
+
     # more detail fixings...
     if save_name.endswith('H_limits'):
         main_pad.SetLogy()
@@ -192,15 +220,30 @@ def handle_plot(name):
 
     if name.startswith('SignalRegion_bkg__'):
         second_pad.GetListOfPrimitives()[1].GetYaxis().SetRangeUser(-0.9, 1.7)
-        # legend.SetTextSize(0.55*cmsTextSize)
+        # legend.SetTextSize(1.3 * legend.GetTextSize())
+        entries = list(legend.GetListOfPrimitives())
+        entries[-1].GetObject().SetLineWidth(2)
+        entries[-1].GetObject().SetLineColor(1)
 
-    if name.startswith('sel_eff_'):
-        legend.SetTextSize(1.2 * legend.GetTextSize())
-        y_axis.SetTitleSize(1.2 * y_axis.GetTitleSize())
+    if name.startswith('Sideband_vs_SignalRegion__'):
+        legend.SetTextSize(1.3 * legend.GetTextSize())
+        entries_tlist = legend.GetListOfPrimitives()
+        entries = list(entries_tlist)
+        entries[0].SetLabel('signal region')
+        entries[1].SetLabel('stat. uncert. bkg.')
+        entries[2].SetLabel('control region')
+        entries[2].GetObject().SetLineWidth(2)
+        entries[2].GetObject().SetLineColor(1)
+        entries_tlist.Clear()
+        entries_tlist.Add(entries[0])
+        entries_tlist.Add(entries[2])
+        entries_tlist.Add(entries[1])
+
 
     c.Modified()
     c.Update()
-    # c.SaveAs('PlotBeautifier/'+name+'.root')
+    main_pad.Modified()
+    main_pad.Update()
     c.SaveAs('PlotBeautifier/'+name)
 
 

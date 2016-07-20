@@ -22,7 +22,7 @@ theory_xsec_tpb = list(v/4. for v in theory_xsec_tpb)  # branching to tH in 50/2
 
 # theory_xsec_tpt = [0.745, 0.532, 0.388, 0.285, 0.212, 0.159,
 #                    0.120, 0.0917, 0.0706, 0.0541, 0.0420, 0.0324,]
-theory_xsec_tpt = [0.500, 0.365, 0.271, 0.203, 0.152, 0.116, 
+theory_xsec_tpt = [0.500, 0.365, 0.271, 0.203, 0.152, 0.116,
                    0.0894, 0.0692, 0.0540, 0.0420, 0.0330, 0.0259,]
 theory_xsec_tpt = list(v/2. for v in theory_xsec_tpt)  # branching to tH in 0/50/50
 
@@ -187,7 +187,7 @@ def hook_loaded_histos_data_bkg(wrps):
         scale_factor = sr_.obj.Integral() / sb_.obj.Integral()
         sb_ = varial.op.prod([sb_, varial.wrp.FloatWrapper(scale_factor)])
         sb_.sample = 'Bkg'
-        sb_.legend = 'Bkg. estimate'
+        sb_.legend = 'bkg. estimate'
         sb_.region = 'SignalRegion'
         sb_.is_data = False
         sb_.lumi = sr_.lumi
@@ -270,7 +270,7 @@ def scale_bkg_postfit(wrps, theta_res_path):
     for w in wrps:
         if w.sample == 'Bkg':
             w.sample = 'BkgPostFit'
-            w.legend = 'Bkg. post-fit'
+            w.legend = 'bkg. post-fit'
             w.histo.Scale(1+r)
         yield w
 
@@ -288,8 +288,8 @@ def make_combo(wrps):
 def put_uncert_title(canvas_builders):
     for cnv in canvas_builders:
         for entry in cnv.legend.GetListOfPrimitives():
-            if entry.GetLabel() == 'Stat. uncert. MC':
-                entry.SetLabel('Stat. uncert. Bkg')
+            if entry.GetLabel() == 'stat. uncert. MC':
+                entry.SetLabel('stat. uncert. bkg')
         yield cnv
 
 

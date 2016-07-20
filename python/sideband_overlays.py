@@ -26,7 +26,7 @@ def hook_loaded_histos(wrps):
     # wrps = sorted(wrps, key=lambda w: '%s__%s' % (w.category, w.sample))
     # wrps = plot.merge_samples(wrps)
     # wrps = varial.gen.attribute_printer(wrps, 'legend')
-    wrps = varial.gen.gen_norm_to_integral(wrps)
+    # wrps = varial.gen.gen_norm_to_integral(wrps)
     wrps = (rename_y_axis(w) for w in wrps)
     wrps = varial.gen.switch(
         wrps,
@@ -99,7 +99,7 @@ def plot_setup(grps):
         # signal region: line histo
         sr_bkg = list(w for w in bkg if w.legend == 'SignalRegion')
         sr_bkg[0].is_pseudo_data = True
-        sr_bkg[0].draw_option = 'E1' + sr_bkg[0].draw_option
+        sr_bkg[0].draw_option = sr_bkg[0].draw_option + 'E1'
         sr_bkg[0].histo.SetMarkerSize(0)
 
         # sideband region: stack
@@ -126,7 +126,7 @@ def plot_setup_with_data_uncert(grps):
         # signal region: line histo
         sr_bkg = list(w for w in bkg if w.legend == 'SignalRegion')
         sr_bkg[0].is_pseudo_data = True
-        sr_bkg[0].draw_option = 'E1' + sr_bkg[0].draw_option
+        sr_bkg[0].draw_option = sr_bkg[0].draw_option + 'E1'
         sr_bkg[0].histo.SetMarkerSize(0)
 
         # data: needed for sys uncert
@@ -153,16 +153,6 @@ def plot_setup_with_data_uncert(grps):
         yield sr_bkg + sb_bkg
 
 
-def put_uncert_title(canvas_builders):
-    for cnv in canvas_builders:
-        for entry in cnv.legend.GetListOfPrimitives():
-            if entry.GetLabel() == 'Sys. uncert. MC':
-                entry.SetLabel('Stat. uncert. Data')
-            elif entry.GetLabel() == 'Tot. uncert. MC':
-                entry.SetLabel('Tot. Stat. uncert.')
-        yield cnv
-
-
 def multi_region_hook_sample(wrps):
     for w in wrps:
         w.legend = w.sample
@@ -182,9 +172,9 @@ def multi_region_hook_region(wrps):
 def mk_overlay_chains(loadername, add_data_uncert=False, do_standard_plotter=True):
     input_path = '../../../../Loaders/%s' % loadername
 
-    canvas_decorators = [
-        varial.rnd.BottomPlotRatioSplitErr(poisson_errs=False),
-        varial.rnd.Legend,
+    post_build_funcs = [
+        varial.rnd.mk_split_err_ratio_plot_func(poisson_errs=False,y_title='#frac{sig-ctrl}{ctrl}'),
+        varial.rnd.mk_legend_func(),
     ]
 
     standard_plotter = varial.tools.Plotter(
@@ -192,8 +182,7 @@ def mk_overlay_chains(loadername, add_data_uncert=False, do_standard_plotter=Tru
         input_result_path='../HistoLoader',
         plot_grouper=varial.plotter.plot_grouper_by_name,
         plot_setup=plot_setup_with_data_uncert if add_data_uncert else plot_setup,
-        hook_canvas_post_build=put_uncert_title,
-        canvas_decorators=canvas_decorators,
+        canvas_post_build_funcs=post_build_funcs,
     )
 
     return varial.tools.ToolChainParallel(loadername, [
@@ -215,7 +204,7 @@ def mk_overlay_chains(loadername, add_data_uncert=False, do_standard_plotter=Tru
                         varial.gen.gen_copy(ws),
                         legend=lambda w: w.sample+'/'+w.in_file_path.split('/')[0]),
                     plot_grouper=varial.plotter.plot_grouper_by_name,
-                    canvas_decorators=canvas_decorators,
+                    canvas_post_build_funcs=post_build_funcs,
                 ),
             ] + ([standard_plotter] if do_standard_plotter else [])
         ),
@@ -238,7 +227,7 @@ def mk_overlay_chains(loadername, add_data_uncert=False, do_standard_plotter=Tru
                     plot_grouper=varial.plotter.plot_grouper_by_in_file_path,
                     hook_loaded_histos=multi_region_hook_sample,
                     save_name_func=lambda w: w.in_file_path.replace('/', '_'),
-                    canvas_decorators=canvas_decorators,
+                    canvas_post_build_funcs=post_build_funcs,
                 ),
                 varial.tools.Plotter(
                     'PlotterCombineRegions',
@@ -247,7 +236,7 @@ def mk_overlay_chains(loadername, add_data_uncert=False, do_standard_plotter=Tru
                         ws, [633, 601, 417, 617]),
                     plot_grouper=varial.plotter.plot_grouper_by_name,
                     hook_loaded_histos=multi_region_hook_region,
-                    canvas_decorators=canvas_decorators,
+                    canvas_post_build_funcs=post_build_funcs,
                 ),
             ]
         ),

@@ -102,7 +102,7 @@ varial.settings.pretty_names.update({
      'dr_higg_top_tex':             r'$\Delta R(H, t)$',
      'tlep_pt_tex':                 r't \pt',
      'h_mass_tex':                  r'$M(H)$',
-     '1000 X output/input_tex':     r'$\epsilon$ * 1000'
+     '1000 X output/input_tex':     r'$\epsilon$ * 1000',
 })
 
 
@@ -142,6 +142,9 @@ hadd = Hadd(
     samplename_func=common.get_samplename,
 )
 
+post_build_funcs_only_legend = [
+    varial.rnd.mk_legend_func(),
+]
 
 tc = ToolChain(dir_name, [
     # varial.extensions.make.Make([
@@ -177,12 +180,22 @@ tc = ToolChain(dir_name, [
                                               '%s/Inputs/El/SysTreeProjectors/*/*.root'%dir_name]),
         plot.mk_toolchain('SelectionsMu', ['%s/Inputs/Mu/TreeProjector/*.root'%dir_name,
                                               '%s/Inputs/Mu/SysTreeProjectors/*/*.root'%dir_name]),
-        plot.mk_toolchain('SelectionsElNoData', ['%s/Inputs/El/TreeProjector/*.root'%dir_name,
-                                              '%s/Inputs/El/SysTreeProjectors/*/*.root'%dir_name
-                                              ], filter_keyfunc=lambda w: 'Run2015' not in w.file_path),
-        plot.mk_toolchain('SelectionsMuNoData', ['%s/Inputs/Mu/TreeProjector/*.root'%dir_name,
-                                              '%s/Inputs/Mu/SysTreeProjectors/*/*.root'%dir_name
-                                              ], filter_keyfunc=lambda w: 'Run2015' not in w.file_path),
+        plot.mk_toolchain('SelectionsElNoData',
+            [
+                '%s/Inputs/El/TreeProjector/*.root'%dir_name,
+                '%s/Inputs/El/SysTreeProjectors/*/*.root'%dir_name
+            ],
+            filter_keyfunc=lambda w: 'Run2015' not in w.file_path,
+            canvas_post_build_funcs=post_build_funcs_only_legend,
+        ),
+        plot.mk_toolchain('SelectionsMuNoData',
+            [
+                '%s/Inputs/Mu/TreeProjector/*.root'%dir_name,
+                '%s/Inputs/Mu/SysTreeProjectors/*/*.root'%dir_name
+            ],
+            filter_keyfunc=lambda w: 'Run2015' not in w.file_path,
+            canvas_post_build_funcs=post_build_funcs_only_legend,
+        ),
         plot.mk_toolchain('SelectionsElJetPT', ['%s/Inputs/El/TreeProjector/*.root'%dir_name,
                                               '%s/Inputs/El/SysTreeProjectors/jet_pt__*/*.root'%dir_name]),
         plot.mk_toolchain('SelectionsMuJetPT', ['%s/Inputs/Mu/TreeProjector/*.root'%dir_name,
@@ -216,7 +229,7 @@ tc = ToolChain(dir_name, [
     # varial.tools.PrintToolTree(),
     varial.tools.WebCreator(),
     tex_content.tc,
-    varial.tools.CopyTool('~/www/auth/VLQ2HT', use_rsync=True),
+    # varial.tools.CopyTool('~/www/auth/VLQ2HT', use_rsync=True),
     ] if True else []) + [
 ])
 

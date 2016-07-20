@@ -22,6 +22,7 @@ class EffNumTable(varial.tools.Tool):
             if len(nums) == 4:
                 i, st, _, sy = nums
                 st, sy = max(st, 0.01), max(sy, 0.01)
+                sy = (sy**2 + (i*0.15)**2)**.5
             else:
                 (i, st), sy = nums, 0.
             num = r'& $%5.1f \pm %4.1f \pm %4.1f$ ' % (i, st, sy)
@@ -54,6 +55,9 @@ class EffNumTable(varial.tools.Tool):
         )
         res = '\n'.join(res)
         with open(self.cwd+'table_content.tex', 'w') as f:
+            f.write('WARNING!!! Manually adding 15\\% fwd jet uncert!!\n')
+            f.write('WARNING!!! Manually adding 15\\% fwd jet uncert!!\n')
+            f.write('WARNING!!! Manually adding 15\\% fwd jet uncert!!\n')
             f.write(res)
 
 

@@ -419,8 +419,8 @@ public:
         //     50, 0., 5.
         // ))
     {
-        higgProdPdgId->SetBit(TH1::kCanRebin);
-        fwPartonPdgId->SetBit(TH1::kCanRebin);
+        higgProdPdgId->SetCanExtend(TH1::kXaxis);
+        fwPartonPdgId->SetCanExtend(TH1::kXaxis);
     }
 
     virtual void fill(const uhh2::Event & e) override {

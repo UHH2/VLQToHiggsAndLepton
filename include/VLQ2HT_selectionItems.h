@@ -25,6 +25,7 @@ static vector<shared_ptr<SelectionItem>> SEL_ITEMS_VLQ2HT {
     shared_ptr<SelectionItem>(new SelDatF("h_mass",            ";Higgs candidate mass;events / 10 GeV",         25, 50, 300                 )),
     shared_ptr<SelectionItem>(new SelDatF("primary_lepton_pt", ";primary lepton p_{T};events / 20 GeV",         50, 0., 1000                )),
     shared_ptr<SelectionItem>(new SelDatI("trigger_accept_el", "electron trigger accept (mu veto)",             2, -.5, 1.5                 )),
+    shared_ptr<SelectionItem>(new SelDatI("trigger_accept_el_alone", "electron trigger accept",                 2, -.5, 1.5                 )),
     shared_ptr<SelectionItem>(new SelDatI("trigger_accept_mu", "muon trigger accept",                           2, -.5, 1.5                 )),
     shared_ptr<SelectionItem>(new SelDatF("h_pt",              ";Higgs candidate p_{T};events / 40 GeV",        25, 0, 1000                 )),
     shared_ptr<SelectionItem>(new SelDatI("n_leading_btags",   "N_{b-tag leading}",                             11, -.5, 10.5               )),

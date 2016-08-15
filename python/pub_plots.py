@@ -190,13 +190,23 @@ def handle_plot(name):
     y_axis.SetNoExponent()
     x_axis.SetTitle(x_axis.GetTitle().replace('/ GeV', '(GeV)'))
 
-    # fix signal line width
+    # fix signal lines
     if any(isinstance(h, ROOT.THStack) for h in main_hists) and 4 < len(main_hists):
         offset = 1 if len(main_hists) == 5 else 2
         for i in xrange(3):
             main_hists[-offset-i].SetLineWidth(2)
             main_hists[-offset-i].SetLineColor(602)
             main_hists[-offset-i].SetLineStyle(i+1)
+
+    # fix err fill style
+    if isinstance(main_hists[0], ROOT.THStack):
+        stl, clr = 3475, ROOT.kGray+3
+        main_hists[1].SetFillStyle(stl)
+        main_hists[1].SetFillColor(clr)
+        if main_pad != second_pad:
+            err_hist = second_pad.GetListOfPrimitives()[1]
+            err_hist.SetFillStyle(stl)
+            err_hist.SetFillColor(clr)
 
     if y_scale_max:
         first_obj.SetMaximum(y_scale_max)

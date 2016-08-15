@@ -252,6 +252,8 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
         HiggsTag(60., 99999., is_true<Jet>)
     ));
     v_pre_modules.emplace_back(new TriggerAcceptProducer(
+        ctx, TRIGGER_PATHS_ELE, "trigger_accept_el_alone"));  // NOT vetoing mu trigger!
+    v_pre_modules.emplace_back(new TriggerAcceptProducer(
         ctx, TRIGGER_PATHS_ELE, TRIGGER_PATHS_MU, "trigger_accept_el"));  // Vetoing mu trigger!
     v_pre_modules.emplace_back(new TriggerAcceptProducer(
         ctx, TRIGGER_PATHS_MU, "trigger_accept_mu"));

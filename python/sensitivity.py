@@ -592,7 +592,7 @@ def mk_sense_chain(name,
 def get_tc(name, signals):
 
     def filter_keyfunc_no_rate(w):
-        return 'rate__' not in w.file_path
+        return 'rate_' not in w.file_path
 
     def filter_keyfunc_no_rate_no_ht(w):
         return filter_keyfunc_no_rate(w) and 'HT__' not in w.file_path

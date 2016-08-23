@@ -1,8 +1,7 @@
-import varial.util
-import varial.tools
-import varial.plotter
-
 import UHH2.VLQSemiLepPreSel.common as common
+import varial.plotter
+import varial.tools
+import varial.util
 
 
 plots = ['vlq_mass', 'vlq_pt', 'h_mass', 'h_pt', 'tlep_pt', 'tlep_mass']
@@ -14,7 +13,19 @@ def rename_y_axis(wrp):
     return wrp
 
 
+def set_uncertainty_on_vlq_mass(wrps):
+    # bins (6, 7, 24, 25) get double uncertainty
+    for w in wrps:
+        if w.name == 'vlq_mass':
+            # w.histo.SetBinContent(5, 0.)
+            # w.histo.SetBinError(5, 0.)
+            for i in (6, 7, 24, 25):
+                w.histo.SetBinError(i, 2 * w.histo.GetBinError(i))
+        yield w
+
+
 def hook_loaded_histos(wrps):
+    wrps = set_uncertainty_on_vlq_mass(wrps)
     wrps = common.add_wrp_info(wrps)
     wrps = common.label_axes(wrps)
     wrps = varial.generators.gen_add_wrp_info(
@@ -169,117 +180,126 @@ def multi_region_hook_region(wrps):
         yield w
 
 
-def mk_overlay_chains(loadername, add_data_uncert=False, do_standard_plotter=True):
-    input_path = '../../../../Loaders/%s' % loadername
+class Chi2Test(varial.tools.Tool):
+    def run(self):
+        wrps = self.lookup_result('../HistoLoader')
+        assert wrps, str(wrps)
+        wrps = list(w for w in wrps if w.name == 'vlq_mass')
+        assert len(wrps) == 2, str(wrps)
+        a, b = wrps
+        chi2 = b.histo.Chi2Test(a.histo, 'WW')
+        self.result = varial.wrp.Wrapper(chi2=chi2)
+
+
+class Chi2Collector(varial.tools.Tool):
+    def run(self):
+        sys_names = varial.ana.lookup_children_names('..')
+        sys_names.remove(self.name)
+        assert sys_names, str(sys_names)
+        chi2_vals = dict(
+            (sys, round(self.lookup_result('../%s/Chi2Test'%sys).chi2, 2))
+            for sys in sys_names
+        )
+        self.result = varial.wrp.Wrapper(**chi2_vals)
+
+
+def mk_overlay_chain(name, input_pat, hlh=hook_loaded_histos_squash_mc):
+
+    # keyfunc
+    good_name = lambda w: any(w.name == p for p in plots)
+    good_smpl = lambda w: '_TH_' not in w.file_path and 'Run2015' not in w.file_path
+    good_regn = lambda w: any(
+        t in w.in_file_path
+        for t in ['SignalRegion', 'SidebandRegion']
+    )
+    good_hist = lambda w: good_name(w) and good_smpl(w) and good_regn(w)
 
     post_build_funcs = [
-        varial.rnd.mk_split_err_ratio_plot_func(poisson_errs=False,y_title='#frac{sig-ctrl}{ctrl}'),
+        varial.rnd.mk_split_err_ratio_plot_func(
+            poisson_errs=False,
+            y_title='#frac{sig-ctrl}{ctrl}'
+        ),
         varial.rnd.mk_legend_func(),
     ]
 
-    standard_plotter = varial.tools.Plotter(
-        'Plotter',
-        input_result_path='../HistoLoader',
-        plot_grouper=varial.plotter.plot_grouper_by_name,
-        plot_setup=plot_setup_with_data_uncert if add_data_uncert else plot_setup,
-        canvas_post_build_funcs=post_build_funcs,
+    return varial.tools.ToolChain(
+        name,
+        [
+            varial.tools.HistoLoader(
+                pattern=input_pat,
+                filter_keyfunc=good_hist,
+                hook_loaded_histos=hlh,
+            ),
+            varial.tools.Plotter(
+                'Plotter',
+                input_result_path='../HistoLoader',
+                plot_grouper=varial.plotter.plot_grouper_by_name,
+                plot_setup=plot_setup,
+                canvas_post_build_funcs=post_build_funcs,
+            ),
+            Chi2Test(),
+        ]
     )
 
-    return varial.tools.ToolChainParallel(loadername, [
-        varial.tools.ToolChain(
-            'SideBandRegion',
-            [
-                varial.tools.HistoLoader(
-                    input_result_path=input_path,
-                    filter_keyfunc=lambda w: any(
-                        t in w.in_file_path
-                        for t in ['SignalRegion', 'SidebandRegion']
-                    ) and (add_data_uncert or 'Run20' not in w.sample),
-                ),
-                varial.tools.Plotter(
-                    'PlotterIndividualSamples',
-                    input_result_path='../HistoLoader',
-                    filter_keyfunc=lambda w: not w.is_data,
-                    hook_loaded_histos=lambda ws: varial.gen.gen_add_wrp_info(
-                        varial.gen.gen_copy(ws),
-                        legend=lambda w: w.sample+'/'+w.in_file_path.split('/')[0]),
-                    plot_grouper=varial.plotter.plot_grouper_by_name,
-                    canvas_post_build_funcs=post_build_funcs,
-                ),
-            ] + ([standard_plotter] if do_standard_plotter else [])
-        ),
-        varial.tools.ToolChain(
-            'MultiRegion',
-            [
-                varial.tools.HistoLoader(
-                    input_result_path=input_path,
-                    filter_keyfunc=lambda w: any(
-                        t in w.in_file_path
-                        for t in ['SignalRegion', 'SidebandRegion',
-                                  'Fw1B0Selection', 'Fw0B0Selection']
-                    ) and 'Run20' not in w.sample,
-                ),
-                varial.tools.Plotter(
-                    'Plotter',
-                    input_result_path='../HistoLoader',
-                    plot_setup=lambda ws: varial.plotter.default_plot_colorizer(
-                        ws, [633, 601, 417, 617]),
-                    plot_grouper=varial.plotter.plot_grouper_by_in_file_path,
-                    hook_loaded_histos=multi_region_hook_sample,
-                    save_name_func=lambda w: w.in_file_path.replace('/', '_'),
-                    canvas_post_build_funcs=post_build_funcs,
-                ),
-                varial.tools.Plotter(
-                    'PlotterCombineRegions',
-                    input_result_path='../HistoLoader',
-                    plot_setup=lambda ws: varial.plotter.default_plot_colorizer(
-                        ws, [633, 601, 417, 617]),
-                    plot_grouper=varial.plotter.plot_grouper_by_name,
-                    hook_loaded_histos=multi_region_hook_region,
-                    canvas_post_build_funcs=post_build_funcs,
-                ),
-            ]
-        ),
-    ])
 
-def get_tc(pat):
-    name = 'Sidebands' + pat
-    pat = '/%s/' % pat
+def get_xsec_sys(input_pat):
+    bkgs = list(varial.settings.stacking_order)
+    percent_errs = {
+        'TTbar':        0.2,  # 0.08,    # 0.15,  # 0.05650
+        'SingleT':      0.2,  # 0.2,     # 0.15,  # 0.04166
+        'QCD':          0.5,  # 0.3,
+        'DYJets':       0.2,  # 0.2,     # 0.15,  # 0.01728
+        'WJets':        0.2,  # 0.06,    # 0.15,  # 0.03759
+    }
 
-    good_name = lambda w: any(w.name == p for p in plots)
-    good_smpl = lambda w: '_TH_' not in w.file_path
-    good_chnl = lambda w: pat in w.file_path
-    good_hist = lambda w: good_chnl(w) and good_name(w) and good_smpl(w)
+    def mk_hook_ld_hist_renorm(bkg, factor):
+        scale_factor = percent_errs[bkg]*factor + 1
+
+        def scale_bkg(wrps):
+            for w in wrps:
+                if w.sample == bkg:
+                    w.histo.Scale(scale_factor)
+                yield w
+
+        def new_hook(wrps):
+            wrps = scale_bkg(wrps)
+            wrps = hook_loaded_histos_squash_mc(wrps)
+            return wrps
+
+        return new_hook
+
+    return list(
+        mk_overlay_chain(
+            b + ('__plus' if fctr>0 else '__minus'),
+            input_pat,
+            hlh=mk_hook_ld_hist_renorm(b, fctr)
+        )
+        for b in bkgs
+        for fctr in (+1., -1.)
+    )
+
+
+def get_sys(sys_name, input_pat):
+    input_pat += '/SysTreeProjectors/%s/*.root' % sys_name
+    return mk_overlay_chain(sys_name, input_pat)
+
+
+def get_tc(base_path):
+    name = 'Sidebands' + ('El' if base_path.endswith('/El') else 'Mu')
 
     return varial.tools.ToolChain(
-        name, [
-            varial.tools.ToolChainParallel(
-                'Loaders', [
-                    varial.tools.HistoLoader(
-                        filter_keyfunc=good_hist,
-                        hook_loaded_histos=hook_loaded_histos_squash_mc,
-                        name='AllSamples',
-                    ),
-                    varial.tools.HistoLoader(
-                        filter_keyfunc=lambda w: w.sample in ('WJets', 'TTbar')
-                                                 and good_hist(w),
-                        hook_loaded_histos=hook_loaded_histos,
-                        name='WJetsTTbar',
-                    ),
-                ]
-            ),
-            varial.tools.ToolChainParallel(
-                'Plots', [
-                    mk_overlay_chains('AllSamples'),
-                    mk_overlay_chains('WJetsTTbar', do_standard_plotter=False),
-                    # mk_overlay_chains('WJets'),
-                    # mk_overlay_chains('SquashMC'),
-                ]
-            ),
-            varial.tools.ToolChainParallel(
-                'PlotsWithDataUncert', [
-                    mk_overlay_chains('AllSamples', True),
-                ]
-            ),
+        name,
+        [
+            mk_overlay_chain('Nominal', base_path+'/TreeProjector/*.root'),
+            get_sys('b_tag_bc__minus', base_path),
+            get_sys('b_tag_bc__plus', base_path),
+            get_sys('b_tag_udsg__minus', base_path),
+            get_sys('b_tag_udsg__plus', base_path),
+            get_sys('JES__minus', base_path),
+            get_sys('JES__plus', base_path),
+            get_sys('JER__minus', base_path),
+            get_sys('JER__plus', base_path),
+        ] + get_xsec_sys(base_path+'/TreeProjector/*.root') + [
+            Chi2Collector()
         ]
     )

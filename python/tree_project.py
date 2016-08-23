@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from varial_ext.treeprojector import BatchTreeProjector, TreeProjector
+from varial_ext.treeprojector import TreeProjector
 #from varial_ext.treeprojector import TreeProjector
 import multiprocessing as mp
 from os.path import join
@@ -11,11 +11,11 @@ import ast
 import os
 
 
-if False:
-    TreeProjector = BatchTreeProjector
-    from varial_ext.sgeworker import SGESubmitter
-    import varial_ext.treeprojector as tp
-    SGESubmitter(500, tp.jug_work_dir_pat, tp.jug_file_search_pat).submit()
+# if False:
+#     TreeProjector = BatchTreeProjector
+#     from varial_ext.sgeworker import SGESubmitter
+#     import varial_ext.treeprojector as tp
+#     SGESubmitter(500, tp.jug_work_dir_pat, tp.jug_file_search_pat).submit()
 
 
 iteration = [1]  # non-local variable
@@ -244,33 +244,27 @@ def mk_sys_tps(add_sel=None):
         for sample in samples
         if 'Run20' not in sample
     )
-    rate_minus_dict = dict(
-        (
-            ('TTbar',       base_weight + '*0.84'),
-            ('SingleT',     base_weight + '*0.8'),
-            ('QCD',         base_weight + '*0.8'),
-            ('DYJets',      base_weight + '*0.8'),
-            ('WJets',       base_weight + '*0.88'),  # should only be 8%, but fwd jet + lep
-            ('TpB_TH_0700', base_weight + '*0.841886'),
-            ('TpB_TH_1200', base_weight + '*0.841886'),
-            ('TpB_TH_1700', base_weight + '*0.841886'),
-        ) + tuple(
-            (s, base_weight + '*0.841886') for s in varial.settings.all_signals
-        )
+    # https://twiki.cern.ch/twiki/bin/viewauth/CMS/StandardModelCrossSectionsat13TeV
+    percent_errs = {
+        'TTbar':        0.08,    # 0.15,  # 0.05650
+        'SingleT':      0.2,     # 0.15,  # 0.04166
+        'QCD':          0.3,
+        'DYJets':       0.2,     # 0.15,  # 0.01728
+        'WJets':        0.06,    # 0.15,  # 0.03759
+    }
+    filenames_bkg = dict(
+        (s, fs)
+        for s, fs in filenames.iteritems()
+        if s in percent_errs
     )
-    rate_plus_dict = dict(
-        (
-            ('TTbar',       base_weight + '*1.16'),
-            ('SingleT',     base_weight + '*1.2'),
-            ('QCD',         base_weight + '*1.2'),
-            ('DYJets',      base_weight + '*1.2'),
-            ('WJets',       base_weight + '*1.12'), # should only be 8%, but fwd jet + lep
-            ('TpB_TH_0700', base_weight + '*1.158114'),
-            ('TpB_TH_1200', base_weight + '*1.158114'),
-            ('TpB_TH_1700', base_weight + '*1.158114'),
-        ) + tuple(
-            (s, base_weight + '*1.158114') for s in varial.settings.all_signals
-        )
+
+    rate_xsec_minus_dict = dict(
+        (s, base_weight + ('*(1-%g)'% sw))
+        for s, sw in percent_errs.iteritems()
+    )
+    rate_xsec_plus_dict = dict(
+        (s, base_weight + ('*(1+%g)'% sw))
+        for s, sw in percent_errs.iteritems()
     )
     sys_sec_sel_weight = list(
         (name, [
@@ -294,13 +288,17 @@ def mk_sys_tps(add_sel=None):
             ('jet_pt__plus',        'weight_ak4jet'),
             ('HT__minus',           '1'),
             ('HT__plus',            'ht_weight'),
-            ('rate__minus',         rate_minus_dict),  # 1 - (0.05**2 + 0.15**2)**.5
-            ('rate__plus',          rate_plus_dict),  # 1 + (0.05**2 + 0.15**2)**.5
+            ('rate_xsec__minus',    rate_xsec_minus_dict),
+            ('rate_xsec__plus',     rate_xsec_plus_dict),
+            ('rate_fwdjet__minus',  '0.85'),
+            ('rate_fwdjet__plus',   '1.15'),
+            ('rate_lepiso__minus',  '0.95'),
+            ('rate_lepiso__plus',   '1.05'),
         )
     )
     sys_tps += list(
         TreeProjector(
-            filenames,
+            filenames_bkg if name.startswith('rate_') else filenames,
             sys_params,
             ssw,
             add_aliases_to_analysis=False,
@@ -308,6 +306,7 @@ def mk_sys_tps(add_sel=None):
         )
         for name, ssw in sys_sec_sel_weight
     )
+
 
     ####################################################### PDF uncertainty ###
     with open('weight_dict_TpB') as f:

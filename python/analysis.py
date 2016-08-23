@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 print 'importing modules.'
-
 import UHH2.VLQSemiLepPreSel.vlq_settings as vlq_settings
 import UHH2.VLQSemiLepPreSel.common as common
 from varial.extensions.hadd import Hadd
@@ -180,6 +179,20 @@ tc = ToolChain(dir_name, [
                                               '%s/Inputs/El/SysTreeProjectors/*/*.root'%dir_name]),
         plot.mk_toolchain('SelectionsMu', ['%s/Inputs/Mu/TreeProjector/*.root'%dir_name,
                                               '%s/Inputs/Mu/SysTreeProjectors/*/*.root'%dir_name]),
+        plot.mk_toolchain('SelectionsElNoFwdSys',
+            [
+                '%s/Inputs/El/TreeProjector/*.root'%dir_name,
+                '%s/Inputs/El/SysTreeProjectors/*/*.root'%dir_name
+            ],
+            filter_keyfunc=lambda w: 'rate_fwdjet__' not in w.file_path,
+        ),
+        plot.mk_toolchain('SelectionsMuNoFwdSys',
+            [
+                '%s/Inputs/Mu/TreeProjector/*.root'%dir_name,
+                '%s/Inputs/Mu/SysTreeProjectors/*/*.root'%dir_name
+            ],
+            filter_keyfunc=lambda w: 'rate_fwdjet__' not in w.file_path,
+        ),
         plot.mk_toolchain('SelectionsElNoData',
             [
                 '%s/Inputs/El/TreeProjector/*.root'%dir_name,
@@ -211,10 +224,10 @@ tc = ToolChain(dir_name, [
         plot.mk_toolchain('SFramePlots', '%s/Inputs/Hadd/*.root' % dir_name),
         plot.mk_cutflowchain('SFrameCutflowEl', '%s/Inputs/Hadd/*.root' % dir_name, lambda w: 'ElChan/' in w.in_file_path),
         plot.mk_cutflowchain('SFrameCutflowMu', '%s/Inputs/Hadd/*.root' % dir_name, lambda w: 'MuChan/' in w.in_file_path),
-        sideband_overlays.get_tc('El'),
-        sideband_overlays.get_tc('Mu'),
-        fit_w_peak.WPeakFitter(),
-        fit_w_peak.tc_sys_comp,
+        sideband_overlays.get_tc('%s/Inputs/El'%dir_name),
+        sideband_overlays.get_tc('%s/Inputs/Mu'%dir_name),
+        # fit_w_peak.WPeakFitter(),
+        # fit_w_peak.tc_sys_comp,
         # lep_plus_minus.pltr,
         sensitivity.get_tc('LimitsTpBLH', varial.settings.my_lh_signals),
         sensitivity.get_tc('LimitsTpBRH', varial.settings.my_rh_signals),
@@ -228,8 +241,8 @@ tc = ToolChain(dir_name, [
     yields_n_eff.sig_eff_grph_pltr,
     # varial.tools.PrintToolTree(),
     varial.tools.WebCreator(),
-    tex_content.tc,
-    # varial.tools.CopyTool('~/www/auth/VLQ2HT', use_rsync=True),
+    # tex_content.tc,
+    varial.tools.CopyTool('~/www/auth/VLQ2HT', use_rsync=True),
     ] if True else []) + [
 ])
 

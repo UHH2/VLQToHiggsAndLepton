@@ -2,6 +2,7 @@
 # check THIS out: https://ghm.web.cern.ch/ghm/plots/ #
 ######################################################
 
+import ctypes
 import ROOT
 import os
 
@@ -14,21 +15,23 @@ def get_p_lim(sig):
 
 
 pas_single = {
-    'selblock_primary_el_pt_lin.pdf': p_base + 'SelectionsEl/Stacks/BaseLineSelection/primary_lepton_pt_lin.pdf',
-    'selblock_primary_mu_pt_lin.pdf': p_base + 'SelectionsMu/Stacks/BaseLineSelection/primary_lepton_pt_lin.pdf',
-    'selblock_ST_lin.pdf':                p_base + 'SelectionsEl/Stacks/BaseLineSelection/ST_lin.pdf',
-    'selblock_h_mass_lin.pdf':            p_base + 'SelectionsMu/Stacks/BaseLineSelection/h_mass_lin.pdf',
-    'tlep_mass_lin.pdf': p_base + 'SelectionsMu/Stacks/BaseLineSelection/tlep_mass_lin.pdf',
-    'tlep_pt_lin.pdf': p_base + 'SelectionsMu/Stacks/BaseLineSelection/tlep_pt_lin.pdf',
+    'selblock_primary_el_pt_lin.pdf': p_base + 'SelectionsElNoFwdSys/Stacks/BaseLineSelection/primary_lepton_pt_lin.pdf',
+    'selblock_primary_mu_pt_lin.pdf': p_base + 'SelectionsMuNoFwdSys/Stacks/BaseLineSelection/primary_lepton_pt_lin.pdf',
+    'selblock_ST_lin.pdf':                p_base + 'SelectionsElNoFwdSys/Stacks/BaseLineSelection/ST_lin.pdf',
+    'selblock_h_mass_lin.pdf':            p_base + 'SelectionsMuNoFwdSys/Stacks/BaseLineSelection/h_mass_lin.pdf',
+    'tlep_mass_lin.pdf': p_base + 'SelectionsMuNoFwdSys/Stacks/BaseLineSelection/tlep_mass_lin.pdf',
+    'tlep_pt_lin.pdf': p_base + 'SelectionsMuNoFwdSys/Stacks/BaseLineSelection/tlep_pt_lin.pdf',
+    'SignalRegion_data__el_lin.pdf': p_base + 'SelectionsEl/Stacks/SignalRegion/vlq_mass_lin.pdf',
+    'SignalRegion_data__mu_lin.pdf': p_base + 'SelectionsMu/Stacks/SignalRegion/vlq_mass_lin.pdf',
     'SignalRegion__el_lin.pdf': p_base + 'SelectionsElNoData/Stacks/SignalRegion/vlq_mass_lin.pdf',
     'SignalRegion__mu_lin.pdf': p_base + 'SelectionsMuNoData/Stacks/SignalRegion/vlq_mass_lin.pdf',
     'SignalRegion_bkg__el_lin.pdf': p_base + 'LimitsTpBLH/DataBackground/PostFit/SignalRegion__el_lin.pdf',
     'SignalRegion_bkg__mu_lin.pdf': p_base + 'LimitsTpBLH/DataBackground/PostFit/SignalRegion__mu_lin.pdf',
     'SignalRegion_bkg__comb_lin.pdf': p_base + 'LimitsTpBLH/DataBackground/PostFit/SignalRegion__comb_lin.pdf',
-    'Sideband__el_lin.pdf': p_base + 'SelectionsEl/Stacks/SidebandRegion/vlq_mass_lin.pdf',
-    'Sideband__mu_lin.pdf': p_base + 'SelectionsMu/Stacks/SidebandRegion/vlq_mass_lin.pdf',
-    'Sideband_vs_SignalRegion__el.pdf': p_base+'SidebandsEl/Plots/AllSamples/SideBandRegion/Plotter/vlq_mass_lin.pdf',
-    'Sideband_vs_SignalRegion__mu.pdf': p_base+'SidebandsMu/Plots/AllSamples/SideBandRegion/Plotter/vlq_mass_lin.pdf',
+    'Sideband__el_lin.pdf': p_base + 'SelectionsElNoFwdSys/Stacks/SidebandRegion/vlq_mass_lin.pdf',
+    'Sideband__mu_lin.pdf': p_base + 'SelectionsMuNoFwdSys/Stacks/SidebandRegion/vlq_mass_lin.pdf',
+    'Sideband_vs_SignalRegion__el.pdf': p_base+'SidebandsEl/Nominal/Plotter/vlq_mass_lin.pdf',
+    'Sideband_vs_SignalRegion__mu.pdf': p_base+'SidebandsMu/Nominal/Plotter/vlq_mass_lin.pdf',
     'TpBLH_limits.pdf': get_p_lim('TpBLH')+'/LimitGraphsPlot/Graph_log'+ext,
     'TpBRH_limits.pdf': get_p_lim('TpBRH')+'/LimitGraphsPlot/Graph_log'+ext,
     'TpTLH_limits.pdf': get_p_lim('TpTLH')+'/LimitGraphsPlot/Graph_log'+ext,
@@ -57,8 +60,11 @@ plot_config = {  #                   lumi legend x1 x2 y1 y2    CMS pos   chan p
 'Sideband_vs_SignalRegion__el.pdf': (0,   (.62, .82, .67, .85), (.2, .8), (.2,.62, 1),  0.19),
 'Sideband_vs_SignalRegion__mu.pdf': (0,   (.62, .82, .67, .85), (.2, .8), (.2,.62, 2),   0.0),
 
-'SignalRegion__el_lin.pdf':         (0,   (.20, .40, .46, .85), (.9, .8), (.2,.38, 1),  13.5),
-'SignalRegion__mu_lin.pdf':         (0,   (.60, .80, .46, .85), (.2, .8), (.2,.62, 2),  50.0),
+'SignalRegion_data__el_lin.pdf':    (2.2, (.20, .40, .36, .85), (.9, .8), (.9, .7, 1),  13.5),
+'SignalRegion_data__mu_lin.pdf':    (2.3, (.60, .80, .36, .85), (.2, .8), (.2, .7, 2),  50.0),
+
+'SignalRegion__el_lin.pdf':         (2.2, (.20, .40, .46, .85), (.9, .8), (.2,.38, 1),  13.5),
+'SignalRegion__mu_lin.pdf':         (2.3, (.60, .80, .46, .85), (.2, .8), (.2,.62, 2),  50.0),
 
 'SignalRegion_bkg__el_lin.pdf':     (2.2, (.65, .85, .55, .85), (.2, .8), (.2, .7, 1),  11.0),
 'SignalRegion_bkg__mu_lin.pdf':     (2.3, (.65, .85, .55, .85), (.2, .8), (.2, .7, 2),  35.0),
@@ -98,7 +104,7 @@ def handle_plot(name):
     if isinstance(canv_prims[0], ROOT.TPad) and isinstance(canv_prims[1], ROOT.TPad):
         main_pad, second_pad, size_factor = canv_prims[0], canv_prims[1], 0.8
     else:
-        main_pad, second_pad, size_factor = c, c, 1
+        main_pad, second_pad, size_factor = c, None, 1
 
     def get_pos(old_pos):
         return old_pos*size_factor + (1 - size_factor)
@@ -110,9 +116,28 @@ def handle_plot(name):
     )
 
     # set margins
+    c.Modified()
+    c.Update()
     main_pad.SetTopMargin(0.087)
     main_pad.SetRightMargin(0.05)
-    second_pad.SetRightMargin(0.05)
+    if second_pad:
+        second_pad.SetRightMargin(0.05)
+        second_pad.SetTopMargin(0.05)
+        second_pad.SetBottomMargin(second_pad.GetBottomMargin())
+
+        pars = [ctypes.c_double(), ctypes.c_double(), ctypes.c_double(), ctypes.c_double()]
+        main_pad.GetPadPar(*pars)
+        pars = [d.value for d in pars]
+        pars[1] += 0.002  # lift ylow very slightly
+        main_pad.SetPad(*pars)
+
+        second_pad.cd()
+        pave = ROOT.TPave(0.15, 0.955, 0.95, 1, 0,'NDC')
+        pave.Draw()
+        main_pad.cd()
+
+
+
 
 #    # area in coupling plots
 #    if '_coupling_' in save_name:
@@ -163,12 +188,12 @@ def handle_plot(name):
     latex.SetTextFont(52)
     latex.SetTextAlign(31 if cms_x > 0.5 else 11)
     latex.SetTextSize(0.76 * cmsTextSize)
-    if not lumi:
+    if (not lumi) or name.startswith('SignalRegion__'):
         latex.DrawLatex(cms_x, get_pos(cms_y - 1.0*cmsTextSize), 'Simulation')
 
     # electron / muon channel
     if chan:
-        chan_txts = {1: 'electron', 2: 'muon', 3: 'electron+muon'}
+        chan_txts = {1: 'Electron', 2: 'Muon', 3: 'Electron+muon'}
         chan_txt2 = 'channel'
         latex.SetTextFont(42)
         latex.SetTextAlign(31 if chan_x > 0.5 else 11)
@@ -183,12 +208,31 @@ def handle_plot(name):
 
     # x and y axes
     first_obj = main_hists[0]
-    x_axis = second_pad.GetListOfPrimitives()[1].GetXaxis()
+    x_axis = (second_pad or main_pad).GetListOfPrimitives()[1].GetXaxis()
+    x_axis.SetTitle(x_axis.GetTitle().replace('/ GeV', '(GeV)'))
+
     y_axis = first_obj.GetYaxis()
-    y_axis.SetTitleOffset(1.4)
     y_axis.CenterTitle(0)
     y_axis.SetNoExponent()
-    x_axis.SetTitle(x_axis.GetTitle().replace('/ GeV', '(GeV)'))
+    y_axis.SetTitle(y_axis.GetTitle().replace('events / ', 'Events / '))
+
+    x_axis_1st = main_pad.GetListOfPrimitives()[1].GetXaxis() if second_pad else None
+    y_axis_2nd = second_pad.GetListOfPrimitives()[1].GetYaxis() if second_pad else None
+
+    # main axes font sizes
+    y_axis.SetTitleOffset(1.45)
+    x_axis.SetTitleOffset(0.9)
+    x_axis.SetTitleSize(1.2 * x_axis.GetTitleSize())
+    if not y_axis_2nd:  # all plots without ratio plot
+        y_axis.SetTitleSize(1.3 * y_axis.GetTitleSize())
+        y_axis.SetTitleOffset(1.2)
+        x_axis.SetTitleOffset(1.1)
+
+
+    # if y_axis_2nd:
+    #     y_axis.SetTitleSize(0.8 * y_axis.GetTitleSize())  # y-titles were to large
+    #     y_axis.SetTitleOffset(1.6)
+    #     y_axis.SetLabelSize(0.8 * y_axis.GetLabelSize())
 
     # fix signal lines
     if any(isinstance(h, ROOT.THStack) for h in main_hists) and 4 < len(main_hists):
@@ -203,7 +247,7 @@ def handle_plot(name):
         stl, clr = 3475, ROOT.kGray+3
         main_hists[1].SetFillStyle(stl)
         main_hists[1].SetFillColor(clr)
-        if main_pad != second_pad:
+        if second_pad:
             err_hist = second_pad.GetListOfPrimitives()[1]
             err_hist.SetFillStyle(stl)
             err_hist.SetFillColor(clr)
@@ -217,32 +261,58 @@ def handle_plot(name):
     if save_name.endswith('_limits'):
         legend.SetTextSize(1.2 * legend.GetTextSize())
         x_axis = first_obj.GetXaxis()
-        x_axis.SetRangeUser(700, 1700)
+        x_axis.SetRangeUser(700, 1800)
+
+    if name == 'tlep_pt_lin.pdf':
+        x_axis.SetTitle('Top quark candidate p_{T} (GeV)')
+
+    if name == 'tlep_mass_lin.pdf':
+        x_axis.SetTitle('Top quark candidate mass (GeV)')
+
+    if name == 'selblock_primary_el_pt_lin.pdf':
+        x_axis.SetTitle('Electron p_{T} (GeV)')
+
+    if name == 'selblock_primary_mu_pt_lin.pdf':
+        x_axis.SetTitle('Muon p_{T} (GeV)')
 
     if name.startswith('sel_eff_'):
         legend.SetTextSize(1.3 * legend.GetTextSize())
-        y_axis.SetTitleSize(1.2 * y_axis.GetTitleSize())
 
     # more detail fixings...
+    if save_name.endswith('_limits'):
+        y_axis.SetTitleOffset(1.0)
+
     if save_name.endswith('H_limits'):
         main_pad.SetLogy()
-        first_obj.SetMinimum(0.05)
-        y_axis.SetTitle(y_axis.GetTitle().replace('->', '#rightarrow').replace('/ pb', '(pb)'))
+        first_obj.SetMinimum(0.02)
+        y_axis.SetTitle(y_axis.GetTitle().replace('->', '#rightarrow').replace('/ pb', '(pb)').replace('BR', 'B'))
+        entries = list(legend.GetListOfPrimitives())
+        entries[0].SetLabel(entries[0].GetLabel().replace('BR', 'B').replace('=1.0,', '=0.5,'))
+        th = main_hists[-1]
+        for i in xrange(th.GetN()):
+            x, y = ctypes.c_double(), ctypes.c_double()
+            th.GetPoint(i, x, y)
+            th.SetPoint(i, x.value, y.value / 4.)
+        # y_axis.SetRangeUser(0.01, 99.)
+        th.Draw()
 
     if name.startswith('SignalRegion_bkg__'):
-        second_pad.GetListOfPrimitives()[1].GetYaxis().SetRangeUser(-0.9, 1.7)
+        y_axis_2nd.SetRangeUser(-0.9, 1.7)
         # legend.SetTextSize(1.3 * legend.GetTextSize())
         entries = list(legend.GetListOfPrimitives())
         entries[-1].GetObject().SetLineWidth(2)
         entries[-1].GetObject().SetLineColor(1)
+        entries[-2].SetLabel('Stat. uncert. bkg.')
+        for e in entries:
+            e.SetLabel(e.GetLabel().replace('rightarrowtH', 'rightarrowtH (1pb)'))
 
     if name.startswith('Sideband_vs_SignalRegion__'):
         # legend.SetTextSize(1.3 * legend.GetTextSize())
         entries_tlist = legend.GetListOfPrimitives()
         entries = list(entries_tlist)
-        entries[0].SetLabel('signal region')
-        entries[1].SetLabel('stat. uncert. bkg.')
-        entries[2].SetLabel('control region')
+        entries[0].SetLabel('Signal region')
+        entries[1].SetLabel('Stat. uncert. bkg.')
+        entries[2].SetLabel('Control region')
         entries[2].GetObject().SetLineWidth(2)
         entries[2].GetObject().SetLineColor(1)
         entries_tlist.Clear()
@@ -250,8 +320,14 @@ def handle_plot(name):
         entries_tlist.Add(entries[2])
         entries_tlist.Add(entries[1])
 
+    if name == 'selblock_ST_lin.pdf':
+        x_axis.SetRangeUser(400., 2500.)
+        x_axis_1st.SetRangeUser(400., 2500.)
+
+
     c.Modified()
     c.Update()
+    # c.SaveAs('PlotBeautifier/'+name.replace('.pdf', '.root'))
     c.SaveAs('PlotBeautifier/'+name)
 
 

@@ -187,7 +187,7 @@ def hook_loaded_histos_data_bkg(wrps):
         scale_factor = sr_.obj.Integral() / sb_.obj.Integral()
         sb_ = varial.op.prod([sb_, varial.wrp.FloatWrapper(scale_factor)])
         sb_.sample = 'Bkg'
-        sb_.legend = 'bkg. estimate'
+        sb_.legend = 'Bkg. estimate'
         sb_.region = 'SignalRegion'
         sb_.is_data = False
         sb_.lumi = sr_.lumi
@@ -270,7 +270,7 @@ def scale_bkg_postfit(wrps, theta_res_path):
     for w in wrps:
         if w.sample == 'Bkg':
             w.sample = 'BkgPostFit'
-            w.legend = 'bkg. post-fit'
+            w.legend = 'Bkg. post-fit'
             w.histo.Scale(1+r)
         yield w
 
@@ -288,8 +288,8 @@ def make_combo(wrps):
 def put_uncert_title(canvas_builders):
     for cnv in canvas_builders:
         for entry in cnv.legend.GetListOfPrimitives():
-            if entry.GetLabel() == 'stat. uncert. MC':
-                entry.SetLabel('stat. uncert. bkg')
+            if entry.GetLabel() == 'Stat. uncert. MC':
+                entry.SetLabel('Stat. uncert. bkg')
         yield cnv
 
 

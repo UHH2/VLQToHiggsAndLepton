@@ -116,24 +116,58 @@ AutoContentSelection = varial.extensions.tex.TexContent(
 
 ####################################################### AutoContentSideband ###
 def get4sb(chan):
+    # /SidebandsMu /Nominal /Plotter /vlq_mass
     p_sel = p_base + 'Selections' + chan + '/Stacks/'
     p_baseline = p_sel + 'BaseLineSelection/'
     p_baseline_ht = p_sel + 'BaseLineSelectionHTWeight/'
+
+    def closure_path(*uncerts):
+        return tuple(
+            p_base+'Sidebands'+chan+'/'+ncrt+'/Plotter/vlq_mass_lin'+ext
+            for ncrt in uncerts
+        )
+
     return {
         chan+'_variables': (
             p_baseline+'n_fwd_jets_lin'+ext,
             p_baseline+'h_n_subjet_btags_lin'+ext,
-            p_base+'Sidebands'+chan+'/Plots/AllSamples/SideBandRegion/Plotter/vlq_mass_lin'+ext,
-            p_base+'Sidebands'+chan+'/PlotsWithDataUncert/AllSamples/SideBandRegion/Plotter/vlq_mass_lin'+ext,
+            p_base+'Sidebands'+chan+'/Nominal/Plotter/vlq_mass_lin'+ext,
+            # p_base+'Sidebands'+chan+'/PlotsWithDataUncert/AllSamples/SideBandRegion/Plotter/vlq_mass_lin'+ext,
+        ),
+        chan+'_closure_JERC': closure_path(
+            'JER__minus',
+            'JER__plus',
+            'JES__minus',
+            'JES__plus',
+        ),
+        chan+'_closure_b_tag': closure_path(
+            'b_tag_bc__minus',
+            'b_tag_bc__plus',
+            'b_tag_udsg__minus',
+            'b_tag_udsg__plus',
+        ),
+        chan+'_closure_MC1': closure_path(
+            'TTbar__minus',
+            'TTbar__plus',
+            'QCD__minus',
+            'QCD__plus',
+            'WJets__minus',
+            'WJets__plus',
+        ),
+        chan+'_closure_MC2': closure_path(
+            'DYJets__minus',
+            'DYJets__plus',
+            'SingleT__minus',
+            'SingleT__plus',
         ),
         chan+'_comparison': (
             p_sel+'SidebandRegion/vlq_mass_lin'+ext,
             p_sel+'SignalRegion/vlq_mass_lin'+ext,
         ),
-        chan+'_multiregion': (
-            p_base+'Sidebands'+chan+'/Plots/AllSamples/MultiRegion/PlotterCombineRegions/vlq_mass_lin'+ext,
-            p_sel+'Fw0B0Selection/vlq_mass_lin'+ext,
-        ),
+        # chan+'_multiregion': (
+        #     p_base+'Sidebands'+chan+'/Plots/AllSamples/MultiRegion/PlotterCombineRegions/vlq_mass_lin'+ext,
+        #     p_sel+'Fw0B0Selection/vlq_mass_lin'+ext,
+        # ),
         chan+'_ht_check': (
             p_baseline_ht+'leading_jet_pt_lin'+ext,
             p_baseline_ht+'subleading_jet_pt_lin'+ext,
@@ -242,8 +276,8 @@ pas_single = {
     'SignalRegion_bkg__comb_lin.pdf': p_base + 'LimitsTpBLH/DataBackground/PostFit/SignalRegion__comb_lin.pdf',
     'Sideband__el_lin.pdf': p_base + 'SelectionsEl/Stacks/SidebandRegion/vlq_mass_lin.pdf',
     'Sideband__mu_lin.pdf': p_base + 'SelectionsMu/Stacks/SidebandRegion/vlq_mass_lin.pdf',
-    'Sideband_vs_SignalRegion__el.pdf': p_base+'SidebandsEl/Plots/AllSamples/SideBandRegion/Plotter/vlq_mass_lin.pdf',
-    'Sideband_vs_SignalRegion__mu.pdf': p_base+'SidebandsMu/Plots/AllSamples/SideBandRegion/Plotter/vlq_mass_lin.pdf',
+    'Sideband_vs_SignalRegion__el.pdf': p_base+'SidebandsEl/Nominal/Plotter/vlq_mass_lin.pdf',
+    'Sideband_vs_SignalRegion__mu.pdf': p_base+'SidebandsMu/Nominal/Plotter/vlq_mass_lin.pdf',
     'TpBLH_limits.pdf': get_p_lim('TpBLH')+'/LimitGraphsPlot/Graph_log'+ext,
     'TpBRH_limits.pdf': get_p_lim('TpBRH')+'/LimitGraphsPlot/Graph_log'+ext,
     'TpTLH_limits.pdf': get_p_lim('TpTLH')+'/LimitGraphsPlot/Graph_log'+ext,

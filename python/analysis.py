@@ -241,7 +241,7 @@ tc = ToolChain(dir_name, [
     yields_n_eff.sig_eff_grph_pltr,
     # varial.tools.PrintToolTree(),
     varial.tools.WebCreator(),
-    # tex_content.tc,
+    tex_content.tc,
     varial.tools.CopyTool('~/www/auth/VLQ2HT', use_rsync=True),
     ] if True else []) + [
 ])

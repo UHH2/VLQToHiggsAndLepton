@@ -9,7 +9,7 @@ varial.settings.colors['SignalRegion'] = 617
 
 
 def rename_y_axis(wrp):
-    wrp.obj.GetYaxis().SetTitle('a.u.')
+    wrp.obj.GetYaxis().SetTitle('A.u.')
     return wrp
 
 
@@ -25,7 +25,7 @@ def set_uncertainty_on_vlq_mass(wrps):
 
 
 def hook_loaded_histos(wrps):
-    wrps = set_uncertainty_on_vlq_mass(wrps)
+    # wrps = set_uncertainty_on_vlq_mass(wrps)
     wrps = common.add_wrp_info(wrps)
     wrps = common.label_axes(wrps)
     wrps = varial.generators.gen_add_wrp_info(
@@ -217,7 +217,7 @@ def mk_overlay_chain(name, input_pat, hlh=hook_loaded_histos_squash_mc):
     post_build_funcs = [
         varial.rnd.mk_split_err_ratio_plot_func(
             poisson_errs=False,
-            y_title='#frac{sig-ctrl}{ctrl}'
+            y_title='#frac{Sig-ctrl}{ctrl}'
         ),
         varial.rnd.mk_legend_func(),
     ]

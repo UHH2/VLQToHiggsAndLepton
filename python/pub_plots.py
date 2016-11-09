@@ -74,14 +74,14 @@ plot_config = {  #                   lumi legend x1 x2 y1 y2    CMS pos   chan p
 'tlep_pt_lin.pdf':                  (2.3, (.62, .82, .24, .73), (.9, .8), (.61,.8, 2),  2700),
 
 'TpBLH_limits.pdf':                 (2.3, (.38, .58, .58, .85), (.2, .8), (.9, .6, 0),   99.),
-'TpBRH_limits.pdf':                 (2.3, (.38, .58, .58, .85), (.2, .8), (.9, .6, 0),   99.),
-'TpTLH_limits.pdf':                 (2.3, (.38, .58, .58, .85), (.2, .8), (.9, .6, 0),   99.),
+# 'TpBRH_limits.pdf':                 (2.3, (.38, .58, .58, .85), (.2, .8), (.9, .6, 0),   99.),
+# 'TpTLH_limits.pdf':                 (2.3, (.38, .58, .58, .85), (.2, .8), (.9, .6, 0),   99.),
 'TpTRH_limits.pdf':                 (2.3, (.38, .58, .58, .85), (.2, .8), (.9, .6, 0),   99.),
 
-'TpBLH_coupling_limits.pdf':        (2.3, (.38, .58, .63, .85), (.2, .8), (.2, .6, 0),   0.0),
-'TpBRH_coupling_limits.pdf':        (2.3, (.38, .58, .63, .85), (.2, .8), (.2, .6, 0),   0.0),
-'TpTLH_coupling_limits.pdf':        (2.3, (.38, .58, .63, .85), (.2, .8), (.2, .6, 0),   9.9),
-'TpTRH_coupling_limits.pdf':        (2.3, (.38, .58, .63, .85), (.2, .8), (.2, .6, 0),   9.9),
+# 'TpBLH_coupling_limits.pdf':        (2.3, (.38, .58, .63, .85), (.2, .8), (.2, .6, 0),   0.0),
+# 'TpBRH_coupling_limits.pdf':        (2.3, (.38, .58, .63, .85), (.2, .8), (.2, .6, 0),   0.0),
+# 'TpTLH_coupling_limits.pdf':        (2.3, (.38, .58, .63, .85), (.2, .8), (.2, .6, 0),   9.9),
+# 'TpTRH_coupling_limits.pdf':        (2.3, (.38, .58, .63, .85), (.2, .8), (.2, .6, 0),   9.9),
 }
 
 
@@ -123,45 +123,31 @@ def handle_plot(name):
     if second_pad:
         second_pad.SetRightMargin(0.05)
         second_pad.SetTopMargin(0.05)
-        second_pad.SetBottomMargin(second_pad.GetBottomMargin())
 
+        # lift ylow very slightly
         pars = [ctypes.c_double(), ctypes.c_double(), ctypes.c_double(), ctypes.c_double()]
         main_pad.GetPadPar(*pars)
         pars = [d.value for d in pars]
         pars[1] += 0.002  # lift ylow very slightly
         main_pad.SetPad(*pars)
 
+        # redraw to squelch strange box under frame
         second_pad.cd()
-        pave = ROOT.TPave(0.15, 0.955, 0.95, 1, 0,'NDC')
-        pave.Draw()
+        second_pad.SetBottomMargin(0.1 + second_pad.GetBottomMargin())
+        c.cd()
+        second_pad.Draw()
         main_pad.cd()
 
-
-
-
-#    # area in coupling plots
-#    if '_coupling_' in save_name:
-#        obs_lim = main_hists[-1]
-#        n = obs_lim.GetN()
-#        obs_lim.SetPoint(n, 1800, 40)
-#        obs_lim.SetPoint(n+1, 700, 40)
-#        obs_lim.SetFillStyle(3344)
-#        obs_lim.SetFillColor(ROOT.kGray + 1)
-#        obs_lim.SetLineColor(ROOT.kGray + 1)
-#        obs_lim.SetLineWidth(2)
-#        obs_lim.Draw('F')
-#        legend_entry = legend.GetListOfPrimitives()[0]
-#        legend_entry.SetObject(obs_lim)
-#        legend_entry.SetOption('F')
-#        # legend_entry.SetFillColor(ROOT.kGray + 1)
-#        # legend_entry.SetFillStyle(3244)
-
-    # move legend
+    # legend
     # legend.SetTextSize(1.1 * legend.GetTextSize())
     legend.SetX1NDC(x1)
     legend.SetX2NDC(x2)
     legend.SetY1NDC(get_pos(y1))
     legend.SetY2NDC(get_pos(y2))
+    first_legend_entry = legend.GetListOfPrimitives()[0]
+    if first_legend_entry.GetLabel() == 'Data':
+        first_legend_entry.SetOption('pe')
+        main_hists[-1].SetMarkerSize(1)
 
     # lumi / sqrt s text
     lumi_line = ('%.1f fb^{-1} (13 TeV)' % lumi) if lumi else '(13 TeV)'
@@ -221,12 +207,12 @@ def handle_plot(name):
 
     # main axes font sizes
     y_axis.SetTitleOffset(1.45)
-    x_axis.SetTitleOffset(0.9)
-    x_axis.SetTitleSize(1.2 * x_axis.GetTitleSize())
+    x_axis.SetTitleOffset(1.0)
+    x_axis.SetTitleSize(1.3 * x_axis.GetTitleSize())
     if not y_axis_2nd:  # all plots without ratio plot
         y_axis.SetTitleSize(1.3 * y_axis.GetTitleSize())
         y_axis.SetTitleOffset(1.2)
-        x_axis.SetTitleOffset(1.1)
+        x_axis.SetTitleOffset(1.)
 
 
     # if y_axis_2nd:
@@ -285,7 +271,7 @@ def handle_plot(name):
     if save_name.endswith('H_limits'):
         main_pad.SetLogy()
         first_obj.SetMinimum(0.02)
-        y_axis.SetTitle(y_axis.GetTitle().replace('->', '#rightarrow').replace('/ pb', '(pb)').replace('BR', 'B'))
+        y_axis.SetTitle(y_axis.GetTitle().replace('->', '#rightarrow').replace('/ pb', '(pb)').replace('BR', '#bf{#it{#Beta}}'))
         entries = list(legend.GetListOfPrimitives())
         entries[0].SetLabel(entries[0].GetLabel().replace('BR', 'B').replace('=1.0,', '=0.5,'))
         th = main_hists[-1]

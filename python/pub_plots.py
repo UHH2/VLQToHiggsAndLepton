@@ -48,6 +48,7 @@ pas_single = {
 plot_config = {  #                   lumi legend x1 x2 y1 y2    CMS pos   chan pos    y_max
 'sel_eff_el.pdf':                   (0,   (.70, .90, .65, .85), (.2, .8), (.2, .6, 1),   1.9),
 'sel_eff_mu.pdf':                   (0,   (.70, .90, .20, .40), (.2, .8), (.65,.255,2),  1.9),
+'sel_eff_new.pdf':                  (0,   (.50, .70, .65, .85), (.2, .8), (.2, .6, 0),   2.8),
 
 'selblock_h_mass_lin.pdf':          (2.3, (.62, .82, .24, .73), (.9, .8), (.61,.8, 2),  5500),
 'selblock_primary_el_pt_lin.pdf':   (2.2, (.62, .82, .24, .73), (.9, .8), (.61,.8, 1),  1100),
@@ -73,10 +74,10 @@ plot_config = {  #                   lumi legend x1 x2 y1 y2    CMS pos   chan p
 'tlep_mass_lin.pdf':                (2.3, (.62, .82, .24, .73), (.9, .8), (.61,.8, 2),  2000),
 'tlep_pt_lin.pdf':                  (2.3, (.62, .82, .24, .73), (.9, .8), (.61,.8, 2),  2700),
 
-'TpBLH_limits.pdf':                 (2.3, (.38, .58, .58, .85), (.2, .8), (.9, .6, 0),   99.),
+'TpBLH_limits.pdf':                 (2.3, (.35, .55, .58, .85), (.2, .8), (.9, .6, 0),   99.),
 # 'TpBRH_limits.pdf':                 (2.3, (.38, .58, .58, .85), (.2, .8), (.9, .6, 0),   99.),
 # 'TpTLH_limits.pdf':                 (2.3, (.38, .58, .58, .85), (.2, .8), (.9, .6, 0),   99.),
-'TpTRH_limits.pdf':                 (2.3, (.38, .58, .58, .85), (.2, .8), (.9, .6, 0),   99.),
+'TpTRH_limits.pdf':                 (2.3, (.35, .55, .58, .85), (.2, .8), (.9, .6, 0),   99.),
 
 # 'TpBLH_coupling_limits.pdf':        (2.3, (.38, .58, .63, .85), (.2, .8), (.2, .6, 0),   0.0),
 # 'TpBRH_coupling_limits.pdf':        (2.3, (.38, .58, .63, .85), (.2, .8), (.2, .6, 0),   0.0),
@@ -85,18 +86,67 @@ plot_config = {  #                   lumi legend x1 x2 y1 y2    CMS pos   chan p
 }
 
 
-def handle_plot(name):
-    # get parameters
-    lumi, (x1, x2, y1, y2), (cms_x, cms_y), (chan_x, chan_y, chan), y_scale_max = plot_config[name]
-    save_name = name.replace('.pdf', '')
+def build_sel_eff_canvas():
+    c_mu = get_canvas('sel_eff_mu.pdf')
+    c_el = get_canvas('sel_eff_el.pdf')
 
-    # get some info and fetch canvas
+    # start with legends (they contain the labels)
+    el_leg = list(c_el.GetListOfPrimitives())[-1]
+    mu_leg = list(c_mu.GetListOfPrimitives())[-1]
+
+    # get the graphs
+    el_objs = dict(
+        (e.GetLabel(), e)
+        for e in el_leg.GetListOfPrimitives()
+    )
+    mu_objs = dict(
+        (e.GetLabel(), e)
+        for e in mu_leg.GetListOfPrimitives()
+    )
+
+    def migrate_points(from_g, to_g):
+        x, y = ctypes.c_double(), ctypes.c_double()
+        for i in xrange(to_g.GetN()):
+            to_g.RemovePoint(0)
+        for i in xrange(from_g.GetN()):
+            from_g.GetPoint(i, x, y)
+            to_g.SetPoint(i, x.value, y.value)
+
+    # set points in electron graphs to the ones from the mu graphs
+    # T_{lh} b in ele chan can stay
+    migrate_points(el_objs['T_{rh} t'].GetObject(), el_objs['T_{rh} b'].GetObject())
+    migrate_points(mu_objs['T_{lh} b'].GetObject(), el_objs['T_{lh} t'].GetObject())
+    migrate_points(mu_objs['T_{rh} t'].GetObject(), el_objs['T_{rh} t'].GetObject())
+
+    # update the legend
+    el_objs['T_{lh} b'].SetLabel('pp#rightarrowTb+X (ele. ch.)')
+    el_objs['T_{rh} b'].SetLabel('pp#rightarrowTt+X (ele. ch.)')
+    el_objs['T_{lh} t'].SetLabel('pp#rightarrowTb+X (mu. ch.)')
+    el_objs['T_{rh} t'].SetLabel('pp#rightarrowTt+X (mu. ch.)')
+
+    return c_el
+
+
+def get_canvas(name):
+    if name == 'sel_eff_new.pdf':
+        return build_sel_eff_canvas()
+
     path = pas_single[name]
     path, basename = os.path.dirname(path), os.path.splitext(os.path.basename(path))[0]
     canvname = basename.replace('_log', '').replace('_lin', '')
     f = ROOT.TFile(path + '/_varial_rootobjects.root.rt')
     c = f.Get('{n}/{n}'.format(n=canvname))
     f.Close()
+    return c
+
+
+def handle_plot(name):
+    # get parameters
+    lumi, (x1, x2, y1, y2), (cms_x, cms_y), (chan_x, chan_y, chan), y_scale_max = plot_config[name]
+    save_name = name.replace('.pdf', '')
+
+    # get some info and fetch canvas
+    c = get_canvas(name)
 
     # pull items out of canvas
     canv_prims = list(c.GetListOfPrimitives())
@@ -271,9 +321,16 @@ def handle_plot(name):
     if save_name.endswith('H_limits'):
         main_pad.SetLogy()
         first_obj.SetMinimum(0.02)
-        y_axis.SetTitle(y_axis.GetTitle().replace('->', '#rightarrow').replace('/ pb', '(pb)').replace('BR', '#bf{#it{#Beta}}'))
+        y_axis.SetTitle(y_axis.GetTitle().replace(
+            '->', '#rightarrow').replace(
+            '/ pb', '(pb)').replace(
+            'BR', '#bf{#it{#Beta}}'))
         entries = list(legend.GetListOfPrimitives())
-        entries[0].SetLabel(entries[0].GetLabel().replace('BR', 'B').replace('=1.0,', '=0.5,'))
+        entries[0].SetLabel(entries[0].GetLabel().replace(
+            'Tb, ', 'pp#rightarrowTb+X, ').replace(
+            'Tt, ', 'pp#rightarrowTt+X, ').replace(
+            'BR', 'B').replace(
+            '=1.0,', '=0.5,'))
         th = main_hists[-1]
         for i in xrange(th.GetN()):
             x, y = ctypes.c_double(), ctypes.c_double()

@@ -25,6 +25,7 @@
 #include "UHH2/common/include/TTbarReconstruction.h"
 #include "UHH2/common/include/CollectionProducer.h"
 #include "UHH2/common/include/MCWeight.h"
+#include "UHH2/common/include/PrimaryLepton.h"
 
 #include "UHH2/VLQSemiLepPreSel/include/VLQCommonModules.h"
 #include "UHH2/VLQSemiLepPreSel/include/SelectionHists.h"
@@ -212,21 +213,22 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
         cout << " " << kv.first << " = " << kv.second << endl;
     }
 
-    if (version == "Run2015D_Ele") {
-        ctx.set("lumi_file", "/afs/desy.de/user/t/tholenhe/xxl-af-cms/CMSSW_7_4_15_patch1/src/UHH2/common/data/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON_NoBadBSRuns.root");
-    } else if (version == "Run2015D_Mu") {
-        ctx.set("lumi_file", "/afs/desy.de/user/t/tholenhe/xxl-af-cms/CMSSW_7_4_15_patch1/src/UHH2/common/data/Latest_2015_Golden_JSON.root");
-    }
+    ctx.set("lumi_file", "/nfs/dust/cms/user/schumas/ANALYSIS/80Xv2/CMSSW_8_0_20/src/UHH2/common/data/Cert_271036-280385_13TeV_PromptReco_Collisions16_JSON_NoL1T_v2.root");
+    //if (version == "Run2015D_Ele") {
+    //ctx.set("lumi_file", "/afs/desy.de/user/t/tholenhe/xxl-af-cms/CMSSW_7_4_15_patch1/src/UHH2/common/data/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON_NoBadBSRuns.root");
+    //} else if (version == "Run2015D_Mu") {
+    //ctx.set("lumi_file", "/afs/desy.de/user/t/tholenhe/xxl-af-cms/CMSSW_7_4_15_patch1/src/UHH2/common/data/Latest_2015_Golden_JSON.root");
+    //}
 
     // remove everything from the output branch
     // ctx.undeclare_all_event_output();
 
     // jet correction (if nominal, the corrections were already applied in the preselection)
     if (ctx.get("jecsmear_direction", "nominal") != "nominal") {
-        auto ak8_corr = (type == "MC") ? JERFiles::Summer15_25ns_L23_AK8PFchs_MC
-                                       : JERFiles::Summer15_25ns_L23_AK8PFchs_DATA;
-        auto ak4_corr = (type == "MC") ? JERFiles::Summer15_25ns_L123_AK4PFchs_MC
-                                       : JERFiles::Summer15_25ns_L123_AK4PFchs_DATA;
+        auto ak8_corr = (type == "MC") ? JERFiles::Spring16_25ns_L23_AK8PFchs_MC
+                                       : JERFiles::Spring16_25ns_L23_AK8PFchs_DATA;
+        auto ak4_corr = (type == "MC") ? JERFiles::Spring16_25ns_L123_AK4PFchs_MC
+                                       : JERFiles::Spring16_25ns_L123_AK4PFchs_DATA;
         v_pre_modules.emplace_back(new GenericTopJetCorrector(ctx,
             ak8_corr, "patJetsAk8CHSJetsSoftDropPacked_daughters"));
         v_pre_modules.emplace_back(new GenericSubJetCorrector(ctx,
@@ -239,7 +241,7 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     }
     if (type == "MC") {
         v_pre_modules.emplace_back(new JetResolutionSmearer(ctx));
-        v_pre_modules.emplace_back(new GenericJetResolutionSmearer(ctx, "topjets", "slimmedGenJetsAK8", false));
+        //v_pre_modules.emplace_back(new GenericJetResolutionSmearer(ctx, "topjets", "slimmedGenJetsAK8", false));        //!!!!!!    invalid handle to GEN-jets --> ist die GEN Collection in NTuples und sind die handle richtig? 
     }
     v_pre_modules.emplace_back(new HiggsJetBuilder(ctx));
     v_pre_modules.emplace_back(new TopJetCleaner(ctx,
@@ -251,12 +253,24 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
         PrimaryLeptonDeltaPhiId(ctx, 1.0),
         HiggsTag(60., 99999., is_true<Jet>)
     ));
-    v_pre_modules.emplace_back(new TriggerAcceptProducer(
-        ctx, TRIGGER_PATHS_ELE, TRIGGER_PATHS_MU, "trigger_accept_el"));  // Vetoing mu trigger!
-    v_pre_modules.emplace_back(new TriggerAcceptProducer(
-        ctx, TRIGGER_PATHS_MU, "trigger_accept_mu"));
+    v_pre_modules.emplace_back(new PrimaryLepton(
+	 ctx, "PrimaryLepton", 0.,  0.));  
+
+    if (type == "DATA") {    
+      v_pre_modules.emplace_back(new TriggerAcceptProducer(
+         ctx, TRIGGER_PATHS_ELE, TRIGGER_PATHS_MU, "trigger_accept_el"));  // Vetoing mu trigger!
+      v_pre_modules.emplace_back(new TriggerAcceptProducer(
+         ctx, TRIGGER_PATHS_MU, "trigger_accept_mu"));
+    }
+    else {    
+      v_pre_modules.emplace_back(new FakeTriggerAcceptProducer(
+	 ctx, "PrimaryLepton", "electrons", "trigger_accept_el"));  
+      v_pre_modules.emplace_back(new FakeTriggerAcceptProducer(
+         ctx, "PrimaryLepton", "muons", "trigger_accept_mu"));
+    }
+
     v_pre_modules.emplace_back(new TriggerAwarePrimaryLepton(
-        ctx, "PrimaryLepton", "trigger_accept_el", "trigger_accept_mu", 50., 47.));
+        ctx, "PrimaryLepton", "trigger_accept_el", "trigger_accept_mu", 50., 53.));
     v_pre_modules.emplace_back(new CollectionProducer<TopJet>(
         ctx, "combined_ak8_jets", "h_jets", n_htags_all));
     v_pre_modules.emplace_back(new CollectionSizeProducer<TopJet>(
@@ -267,25 +281,25 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     // setup modules to prepare the event.
     // weights
     if (type == "MC") {
-        v_cat_modules.emplace_back(new TriggerAwareEventWeight(ctx, "trigger_accept_el", (target_lumi - 93.)/target_lumi));
+      //v_cat_modules.emplace_back(new TriggerAwareEventWeight(ctx, "trigger_accept_el", (target_lumi - 93.)/target_lumi));
         v_cat_modules.emplace_back(new MCLumiWeight(ctx));
         v_cat_modules.emplace_back(new MCPileupReweight(ctx));
-        v_cat_modules.emplace_back(new MCBTagScaleFactor(ctx, CSVBTag::WP_LOOSE, "h_jets"));
-        v_cat_modules.emplace_back(new MCMuonScaleFactor(ctx,
-            data_dir_path + "MuonID_Z_RunD_Reco74X_Nov20.root",
-            "NUM_MediumID_DEN_genTracks_PAR_pt_spliteta_bin1", 1., "id", "nominal", "prim_mu_coll"));
-        v_cat_modules.emplace_back(new MCMuonScaleFactor(ctx,
-            data_dir_path + "SingleMuonTrigger_Z_RunD_Reco74X_Nov20.root",
-            "Mu45_eta2p1_PtEtaBins", 1., "trg", "nominal", "prim_mu_coll"));
+        //v_cat_modules.emplace_back(new MCBTagScaleFactor(ctx, CSVBTag::WP_LOOSE, "h_jets"));
+        //v_cat_modules.emplace_back(new MCMuonScaleFactor(ctx,
+	//data_dir_path + "MuonID_Z_RunD_Reco74X_Nov20.root",
+	//"NUM_MediumID_DEN_genTracks_PAR_pt_spliteta_bin1", 1., "id", "nominal", "prim_mu_coll"));
+        //v_cat_modules.emplace_back(new MCMuonScaleFactor(ctx,
+	//data_dir_path + "SingleMuonTrigger_Z_RunD_Reco74X_Nov20.root",
+	//"Mu45_eta2p1_PtEtaBins", 1., "trg", "nominal", "prim_mu_coll"));
         if (version.size() > 7 && version.substr(0, 7) == "Signal_") {
             v_cat_modules.emplace_back(new PDFWeightBranchCreator(ctx, 110));
         }
     }
 
-    if (version == "TTbar") {
-        v_cat_modules.emplace_back(new TTbarGenProducer(ctx, "ttbargen", false));
-        v_cat_modules.emplace_back(new TopPtWeight(ctx, "ttbargen", 0.156, -0.00137, "weight_ttbar", true));
-    }
+    //if (version == "TTbar") {
+    //v_cat_modules.emplace_back(new TTbarGenProducer(ctx, "ttbargen", false));
+    //v_cat_modules.emplace_back(new TopPtWeight(ctx, "ttbargen", 0.156, -0.00137, "weight_ttbar", true));
+    //}
 
     // leptons
     v_cat_modules.emplace_back(new NLeptonsProducer(ctx, "n_leptons"));

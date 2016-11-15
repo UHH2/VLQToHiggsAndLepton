@@ -75,7 +75,7 @@ static vector<shared_ptr<SelectionItem>> SEL_ITEMS_VLQ2HT {
 
 
 static const vector<std::string> TRIGGER_PATHS_MU {
-    "HLT_Mu45_eta2p1_v*",
+    "HLT_Mu50_v*",
 };
 static const vector<std::string> TRIGGER_PATHS_ELE {
     "HLT_Ele45_CaloIdVT_GsfTrkIdT_PFJet200_PFJet50_v*",

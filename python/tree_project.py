@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 from varial_ext.treeprojector import TreeProjector
-#from varial_ext.treeprojector import TreeProjector
 import multiprocessing as mp
 from os.path import join
 import varial.tools
@@ -9,13 +8,6 @@ import plot
 import glob
 import ast
 import os
-
-
-# if False:
-#     TreeProjector = BatchTreeProjector
-#     from varial_ext.sgeworker import SGESubmitter
-#     import varial_ext.treeprojector as tp
-#     SGESubmitter(500, tp.jug_work_dir_pat, tp.jug_file_search_pat).submit()
 
 
 iteration = [1]  # non-local variable

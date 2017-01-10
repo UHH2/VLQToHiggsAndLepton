@@ -27,6 +27,7 @@
 #include "UHH2/common/include/MCWeight.h"
 
 #include "UHH2/VLQSemiLepPreSel/include/VLQCommonModules.h"
+#include "UHH2/VLQSemiLepPreSel/include/VLQSemiLepPreSelHists.h"
 #include "UHH2/VLQSemiLepPreSel/include/SelectionHists.h"
 #include "UHH2/VLQSemiLepPreSel/include/EventHists.h"
 
@@ -42,6 +43,28 @@
 
 using namespace std;
 using namespace uhh2;
+
+
+class WeightSumHist: public Hists {
+public:
+    explicit WeightSumHist(Context & ctx,
+                           const string & dir = "",
+                           const string & name = "WeightSumHist"):
+        Hists(ctx, dir),
+        hist(book<TH1F>(name, name, 2, -.5, 1.5))
+    {
+        hist->SetBit(TH1::kCanRebin);
+    }
+
+    virtual void fill(const Event & e) override {
+        hist->Fill("unweighted", 1.);
+        hist->Fill("weighted", e.weight);
+    }
+
+private:
+    TH1F * hist;
+};
+
 
 
 template <typename TYPE>
@@ -172,6 +195,17 @@ public:
 
 
 
+
+/*
+.___  ___.      ___       __  .__   __.    .___  ___.   ______    _______   __    __   __       _______
+|   \/   |     /   \     |  | |  \ |  |    |   \/   |  /  __  \  |       \ |  |  |  | |  |     |   ____|
+|  \  /  |    /  ^  \    |  | |   \|  |    |  \  /  | |  |  |  | |  .--.  ||  |  |  | |  |     |  |__
+|  |\/|  |   /  /_\  \   |  | |  . `  |    |  |\/|  | |  |  |  | |  |  |  ||  |  |  | |  |     |   __|
+|  |  |  |  /  _____  \  |  | |  |\   |    |  |  |  | |  `--'  | |  '--'  ||  `--'  | |  `----.|  |____
+|__|  |__| /__/     \__\ |__| |__| \__|    |__|  |__|  \______/  |_______/  \______/  |_______||_______|
+*/
+
+
 /** \brief Basic analysis example of an AnalysisModule in UHH2
  */
 class VLQToHiggsAndLeptonModule: public AnalysisModule {
@@ -198,7 +232,10 @@ private:
     vector<unique_ptr<Hists>> v_hists_after_sel_el;
     vector<unique_ptr<Hists>> v_hists_after_sel_mu;
 
-    Event::Handle<int> h_ele_trg;
+    bool is_ele_data;
+    bool is_mu_data;
+
+    Event::Handle<int> h_mu_trg;
 };
 
 
@@ -212,10 +249,14 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
         cout << " " << kv.first << " = " << kv.second << endl;
     }
 
+    is_ele_data = false;
+    is_mu_data = false;
     if (version == "Run2015D_Ele") {
         ctx.set("lumi_file", "/afs/desy.de/user/t/tholenhe/xxl-af-cms/CMSSW_7_4_15_patch1/src/UHH2/common/data/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON_NoBadBSRuns.root");
+        is_ele_data = true;
     } else if (version == "Run2015D_Mu") {
         ctx.set("lumi_file", "/afs/desy.de/user/t/tholenhe/xxl-af-cms/CMSSW_7_4_15_patch1/src/UHH2/common/data/Latest_2015_Golden_JSON.root");
+        is_mu_data = true;
     }
 
     // remove everything from the output branch
@@ -391,7 +432,7 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
         ctx, "subleading_jet_pt", "trigger_accept_el", 70., 50.));
 
     // insert 2D cut
-    unsigned pos_2d_cut = 3;
+    unsigned pos_2d_cut = 1;
     sel_module->insert_selection(pos_2d_cut, new TwoDCutSel(ctx, DR_2D_CUT, DPT_2D_CUT));
 
     nm1_hists_el->insert_hists(pos_2d_cut, new TwoDCutHist(ctx, "ElChan/Nm1Selection"));
@@ -407,7 +448,7 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
 
     // SanityChecks and other histograms after selection
     // separately for ele and mu channel
-    h_ele_trg = ctx.get_handle<int>("trigger_accept_el");
+    h_mu_trg = ctx.get_handle<int>("trigger_accept_mu");
     v_hists_after_sel_el.emplace_back(new ElectronHists(ctx, "ElChan/SanityCheckEle", true));
     v_hists_after_sel_el.emplace_back(new MuonHists(ctx, "ElChan/SanityCheckMu"));
     v_hists_after_sel_el.emplace_back(new EventHists(ctx, "ElChan/SanityCheckEvent"));
@@ -428,6 +469,12 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     v_hists_after_sel_mu.emplace_back(new BTagMCEfficiencyHists(ctx, "MuChan/BTagMCEfficiencyHists", CSVBTag::WP_LOOSE, "h_jets"));
     v_hists_after_sel_mu.emplace_back(new VLQ2HTEventReco(ctx, "MuChan/EventRecoAfterSel"));
     v_hists_after_sel_mu.emplace_back(new HistCollector(ctx, "MuChan/EventHistsPost", type == "MC"));
+    v_hists_el.emplace_back(new EventHists(ctx, "ElChan/SanityCheckEventNoSel"));
+    v_hists_mu.emplace_back(new EventHists(ctx, "MuChan/SanityCheckEventNoSel"));
+    v_hists_el.emplace_back(new WeightSumHist(ctx, "ElChan"));
+    v_hists_mu.emplace_back(new WeightSumHist(ctx, "MuChan"));
+    v_hists_after_sel_el.emplace_back(new WeightSumHist(ctx, "ElChan", "WeightSumHistAfterSel"));
+    v_hists_after_sel_mu.emplace_back(new WeightSumHist(ctx, "MuChan", "WeightSumHistAfterSel"));
 
     // lumi hists
     if (type == "DATA") {
@@ -488,9 +535,14 @@ bool VLQToHiggsAndLeptonModule::process(Event & event) {
     bool all_accepted = sel_module->process(event);
 
     // pick histograms for channel
-    bool ele_acc = event.get(h_ele_trg);
-    const auto & v_hists = (ele_acc) ? v_hists_el : v_hists_mu;
-    const auto & v_hists_after_sel = (ele_acc) ? v_hists_after_sel_el : v_hists_after_sel_mu;
+    bool mu_acc = event.get(h_mu_trg);
+    const auto & v_hists = (mu_acc) ? v_hists_mu : v_hists_el;
+    const auto & v_hists_after_sel = (mu_acc) ? v_hists_after_sel_mu : v_hists_after_sel_el;
+
+    if ((is_ele_data && mu_acc) ||
+        (is_mu_data && !mu_acc)) {
+        return false;
+    }
 
     // fill histograms
     if (all_accepted) {

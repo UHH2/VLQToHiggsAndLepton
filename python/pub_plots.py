@@ -119,10 +119,10 @@ def build_sel_eff_canvas():
     migrate_points(mu_objs['T_{rh} t'].GetObject(), el_objs['T_{rh} t'].GetObject())
 
     # update the legend
-    el_objs['T_{lh} b'].SetLabel('pp#rightarrowTb+X (ele. ch.)')
-    el_objs['T_{rh} b'].SetLabel('pp#rightarrowTt+X (ele. ch.)')
-    el_objs['T_{lh} t'].SetLabel('pp#rightarrowTb+X (mu. ch.)')
-    el_objs['T_{rh} t'].SetLabel('pp#rightarrowTt+X (mu. ch.)')
+    el_objs['T_{lh} b'].SetLabel('pp#rightarrowT_{lh}b+X (ele. ch.)')
+    el_objs['T_{rh} b'].SetLabel('pp#rightarrowT_{rh}t+X (ele. ch.)')
+    el_objs['T_{lh} t'].SetLabel('pp#rightarrowT_{lh}b+X (mu. ch.)')
+    el_objs['T_{rh} t'].SetLabel('pp#rightarrowT_{rh}t+X (mu. ch.)')
 
     return c_el
 
@@ -300,10 +300,10 @@ def handle_plot(name):
         x_axis.SetRangeUser(700, 1800)
 
     if name == 'tlep_pt_lin.pdf':
-        x_axis.SetTitle('Top quark candidate p_{T} (GeV)')
+        x_axis.SetTitle('t quark candidate p_{T} (GeV)')
 
     if name == 'tlep_mass_lin.pdf':
-        x_axis.SetTitle('Top quark candidate mass (GeV)')
+        x_axis.SetTitle('t quark candidate mass (GeV)')
 
     if name == 'selblock_primary_el_pt_lin.pdf':
         x_axis.SetTitle('Electron p_{T} (GeV)')
@@ -313,6 +313,10 @@ def handle_plot(name):
 
     if name.startswith('sel_eff_'):
         legend.SetTextSize(1.3 * legend.GetTextSize())
+        y_axis.SetTitle('Arbitrary units')
+
+    if name.startswith('Sideband_vs_SignalRegion__'):
+        y_axis.SetTitle('Arbitrary units')
 
     # more detail fixings...
     if save_name.endswith('_limits'):
@@ -327,9 +331,9 @@ def handle_plot(name):
             'BR', '#bf{#it{#Beta}}'))
         entries = list(legend.GetListOfPrimitives())
         entries[0].SetLabel(entries[0].GetLabel().replace(
-            'Tb, ', 'pp#rightarrowTb+X, ').replace(
-            'Tt, ', 'pp#rightarrowTt+X, ').replace(
-            'BR', 'B').replace(
+            'Tb, ', 'pp#rightarrowT_{lh}b+X, ').replace(
+            'Tt, ', 'pp#rightarrowT_{rh}t+X, ').replace(
+            'BR', '#it{B}').replace(
             '=1.0,', '=0.5,'))
         th = main_hists[-1]
         for i in xrange(th.GetN()):

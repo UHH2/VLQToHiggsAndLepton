@@ -29,7 +29,7 @@ class EffNumTable(varial.tools.Tool):
             eff = r'& $%2.2f \pm %2.2f \pm %2.2f$ ' % (i/f, st/f, sy/f)
             return ('%50s'%name) + num + eff
 
-        res = ['TpBLH', 'TpBRH', 'TpTLH', 'TpTRH']
+        res = ['TpBLH', 'TpTRH']
         res = (
             './VLQ2HT/Outputs/Limits%s/DataBackground/PostFit/_varial_infodata.pkl' % tok
             for tok in res
@@ -64,8 +64,6 @@ class EffNumTable(varial.tools.Tool):
 class SigEffGraph(varial.tools.Tool):
     graph_attrs = {
         'TpBLH': 'T_{lh} b',
-        'TpBRH': 'T_{rh} b',
-        'TpTLH': 'T_{lh} t',
         'TpTRH': 'T_{rh} t',
     }
 
@@ -126,7 +124,7 @@ class SigEffGraph(varial.tools.Tool):
         return wrps
 
     def run(self):
-        tokens = ['TpBLH', 'TpBRH', 'TpTLH', 'TpTRH']
+        tokens = ['TpBLH', 'TpTRH']
         wrps = (w
                 for t in tokens
                 for w in self.make_graphs(t))

@@ -30,26 +30,18 @@ def vlq2ht_plot_preproc(w):
     return w
 
 
-@varial.history.track_history
-def scale_mc_down_to_1p266invfb(w):
-    if not w.is_data:
-        w.lumi /= 6./10.
-        w = varial.op.norm_to_lumi(w)
-    return w
-
-
-def loader_hook_sig_scale(wrps):
-    wrps = loader_hook(wrps)
+def loader_hook_sig_scale(wrps, rebin_max_bins):
+    wrps = loader_hook(wrps, rebin_max_bins)
     wrps = (vlq2ht_plot_preproc(w) for w in wrps)
-    # wrps = (scale_mc_down_to_1p266invfb(w) for w in wrps)
 
     # filter signals that are not for plotting
     wrps = itertools.ifilter(lambda w: 'Signal_' not in w.sample, wrps)
     return wrps
 
 
-def plotter_factory_stack_sigx10(**kws):
-    kws['hook_loaded_histos'] = loader_hook_sig_scale
+def plotter_factory_stack_sig_scale(**kws):
+    rebin_max_bins = kws.pop('rebin_max_bins', 40)
+    kws['hook_loaded_histos'] = lambda ws: loader_hook_sig_scale(ws, rebin_max_bins)
     kws['plot_setup'] = gen.mc_stack_n_data_sum
     return varial.tools.Plotter(**kws)
 
@@ -76,39 +68,16 @@ def mk_tools(input_pattern=None, **args):
     if not input_pattern:
         input_pattern = input_pat
 
-    rm_uncerts = ('HT__', 'jet_pt__')
-
-    if 'filter_keyfunc' in args:
-        fk = args['filter_keyfunc']
-        args['filter_keyfunc'] = lambda w: (
-            not any(t in w.file_path for t in rm_uncerts)
-            and fk(w)
-        )
-    else:
-        args['filter_keyfunc'] = lambda w: (
-            not any(t in w.file_path for t in rm_uncerts)
-        )
-
     return [
         varial.tools.mk_rootfile_plotter(
             pattern=input_pattern,
             name='Stacks',
-            plotter_factory=plotter_factory_stack_sigx10,
+            plotter_factory=plotter_factory_stack_sig_scale,
             combine_files=True,
             auto_legend=False,
             hook_canvas_post_build=varial.gen.add_sample_integrals,
             **args
         ),
-
-        # TODO for norm: set backgrounds line width to 2
-        # TODO for norm: make data black!
-        #varial.tools.mk_rootfile_plotter(
-        #    pattern=input_pattern,
-        #    name='VLQ2HT_norm',
-        #    plotter_factory=plotter_factory_norm,
-        #    combine_files=True,
-        #    auto_legend=False,
-        #),
 
         #varial.tools.mk_rootfile_plotter(
         #    pattern=input_pat,

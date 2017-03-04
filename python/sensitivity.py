@@ -317,7 +317,7 @@ def canvas_hook_integrals(cnvs):
 
 class PValueCollector(varial.tools.Tool):
     def run(self):
-        tokens = ['TpBLH', 'TpBRH', 'TpTLH', 'TpTRH']
+        tokens = ['TpBLH', 'TpTRH']
         res = (                                     # fetch theta results
             self.lookup_result(
                 '../Outputs/Limits%s/DataBackground/Theta/ThetaLimits' % t)

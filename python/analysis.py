@@ -20,10 +20,9 @@ varial.ROOT.gStyle.SetPadTopMargin(0.1)
 varial.settings.canvas_size_x = 600
 varial.settings.canvas_size_y = 500
 
-dir_name = 'VLQ2HT_full_baseline'
+dir_name = 'VLQ2HT'
 uhh_base = os.getenv('CMSSW_BASE') + '/src/UHH2/'
-# input_pat = '/nfs/dust/cms/user/tholenhe/VLQToHiggsAndLepton/samples_74X/uhh2*.root'
-input_pat = '/nfs/dust/cms/user/tholenhe/VLQToHiggsAndLepton/samples_full_baseline/uhh2*.root'
+input_pat = '/nfs/dust/cms/user/tholenhe/VLQToHiggsAndLepton/samples/uhh2*.root'
 
 varial.settings.my_lh_signals = [
     'Signal_TpB_TH_LH_M0700',
@@ -38,33 +37,6 @@ varial.settings.my_lh_signals = [
     # 'Signal_TpB_TH_LH_M1600',
     'Signal_TpB_TH_LH_M1700',
     'Signal_TpB_TH_LH_M1800',
-]
-varial.settings.my_rh_signals = [
-    'Signal_TpB_TH_RH_M0700',
-    'Signal_TpB_TH_RH_M0800',
-    'Signal_TpB_TH_RH_M0900',
-    'Signal_TpB_TH_RH_M1000',
-    'Signal_TpB_TH_RH_M1100',
-    'Signal_TpB_TH_RH_M1200',
-    'Signal_TpB_TH_RH_M1300',
-    'Signal_TpB_TH_RH_M1400',
-    'Signal_TpB_TH_RH_M1500',
-    'Signal_TpB_TH_RH_M1600',
-    'Signal_TpB_TH_RH_M1700',
-    'Signal_TpB_TH_RH_M1800',
-]
-varial.settings.tpt_lh_signals = [
-    'Signal_TpT_TH_LH_M0700',
-    'Signal_TpT_TH_LH_M0800',
-    'Signal_TpT_TH_LH_M0900',
-    'Signal_TpT_TH_LH_M1000',
-    'Signal_TpT_TH_LH_M1100',
-    'Signal_TpT_TH_LH_M1200',
-    'Signal_TpT_TH_LH_M1300',
-    'Signal_TpT_TH_LH_M1500',
-    'Signal_TpT_TH_LH_M1600',
-    'Signal_TpT_TH_LH_M1700',
-    'Signal_TpT_TH_LH_M1800',
 ]
 varial.settings.tpt_rh_signals = [
     'Signal_TpT_TH_RH_M0700',
@@ -82,8 +54,6 @@ varial.settings.tpt_rh_signals = [
 ]
 varial.settings.all_signals = (
     varial.settings.my_lh_signals +
-    varial.settings.my_rh_signals +
-    varial.settings.tpt_lh_signals +
     varial.settings.tpt_rh_signals
 )
 
@@ -157,93 +127,88 @@ tc = ToolChain(dir_name, [
     # sframe_tools.sframe_tools,
 
     ToolChainParallel('Inputs', [
-#         ToolChainParallel('El', [
-#             tree_project.mk_tp(input_pat, ['trigger_accept_el > 0.5']),
-#             tree_project.mk_sys_tps(['trigger_accept_el > 0.5']),
-#         ], n_workers=1),
-#         ToolChainParallel('Mu', [
-#             tree_project.mk_tp(input_pat, ['trigger_accept_mu > 0.5']),
-#             tree_project.mk_sys_tps(['trigger_accept_mu > 0.5']),
-#         ], n_workers=1),
+        ToolChainParallel('El', [
+            tree_project.mk_tp(input_pat, ['trigger_accept_el > 0.5']),
+            tree_project.mk_sys_tps(['trigger_accept_el > 0.5']),
+        ], n_workers=1),
+        ToolChainParallel('Mu', [
+            tree_project.mk_tp(input_pat, ['trigger_accept_mu > 0.5']),
+            tree_project.mk_sys_tps(['trigger_accept_mu > 0.5']),
+        ], n_workers=1),
         hadd,
     ], n_workers=1),
 
     ] + ([
     ToolChainParallel('Outputs', [
+        plot.mk_toolchain('SelectionsEl', ['%s/Inputs/El/TreeProjector/*.root'%dir_name,
+                                              '%s/Inputs/El/SysTreeProjectors/*/*.root'%dir_name]),
+        plot.mk_toolchain('SelectionsMu', ['%s/Inputs/Mu/TreeProjector/*.root'%dir_name,
+                                              '%s/Inputs/Mu/SysTreeProjectors/*/*.root'%dir_name]),
+        plot.mk_toolchain('SelectionsElNoFwdSys',
+            [
+                '%s/Inputs/El/TreeProjector/*.root'%dir_name,
+                '%s/Inputs/El/SysTreeProjectors/*/*.root'%dir_name
+            ],
+            filter_keyfunc=lambda w: 'rate_fwdjet__' not in w.file_path,
+        ),
+        plot.mk_toolchain('SelectionsMuNoFwdSys',
+            [
+                '%s/Inputs/Mu/TreeProjector/*.root'%dir_name,
+                '%s/Inputs/Mu/SysTreeProjectors/*/*.root'%dir_name
+            ],
+            filter_keyfunc=lambda w: 'rate_fwdjet__' not in w.file_path,
+        ),
+        plot.mk_toolchain('SelectionsElJERC', ['%s/Inputs/El/TreeProjector/*.root'%dir_name,
+                                              '%s/Inputs/El/SysTreeProjectors/JE*/*.root'%dir_name]),
+        plot.mk_toolchain('SelectionsMuJERC', ['%s/Inputs/Mu/TreeProjector/*.root'%dir_name,
+                                              '%s/Inputs/Mu/SysTreeProjectors/JE*/*.root'%dir_name]),
+        plot.mk_toolchain('SelectionsElbtag', ['%s/Inputs/El/TreeProjector/*.root'%dir_name,
+                                              '%s/Inputs/El/SysTreeProjectors/b_tag_*/*.root'%dir_name]),
+        plot.mk_toolchain('SelectionsMubtag', ['%s/Inputs/Mu/TreeProjector/*.root'%dir_name,
+                                              '%s/Inputs/Mu/SysTreeProjectors/b_tag_*/*.root'%dir_name]),
+        plot.mk_toolchain('SFramePlots', '%s/Inputs/Hadd/*.root' % dir_name),
+        plot.mk_toolchain('SFramePlotsNoRebin', '%s/Inputs/Hadd/*.root' % dir_name, rebin_max_bins=5000),
+        plot.mk_cutflowchain('SFrameCutflowEl', '%s/Inputs/Hadd/*.root' % dir_name, lambda w: 'ElChan/' in w.in_file_path),
+        plot.mk_cutflowchain('SFrameCutflowMu', '%s/Inputs/Hadd/*.root' % dir_name, lambda w: 'MuChan/' in w.in_file_path),
+        # sideband_overlays.get_tc('%s/Inputs/El'%dir_name),
+        # sideband_overlays.get_tc('%s/Inputs/Mu'%dir_name),
         # plot.mk_toolchain('SelectionsFwdEl', '%s/Inputs/El/TreeProjector/*.root'%dir_name,
         #     filter_keyfunc=lambda w: 'FwdSelection' in w.in_file_path),  #, keep_content_as_result=True),
         # plot.mk_toolchain('SelectionsFwdMu', '%s/Inputs/Mu/TreeProjector/*.root'%dir_name,
         #     filter_keyfunc=lambda w: 'FwdSelection' in w.in_file_path),  #, keep_content_as_result=True),
         # plot.mk_toolchain('SelectionsFwdComb', '%s/Inputs/*/TreeProjector/*.root'%dir_name,
         #    filter_keyfunc=lambda w: 'FwdSelection' in w.in_file_path),  #, keep_content_as_result=True),
-#         plot.mk_toolchain('SelectionsEl', ['%s/Inputs/El/TreeProjector/*.root'%dir_name,
-#                                               '%s/Inputs/El/SysTreeProjectors/*/*.root'%dir_name]),
-#         plot.mk_toolchain('SelectionsMu', ['%s/Inputs/Mu/TreeProjector/*.root'%dir_name,
-#                                               '%s/Inputs/Mu/SysTreeProjectors/*/*.root'%dir_name]),
-#         plot.mk_toolchain('SelectionsElNoFwdSys',
-#             [
-#                 '%s/Inputs/El/TreeProjector/*.root'%dir_name,
-#                 '%s/Inputs/El/SysTreeProjectors/*/*.root'%dir_name
-#             ],
-#             filter_keyfunc=lambda w: 'rate_fwdjet__' not in w.file_path,
-#         ),
-#         plot.mk_toolchain('SelectionsMuNoFwdSys',
-#             [
-#                 '%s/Inputs/Mu/TreeProjector/*.root'%dir_name,
-#                 '%s/Inputs/Mu/SysTreeProjectors/*/*.root'%dir_name
-#             ],
-#             filter_keyfunc=lambda w: 'rate_fwdjet__' not in w.file_path,
-#         ),
-#         plot.mk_toolchain('SelectionsElNoData',
-#             [
-#                 '%s/Inputs/El/TreeProjector/*.root'%dir_name,
-#                 '%s/Inputs/El/SysTreeProjectors/*/*.root'%dir_name
-#             ],
-#             filter_keyfunc=lambda w: 'Run2015' not in w.file_path,
-#             canvas_post_build_funcs=post_build_funcs_only_legend,
-#         ),
-#         plot.mk_toolchain('SelectionsMuNoData',
-#             [
-#                 '%s/Inputs/Mu/TreeProjector/*.root'%dir_name,
-#                 '%s/Inputs/Mu/SysTreeProjectors/*/*.root'%dir_name
-#             ],
-#             filter_keyfunc=lambda w: 'Run2015' not in w.file_path,
-#             canvas_post_build_funcs=post_build_funcs_only_legend,
-#         ),
-#         plot.mk_toolchain('SelectionsElJetPT', ['%s/Inputs/El/TreeProjector/*.root'%dir_name,
-#                                               '%s/Inputs/El/SysTreeProjectors/jet_pt__*/*.root'%dir_name]),
-#         plot.mk_toolchain('SelectionsMuJetPT', ['%s/Inputs/Mu/TreeProjector/*.root'%dir_name,
-#                                               '%s/Inputs/Mu/SysTreeProjectors/jet_pt__*/*.root'%dir_name]),
-#         plot.mk_toolchain('SelectionsElJERC', ['%s/Inputs/El/TreeProjector/*.root'%dir_name,
-#                                               '%s/Inputs/El/SysTreeProjectors/JE*/*.root'%dir_name]),
-#         plot.mk_toolchain('SelectionsMuJERC', ['%s/Inputs/Mu/TreeProjector/*.root'%dir_name,
-#                                               '%s/Inputs/Mu/SysTreeProjectors/JE*/*.root'%dir_name]),
-#         plot.mk_toolchain('SelectionsElbtag', ['%s/Inputs/El/TreeProjector/*.root'%dir_name,
-#                                               '%s/Inputs/El/SysTreeProjectors/b_tag_*/*.root'%dir_name]),
-#         plot.mk_toolchain('SelectionsMubtag', ['%s/Inputs/Mu/TreeProjector/*.root'%dir_name,
-#                                               '%s/Inputs/Mu/SysTreeProjectors/b_tag_*/*.root'%dir_name]),
-        plot.mk_toolchain('SFramePlots', '%s/Inputs/Hadd/*.root' % dir_name),
-        plot.mk_cutflowchain('SFrameCutflowEl', '%s/Inputs/Hadd/*.root' % dir_name, lambda w: 'ElChan/' in w.in_file_path),
-        plot.mk_cutflowchain('SFrameCutflowMu', '%s/Inputs/Hadd/*.root' % dir_name, lambda w: 'MuChan/' in w.in_file_path),
-#         sideband_overlays.get_tc('%s/Inputs/El'%dir_name),
-#         sideband_overlays.get_tc('%s/Inputs/Mu'%dir_name),
+        # plot.mk_toolchain('SelectionsElNoData',
+        #     [
+        #         '%s/Inputs/El/TreeProjector/*.root'%dir_name,
+        #         '%s/Inputs/El/SysTreeProjectors/*/*.root'%dir_name
+        #     ],
+        #     filter_keyfunc=lambda w: 'Run2015' not in w.file_path,
+        #     canvas_post_build_funcs=post_build_funcs_only_legend,
+        # ),
+        # plot.mk_toolchain('SelectionsMuNoData',
+        #     [
+        #         '%s/Inputs/Mu/TreeProjector/*.root'%dir_name,
+        #         '%s/Inputs/Mu/SysTreeProjectors/*/*.root'%dir_name
+        #     ],
+        #     filter_keyfunc=lambda w: 'Run2015' not in w.file_path,
+        #     canvas_post_build_funcs=post_build_funcs_only_legend,
+        # ),
         # fit_w_peak.WPeakFitter(),
         # fit_w_peak.tc_sys_comp,
         # lep_plus_minus.pltr,
-#         sensitivity.get_tc('LimitsTpBLH', varial.settings.my_lh_signals),
-#         sensitivity.get_tc('LimitsTpBRH', varial.settings.my_rh_signals),
-#         sensitivity.get_tc('LimitsTpTLH', varial.settings.tpt_lh_signals),
-#         sensitivity.get_tc('LimitsTpTRH', varial.settings.tpt_rh_signals),
+        sensitivity.get_tc('LimitsTpBLH', varial.settings.my_lh_signals),
+        sensitivity.get_tc('LimitsTpTRH', varial.settings.tpt_rh_signals),
     ]),
-#     sensitivity.PValueCollector(),
-#     sensitivity.BetaSignalCollector(),
-#     yields_n_eff.EffNumTable(),
-#     yields_n_eff.SigEffGraph(),
-#     yields_n_eff.sig_eff_grph_pltr,
+    sensitivity.PValueCollector(),
+    sensitivity.BetaSignalCollector(),
+    yields_n_eff.EffNumTable(),
+    yields_n_eff.SigEffGraph(),
+    yields_n_eff.sig_eff_grph_pltr,
     # varial.tools.PrintToolTree(),
     varial.tools.WebCreator(),
 #     tex_content.tc,
-#     varial.tools.CopyTool('~/www/auth/VLQ2HT', use_rsync=True),
+    varial.tools.CopyTool('~/www/auth/VLQ2HT', use_rsync=True),
     ] if True else []) + [
 ])
 

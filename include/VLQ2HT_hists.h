@@ -82,12 +82,12 @@ public:
         )),
         top_mass_(book<TH1F>(
             "matching_top_mass",
-            "M_{top cand., reco} / GeV; events",
+            ";top quark candidate mass (GeV);events",
             100, 0, 500.
         )),
         hig_mass_(book<TH1F>(
             "matching_hig_mass",
-            "M_{higgs cand., reco} / GeV; events",
+            ";Higgs boson candidate mass (GeV);events",
             100, 0, 500.
         ))
     {}

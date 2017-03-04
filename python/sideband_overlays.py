@@ -4,24 +4,24 @@ import varial.tools
 import varial.util
 
 
-plots = ['vlq_mass', 'vlq_pt', 'h_mass', 'h_pt', 'tlep_pt', 'tlep_mass']
+plots = ['vlq_mass', 'h_pt', 'tlep_pt']
 varial.settings.colors['SignalRegion'] = 617
 
 
 def rename_y_axis(wrp):
-    wrp.obj.GetYaxis().SetTitle('A.u.')
+    wrp.obj.GetYaxis().SetTitle('Arbitrary units')
     return wrp
 
 
-def set_uncertainty_on_vlq_mass(wrps):
-    # bins (6, 7, 24, 25) get double uncertainty
-    for w in wrps:
-        if w.name == 'vlq_mass':
-            # w.histo.SetBinContent(5, 0.)
-            # w.histo.SetBinError(5, 0.)
-            for i in (6, 7, 24, 25):
-                w.histo.SetBinError(i, 2 * w.histo.GetBinError(i))
-        yield w
+# def set_uncertainty_on_vlq_mass(wrps):
+#     # bins (6, 7, 24, 25) get double uncertainty
+#     for w in wrps:
+#         if w.name == 'vlq_mass':
+#             # w.histo.SetBinContent(5, 0.)
+#             # w.histo.SetBinError(5, 0.)
+#             for i in (6, 7, 24, 25):
+#                 w.histo.SetBinError(i, 2 * w.histo.GetBinError(i))
+#         yield w
 
 
 def hook_loaded_histos(wrps):
@@ -49,35 +49,35 @@ def hook_loaded_histos(wrps):
     return wrps
 
 
-def print_bkg_percentages(wrps):
-
-    def calc_percent_and_error(th1_hist, total_int, total_int_err):
-        val, err = varial.util.integral_and_error(th1_hist)
-        return val / total_int, (err**2 + total_int_err**2)**.5 / total_int
-
-    def mk_prcntgs(grp):
-        h_tot = varial.op.sum(grp)
-        i_tot, i_tot_err = varial.util.integral_and_error(h_tot.obj)
-        return h_tot.in_file_path, list(
-            (w.sample, calc_percent_and_error(w.obj, i_tot, i_tot_err))
-            for w in grp
-        )
-
-    def print_prcntgs(ifp, grp):
-        print "="*80
-        print ifp
-        for it in grp:
-            print it
-        print "="*80
-        return ifp, grp
-
-    wrps = (w for w in wrps if w.name == 'vlq_mass' and w.is_background)
-    wrps = varial.gen.gen_norm_to_lumi(wrps)
-    wrps = sorted(wrps, key=lambda w: w.sample)
-    wrps = sorted(wrps, key=lambda w: w.in_file_path)
-    wrps = varial.gen.group(wrps, lambda w: w.in_file_path)
-    wrps = (mk_prcntgs(grp) for grp in wrps)
-    wrps = list(print_prcntgs(*grp) for grp in wrps)
+# def print_bkg_percentages(wrps):
+#
+#     def calc_percent_and_error(th1_hist, total_int, total_int_err):
+#         val, err = varial.util.integral_and_error(th1_hist)
+#         return val / total_int, (err**2 + total_int_err**2)**.5 / total_int
+#
+#     def mk_prcntgs(grp):
+#         h_tot = varial.op.sum(grp)
+#         i_tot, i_tot_err = varial.util.integral_and_error(h_tot.obj)
+#         return h_tot.in_file_path, list(
+#             (w.sample, calc_percent_and_error(w.obj, i_tot, i_tot_err))
+#             for w in grp
+#         )
+#
+#     def print_prcntgs(ifp, grp):
+#         print "="*80
+#         print ifp
+#         for it in grp:
+#             print it
+#         print "="*80
+#         return ifp, grp
+#
+#     wrps = (w for w in wrps if w.name == 'vlq_mass' and w.is_background)
+#     wrps = varial.gen.gen_norm_to_lumi(wrps)
+#     wrps = sorted(wrps, key=lambda w: w.sample)
+#     wrps = sorted(wrps, key=lambda w: w.in_file_path)
+#     wrps = varial.gen.group(wrps, lambda w: w.in_file_path)
+#     wrps = (mk_prcntgs(grp) for grp in wrps)
+#     wrps = list(print_prcntgs(*grp) for grp in wrps)
 
 
 def hook_loaded_histos_squash_mc(wrps):
@@ -242,6 +242,64 @@ def mk_overlay_chain(name, input_pat, hlh=hook_loaded_histos_squash_mc):
     )
 
 
+def mk_data_overlay_chain(name, input_pat):
+
+    # keyfunc
+    good_name = lambda w: any(w.name == p for p in plots)
+    good_smpl = lambda w: '_TH_' not in w.file_path and 'Run2015' in w.file_path
+    good_regn = lambda w: any(
+        w.in_file_path.startswith(t)
+        for t in ['B0Selection/', 'SidebandRegion']
+    )
+    good_hist = lambda w: good_name(w) and good_smpl(w) and good_regn(w)
+
+    post_build_funcs = [
+        varial.rnd.mk_split_err_ratio_plot_func(
+            poisson_errs=False,
+            y_title='#frac{Sig-ctrl}{ctrl}'
+        ),
+        varial.rnd.mk_legend_func(),
+    ]
+
+    def hook_loaded_histos_data(wrps):
+
+        def marker_style(wrps):
+            for w in wrps:
+                w.histo.SetMarkerStyle(1)
+                yield w
+
+        wrps = common.label_axes(wrps)
+        wrps = varial.generators.gen_add_wrp_info(
+            wrps,
+            legend=lambda w: 'Data:' + w.in_file_path.split('/')[0],
+            draw_option=lambda w: 'histE1',
+            is_data=lambda _: False,
+        )
+        wrps = varial.gen.gen_norm_to_integral(wrps)
+        wrps = marker_style(wrps)
+        return wrps
+
+    return varial.tools.ToolChain(
+        name,
+        [
+            varial.tools.HistoLoader(
+                pattern=input_pat,
+                filter_keyfunc=good_hist,
+                hook_loaded_histos=hook_loaded_histos_data,
+            ),
+            varial.tools.Plotter(
+                'Plotter',
+                input_result_path='../HistoLoader',
+                plot_grouper=varial.plotter.plot_grouper_by_name,
+                # plot_setup=plot_setup,
+                canvas_post_build_funcs=post_build_funcs,
+            ),
+            Chi2Test(),
+        ]
+    )
+
+
+
 def get_xsec_sys(input_pat):
     bkgs = list(varial.settings.stacking_order)
     percent_errs = {
@@ -300,6 +358,7 @@ def get_tc(base_path):
             get_sys('JER__minus', base_path),
             get_sys('JER__plus', base_path),
         ] + get_xsec_sys(base_path+'/TreeProjector/*.root') + [
+            mk_data_overlay_chain('DataB0vsSB', base_path+'/TreeProjector/*.root'),
             Chi2Collector()
         ]
     )

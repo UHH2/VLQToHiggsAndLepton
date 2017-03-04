@@ -73,28 +73,28 @@ static bool is_true(const TYPE &, const Event &) {
 }
 
 
-static bool isTlepEvent(const vector<GenParticle> * gps) {
-    for (const auto & gp : *gps) {
-        if (abs(gp.pdgId()) == 6) {
-            auto d1 = gp.daughter(gps, 1);
-            auto d2 = gp.daughter(gps, 2);
-            if (!(d1 && d2)) {
-                return false;
-            }
-            if (abs(d1->pdgId()) == 24 || abs(d2->pdgId()) == 24) {
-                auto w = (abs(d1->pdgId()) == 24) ? d1 : d2;
-                auto w_dau = w->daughter(gps, 1);
-                if (w_dau && abs(w_dau->pdgId()) < 17 && abs(w_dau->pdgId()) > 10) {
-                    return true;
-                }
-            } else {
-                return (abs(d1->pdgId()) < 17 && abs(d1->pdgId()) > 10)
-                    || (abs(d2->pdgId()) < 17 && abs(d2->pdgId()) > 10);
-            }
-        }
-    }
-    return false;
-}
+// static bool isTlepEvent(const vector<GenParticle> * gps) {
+//     for (const auto & gp : *gps) {
+//         if (abs(gp.pdgId()) == 6) {
+//             auto d1 = gp.daughter(gps, 1);
+//             auto d2 = gp.daughter(gps, 2);
+//             if (!(d1 && d2)) {
+//                 return false;
+//             }
+//             if (abs(d1->pdgId()) == 24 || abs(d2->pdgId()) == 24) {
+//                 auto w = (abs(d1->pdgId()) == 24) ? d1 : d2;
+//                 auto w_dau = w->daughter(gps, 1);
+//                 if (w_dau && abs(w_dau->pdgId()) < 17 && abs(w_dau->pdgId()) > 10) {
+//                     return true;
+//                 }
+//             } else {
+//                 return (abs(d1->pdgId()) < 17 && abs(d1->pdgId()) > 10)
+//                     || (abs(d2->pdgId()) < 17 && abs(d2->pdgId()) > 10);
+//             }
+//         }
+//     }
+//     return false;
+// }
 
 
 class HiggsJetBuilder: public AnalysisModule {
@@ -134,7 +134,7 @@ private:
 class HiggsMassSmear: public AnalysisModule {
 public:
     explicit HiggsMassSmear(Context & ctx):
-        h_jet    (ctx.get_handle<vector<TopJet>>("h_jet")),
+        h_jet    (ctx.declare_event_output<vector<TopJet>>("h_jet")),
         h_genjets(ctx.get_handle<vector<GenTopJet>>("gentopjets")),
         h_mass   (ctx.get_handle<float>("h_mass")),
         h_mass_gen(ctx.declare_event_output<float>("h_mass_gen")),
@@ -235,7 +235,10 @@ private:
     bool is_ele_data;
     bool is_mu_data;
 
-    Event::Handle<int> h_mu_trg;
+    Event::Handle<int>      h_mu_trg;
+    Event::Handle<float>    h_event_chi2;
+    Event::Handle<int>      h_n_vtx;
+    Event::Handle<int>      h_n_true_vtx;
 };
 
 
@@ -448,7 +451,6 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
 
     // SanityChecks and other histograms after selection
     // separately for ele and mu channel
-    h_mu_trg = ctx.get_handle<int>("trigger_accept_mu");
     v_hists_after_sel_el.emplace_back(new ElectronHists(ctx, "ElChan/SanityCheckEle", true));
     v_hists_after_sel_el.emplace_back(new MuonHists(ctx, "ElChan/SanityCheckMu"));
     v_hists_after_sel_el.emplace_back(new EventHists(ctx, "ElChan/SanityCheckEvent"));
@@ -484,8 +486,8 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
         v_hists_after_sel_mu.emplace_back(new LuminosityHists(ctx, "MuChan/LumiHistPost"));
     }
 
-    // signal sample gen hists
-    if (version.size() > 5 && version.substr(version.size() - 5, 100) == "_Tlep") {
+    if (version.size() > 7 && version.substr(0, 7) == "TpB_TH_") {
+        gen_hists.reset(new VLQ2HTGenHists(ctx, "VLQ2HTGenHists"));
         v_hists_el.emplace_back(new VLQ2HTRecoGenComparison(ctx, "ElChan/GenRecoHists"));
         v_hists_el.emplace_back(new VLQ2HTRecoGenMatchHists(ctx, "ElChan/Chi2SignalMatch"));
         v_hists_after_sel_el.emplace_back(new VLQ2HTRecoGenComparison(ctx, "ElChan/GenRecoHistsAfterSel"));
@@ -496,9 +498,11 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
         v_hists_after_sel_mu.emplace_back(new VLQ2HTRecoGenMatchHists(ctx, "MuChan/Chi2SignalMatchAfterSel"));
     }
 
-    if (version.size() > 7 && version.substr(0, 7) == "TpB_TH_") {
-        gen_hists.reset(new VLQ2HTGenHists(ctx, "VLQ2HTGenHists"));
-    }
+    // handles (partly for writing trees)
+    h_mu_trg        = ctx.get_handle<int>("trigger_accept_mu");
+    h_event_chi2    = ctx.get_handle<float>("event_chi2");
+    h_n_vtx         = ctx.declare_event_output<int>("n_vtx");
+    h_n_true_vtx    = ctx.declare_event_output<int>("n_true_vtx");
 }
 
 
@@ -508,15 +512,15 @@ bool VLQToHiggsAndLeptonModule::process(Event & event) {
         gen_hists->fill(event);
     }
 
-    if (type == "MC") {
-        bool tlepEvt = isTlepEvent(event.genparticles);
-        if (version.size() > 5 && version.substr(version.size() - 5, 100) == "_Tlep" && !tlepEvt) {
-            return false;
-        }
-        if (version.size() > 8 && version.substr(version.size() - 8, 100) == "_NonTlep" && tlepEvt) {
-            return false;
-        }
-    }
+    // if (type == "MC") {
+    //     bool tlepEvt = isTlepEvent(event.genparticles);
+    //     if (version.size() > 5 && version.substr(version.size() - 5, 100) == "_Tlep" && !tlepEvt) {
+    //         return false;
+    //     }
+    //     if (version.size() > 8 && version.substr(version.size() - 8, 100) == "_NonTlep" && tlepEvt) {
+    //         return false;
+    //     }
+    // }
 
     // pre-selection
     for (auto & mod : v_pre_modules) {
@@ -531,6 +535,10 @@ bool VLQToHiggsAndLeptonModule::process(Event & event) {
         mod->process(event);
     }
 
+    if (!event.is_valid(h_event_chi2) || event.get(h_event_chi2) > 99998.) {
+        return false;  // we have no T candidate
+    }
+
     // run selection
     bool all_accepted = sel_module->process(event);
 
@@ -539,23 +547,26 @@ bool VLQToHiggsAndLeptonModule::process(Event & event) {
     const auto & v_hists = (mu_acc) ? v_hists_mu : v_hists_el;
     const auto & v_hists_after_sel = (mu_acc) ? v_hists_after_sel_mu : v_hists_after_sel_el;
 
-    if ((is_ele_data && mu_acc) ||
-        (is_mu_data && !mu_acc)) {
-        return false;
+    if ((is_ele_data && mu_acc) || (is_mu_data && !mu_acc)) {  // no mu trigger on el data-
+        return false;                                          // stream and vice versa
     }
 
     // fill histograms
+    for (auto & hist : v_hists) {   // all events with a T quark candidate
+        hist->fill(event);
+    }
     if (all_accepted) {
-        for (auto & hist : v_hists_after_sel) {
+        for (auto & hist : v_hists_after_sel) {   // all baseline selected events
             hist->fill(event);
         }
     }
-    for (auto & hist : v_hists) {
-        hist->fill(event);
-    }
 
-    // decide whether or not to keep the current event in the output:
-    return all_accepted;
+    // set handles for writing data
+    event.set(h_n_vtx, event.pvs->size());
+    event.set(h_n_true_vtx, event.genInfo ? event.genInfo->pileup_TrueNumInteractions() : -1);
+
+    // any event with a T quark candidate should be stored (see above)
+    return true;
 }
 
 UHH2_REGISTER_ANALYSIS_MODULE(VLQToHiggsAndLeptonModule)

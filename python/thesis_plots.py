@@ -7,146 +7,146 @@ import ROOT
 import os
 
 ROOT.gStyle.SetEndErrorSize(0)
-p_base = 'VLQ2HT/Outputs/'
+pb = 'VLQ2HT/Outputs/'
 ext = '.pdf'
 
 def get_p_lim(sig):
-    return p_base + 'Limits' + sig + '/DataBackground/'
+    return pb + 'Limits' + sig + '/DataBackground/'
 
 
-pas_single = {
-    'selblock_primary_el_pt_lin.pdf': p_base + 'SelectionsElNoFwdSys/Stacks/BaseLineSelection/primary_lepton_pt_lin.pdf',
-    'selblock_primary_mu_pt_lin.pdf': p_base + 'SelectionsMuNoFwdSys/Stacks/BaseLineSelection/primary_lepton_pt_lin.pdf',
-    'selblock_ST_lin.pdf':                p_base + 'SelectionsElNoFwdSys/Stacks/BaseLineSelection/ST_lin.pdf',
-    'selblock_h_mass_lin.pdf':            p_base + 'SelectionsMuNoFwdSys/Stacks/BaseLineSelection/h_mass_lin.pdf',
-    'tlep_mass_lin.pdf': p_base + 'SelectionsMuNoFwdSys/Stacks/BaseLineSelection/tlep_mass_lin.pdf',
-    'tlep_pt_lin.pdf': p_base + 'SelectionsMuNoFwdSys/Stacks/BaseLineSelection/tlep_pt_lin.pdf',
-    'SignalRegion_data__el_lin.pdf': p_base + 'SelectionsEl/Stacks/SignalRegion/vlq_mass_lin.pdf',
-    'SignalRegion_data__mu_lin.pdf': p_base + 'SelectionsMu/Stacks/SignalRegion/vlq_mass_lin.pdf',
-    'SignalRegion__el_lin.pdf': p_base + 'SelectionsElNoData/Stacks/SignalRegion/vlq_mass_lin.pdf',
-    'SignalRegion__mu_lin.pdf': p_base + 'SelectionsMuNoData/Stacks/SignalRegion/vlq_mass_lin.pdf',
-    'SignalRegion_bkg__el_lin.pdf': p_base + 'LimitsTpBLH/DataBackground/PostFit/SignalRegion__el_lin.pdf',
-    'SignalRegion_bkg__mu_lin.pdf': p_base + 'LimitsTpBLH/DataBackground/PostFit/SignalRegion__mu_lin.pdf',
-    'SignalRegion_bkg__comb_lin.pdf': p_base + 'LimitsTpBLH/DataBackground/PostFit/SignalRegion__comb_lin.pdf',
-    'Sideband__el_lin.pdf': p_base + 'SelectionsElNoFwdSys/Stacks/SidebandRegion/vlq_mass_lin.pdf',
-    'Sideband__mu_lin.pdf': p_base + 'SelectionsMuNoFwdSys/Stacks/SidebandRegion/vlq_mass_lin.pdf',
-    'Sideband_vs_SignalRegion__el.pdf': p_base+'SidebandsEl/Nominal/Plotter/vlq_mass_lin.pdf',
-    'Sideband_vs_SignalRegion__mu.pdf': p_base+'SidebandsMu/Nominal/Plotter/vlq_mass_lin.pdf',
-    'TpBLH_limits.pdf': get_p_lim('TpBLH')+'/LimitGraphsPlot/Graph_log'+ext,
-    'TpBRH_limits.pdf': get_p_lim('TpBRH')+'/LimitGraphsPlot/Graph_log'+ext,
-    'TpTLH_limits.pdf': get_p_lim('TpTLH')+'/LimitGraphsPlot/Graph_log'+ext,
-    'TpTRH_limits.pdf': get_p_lim('TpTRH')+'/LimitGraphsPlot/Graph_log'+ext,
-    'TpBLH_coupling_limits.pdf': get_p_lim('TpBLH')+'/CouplingLimitPlot/Graph_lin'+ext,
-    'TpBRH_coupling_limits.pdf': get_p_lim('TpBRH')+'/CouplingLimitPlot/Graph_lin'+ext,
-    'TpTLH_coupling_limits.pdf': get_p_lim('TpTLH')+'/CouplingLimitPlot/Graph_lin'+ext,
-    'TpTRH_coupling_limits.pdf': get_p_lim('TpTRH')+'/CouplingLimitPlot/Graph_lin'+ext,
-    'sel_eff_el.pdf': 'VLQ2HT/SigEffGraphPlot/el_lin'+ext,
-    'sel_eff_mu.pdf': 'VLQ2HT/SigEffGraphPlot/mu_lin'+ext,
+path_single = {
+'El_h_n_vtx_lin.pdf':               pb + 'SelectionsElNoFwdSys/Stacks/BaseLineSelection/h_n_vtx_lin.pdf',
+'Mu_h_n_vtx_lin.pdf':               pb + 'SelectionsMuNoFwdSys/Stacks/BaseLineSelection/h_n_vtx_lin.pdf',
+
+'El_primary_lepton_eta_lin.pdf':    pb + 'SelectionsElNoFwdSys/Stacks/BaseLineSelection/primary_lepton_eta_lin.pdf',
+'Mu_primary_lepton_eta_lin.pdf':    pb + 'SelectionsMuNoFwdSys/Stacks/BaseLineSelection/primary_lepton_eta_lin.pdf',
+
+'El_TwoDCut_QCD_lin.pdf':           pb + 'SFramePlots/Stacks/ElChan/Nm1Selection/TwoDCut_QCD_lin.pdf',
+'El_TwoDCut_TpB_TH_1200_lin.pdf':   pb + 'SFramePlots/Stacks/ElChan/Nm1Selection/TwoDCut_TpB_TH_1200_lin.pdf',
+
+'El_leading_jet_pt_log.pdf':        pb + 'SelectionsElNoFwdSys/Stacks/BaseLineSelection/leading_jet_pt_log.pdf',
+'Mu_leading_jet_pt_log.pdf':        pb + 'SelectionsMuNoFwdSys/Stacks/BaseLineSelection/leading_jet_pt_log.pdf',
+'El_subleading_jet_pt_log.pdf':     pb + 'SelectionsElNoFwdSys/Stacks/BaseLineSelection/subleading_jet_pt_log.pdf',
+'Mu_subleading_jet_pt_log.pdf':     pb + 'SelectionsMuNoFwdSys/Stacks/BaseLineSelection/subleading_jet_pt_log.pdf',
+'El_ak4_jet_eta_lin.pdf':           pb + 'SelectionsElNoFwdSys/Stacks/BaseLineSelection/ak4_jet_eta_lin.pdf',
+'Mu_ak4_jet_eta_lin.pdf':           pb + 'SelectionsMuNoFwdSys/Stacks/BaseLineSelection/ak4_jet_eta_lin.pdf',
+'El_n_jets_log.pdf':                pb + 'SelectionsElNoFwdSys/Stacks/BaseLineSelection/n_jets_log.pdf',
+'Mu_n_jets_log.pdf':                pb + 'SelectionsMuNoFwdSys/Stacks/BaseLineSelection/n_jets_log.pdf',
+
+'El_fwd_jet_pt_log.pdf':            pb + 'SelectionsElNoFwdSys/Stacks/BaseLineSelection/fwd_jet_pt_log.pdf',
+'Mu_fwd_jet_pt_log.pdf':            pb + 'SelectionsMuNoFwdSys/Stacks/BaseLineSelection/fwd_jet_pt_log.pdf',
+'El_fwd_jet_eta_lin.pdf':           pb + 'SelectionsElNoFwdSys/Stacks/BaseLineSelection/fwd_jet_eta_lin.pdf',
+'Mu_fwd_jet_eta_lin.pdf':           pb + 'SelectionsMuNoFwdSys/Stacks/BaseLineSelection/fwd_jet_eta_lin.pdf',
+'El_n_fwd_jets_log.pdf':            pb + 'SelectionsElNoFwdSys/Stacks/BaseLineSelection/n_fwd_jets_log.pdf',
+'Mu_n_fwd_jets_log.pdf':            pb + 'SelectionsMuNoFwdSys/Stacks/BaseLineSelection/n_fwd_jets_log.pdf',
+
+'Mu_ST_lin.pdf':                    pb + 'SelectionsMuNoFwdSys/Stacks/BaseLineSelection/ST_lin.pdf',
+'El_MET_lin.pdf':                   pb + 'SelectionsElNoFwdSys/Stacks/BaseLineSelection/MET_lin.pdf',
+'Mu_MET_lin.pdf':                   pb + 'SelectionsMuNoFwdSys/Stacks/BaseLineSelection/MET_lin.pdf',
+
+'El_ak8_jet_pt_log.pdf':            pb + 'SelectionsElNoFwdSys/Stacks/BaseLineSelection/ak8_jet_pt_log.pdf',
+'Mu_ak8_jet_pt_log.pdf':            pb + 'SelectionsMuNoFwdSys/Stacks/BaseLineSelection/ak8_jet_pt_log.pdf',
+'El_ak8_jet_eta_lin.pdf':           pb + 'SelectionsElNoFwdSys/Stacks/BaseLineSelection/ak8_jet_eta_lin.pdf',
+'Mu_ak8_jet_eta_lin.pdf':           pb + 'SelectionsMuNoFwdSys/Stacks/BaseLineSelection/ak8_jet_eta_lin.pdf',
+'El_n_ak8_jets_log.pdf':            pb + 'SelectionsElNoFwdSys/Stacks/BaseLineSelection/n_ak8_jets_log.pdf',
+'Mu_n_ak8_jets_log.pdf':            pb + 'SelectionsMuNoFwdSys/Stacks/BaseLineSelection/n_ak8_jets_log.pdf',
+
+'El_h_pt_lin.pdf':                  pb + 'SelectionsElNoFwdSys/Stacks/BaseLineSelection/h_pt_lin.pdf',
+'Mu_h_pt_lin.pdf':                  pb + 'SelectionsMuNoFwdSys/Stacks/BaseLineSelection/h_pt_lin.pdf',
+'El_h_mass_lin.pdf':                pb + 'SelectionsElNoFwdSys/Stacks/BaseLineSelection/h_mass_lin.pdf',
+
+'Mu_h_mass_pruned_lin.pdf':         pb + 'SelectionsMuJERC/Stacks/TTbar2Selection/h_mass_pruned_lin.pdf',
+'Mu_h_mass_softdrop_lin.pdf':       pb + 'SelectionsMuJERC/Stacks/TTbar2Selection/h_mass_softdrop_lin.pdf',
+
+'El_tlep_pt_lin.pdf':               pb + 'SelectionsElNoFwdSys/Stacks/BaseLineSelection/tlep_pt_lin.pdf',
+'El_tlep_eta_lin.pdf':              pb + 'SelectionsElNoFwdSys/Stacks/BaseLineSelection/tlep_eta_lin.pdf',
+'Mu_tlep_eta_lin.pdf':              pb + 'SelectionsMuNoFwdSys/Stacks/BaseLineSelection/tlep_eta_lin.pdf',
+'El_tlep_mass_lin.pdf':             pb + 'SelectionsElNoFwdSys/Stacks/BaseLineSelection/tlep_mass_lin.pdf',
+
+'Mu_matching_hig_mass_lin.pdf':     pb + 'SFramePlotsNoRebin/Stacks/MuChan/Chi2SignalMatch/matching_hig_mass_lin.pdf',
+'Mu_matching_top_mass_lin.pdf':     pb + 'SFramePlotsNoRebin/Stacks/MuChan/Chi2SignalMatch/matching_top_mass_lin.pdf',
+'Mu_matching_top_hig_dr_lin.pdf':   pb + 'SFramePlotsNoRebin/Stacks/MuChan/Chi2SignalMatch/matching_top_hig_dr_lin.pdf',
+
+'El_vlq_pt_lin.pdf':                pb + 'SelectionsElNoFwdSys/Stacks/BaseLineSelection/vlq_pt_lin.pdf',
+'Mu_vlq_pt_lin.pdf':                pb + 'SelectionsMuNoFwdSys/Stacks/BaseLineSelection/vlq_pt_lin.pdf',
+'El_vlq_eta_lin.pdf':               pb + 'SelectionsElNoFwdSys/Stacks/BaseLineSelection/vlq_eta_lin.pdf',
+'Mu_vlq_eta_lin.pdf':               pb + 'SelectionsMuNoFwdSys/Stacks/BaseLineSelection/vlq_eta_lin.pdf',
+'El_bl_vlq_mass_lin.pdf':           pb + 'SelectionsElNoFwdSys/Stacks/BaseLineSelection/vlq_mass_lin.pdf',
+'Mu_bl_vlq_mass_lin.pdf':           pb + 'SelectionsMuNoFwdSys/Stacks/BaseLineSelection/vlq_mass_lin.pdf',
+
+'El_h_n_subjet_btags_lin.pdf':      pb + 'SelectionsElNoFwdSys/Stacks/BaseLineSelection/h_n_subjet_btags_lin.pdf',
+'Mu_h_n_subjet_btags_lin.pdf':      pb + 'SelectionsMuNoFwdSys/Stacks/BaseLineSelection/h_n_subjet_btags_lin.pdf',
+
+'El_Fw0B0_vlq_mass_lin.pdf':        pb + 'SelectionsElNoFwdSys/Stacks/Fw0B0Selection/vlq_mass_lin.pdf',
+'Mu_Fw0B0_vlq_mass_lin.pdf':        pb + 'SelectionsMuNoFwdSys/Stacks/Fw0B0Selection/vlq_mass_lin.pdf',
+
+'El_n_fwd_jets_log.pdf':            pb + 'SelectionsElNoFwdSys/Stacks/B0Selection/n_fwd_jets_log.pdf',
+'Mu_n_fwd_jets_log.pdf':            pb + 'SelectionsMuNoFwdSys/Stacks/B0Selection/n_fwd_jets_log.pdf',
+'El_fwd_jet_eta_lin.pdf':           pb + 'SelectionsElNoFwdSys/Stacks/B0Selection/fwd_jet_eta_lin.pdf',
+'Mu_fwd_jet_eta_lin.pdf':           pb + 'SelectionsMuNoFwdSys/Stacks/B0Selection/fwd_jet_eta_lin.pdf',
+
+'SigInj_0700_log.pdf':              pb + 'LimitsTpBLH/DataBackgroundSigInjSignal_TpB_TH_LH_M0700/LimitGraphsPlot/Graph_log.pdf',
+'SigInj_0800_log.pdf':              pb + 'LimitsTpBLH/DataBackgroundSigInjSignal_TpB_TH_LH_M0800/LimitGraphsPlot/Graph_log.pdf',
+'SigInj_0900_log.pdf':              pb + 'LimitsTpBLH/DataBackgroundSigInjSignal_TpB_TH_LH_M0900/LimitGraphsPlot/Graph_log.pdf',
+'SigInj_1000_log.pdf':              pb + 'LimitsTpBLH/DataBackgroundSigInjSignal_TpB_TH_LH_M1000/LimitGraphsPlot/Graph_log.pdf',
+'SigInj_1100_log.pdf':              pb + 'LimitsTpBLH/DataBackgroundSigInjSignal_TpB_TH_LH_M1100/LimitGraphsPlot/Graph_log.pdf',
+'SigInj_1200_log.pdf':              pb + 'LimitsTpBLH/DataBackgroundSigInjSignal_TpB_TH_LH_M1200/LimitGraphsPlot/Graph_log.pdf',
+'SigInj_1500_log.pdf':              pb + 'LimitsTpBLH/DataBackgroundSigInjSignal_TpB_TH_LH_M1500/LimitGraphsPlot/Graph_log.pdf',
+'SigInj_1800_log.pdf':              pb + 'LimitsTpBLH/DataBackgroundSigInjSignal_TpB_TH_LH_M1800/LimitGraphsPlot/Graph_log.pdf',
 }
 
 
-plot_config = {  #                   lumi legend x1 x2 y1 y2    CMS pos   chan pos    y_max
-'sel_eff_el.pdf':                   (0,   (.70, .90, .65, .85), (.2, .8), (.2, .6, 1),   1.9),
-'sel_eff_mu.pdf':                   (0,   (.70, .90, .20, .40), (.2, .8), (.65,.255,2),  1.9),
-'sel_eff_new.pdf':                  (0,   (.50, .70, .65, .85), (.2, .8), (.2, .6, 0),   2.8),
+def_leg_pos = (.62, .82, .36, .85)
+def_chan_pos = (.2, .8)
 
-'selblock_h_mass_lin.pdf':          (2.3, (.62, .82, .24, .73), (.9, .8), (.61,.8, 2),  5500),
-'selblock_primary_el_pt_lin.pdf':   (2.2, (.62, .82, .24, .73), (.9, .8), (.61,.8, 1),  1100),
-'selblock_primary_mu_pt_lin.pdf':   (2.3, (.62, .82, .24, .73), (.9, .8), (.61,.8, 2),  6000),
-'selblock_ST_lin.pdf':              (2.2, (.62, .82, .36, .85), (.2, .8), (.2, .7, 1),  1050),
+plot_config = {  #                    y_min_max,   legend x1 x2 y1 y2    chan pos
+'selblock_h_mass_lin.pdf':          ((None, 5500), (.62, .82, .24, .73), (.61,.8)),
+'selblock_primary_el_pt_lin.pdf':   ((None, 1100), (.62, .82, .24, .73), (.61,.8)),
+'selblock_primary_mu_pt_lin.pdf':   ((None, 6000), (.62, .82, .24, .73), (.61,.8)),
+'selblock_ST_lin.pdf':              ((None, 1050), (.62, .82, .36, .85), (.2, .7)),
 
-'Sideband__el_lin.pdf':             (2.2, (.18, .37, .36, .85), (.9, .8), (.9, .7, 1),   150),
-'Sideband__mu_lin.pdf':             (2.3, (.62, .82, .36, .85), (.2, .8), (.2, .7, 2),   800),
+'Sideband__el_lin.pdf':             ((None,  150), (.18, .37, .36, .85), (.9, .7)),
+'Sideband__mu_lin.pdf':             ((None,  800), (.62, .82, .36, .85), (.2, .7)),
 
-'Sideband_vs_SignalRegion__el.pdf': (0,   (.62, .82, .67, .85), (.2, .8), (.2,.62, 1),  0.19),
-'Sideband_vs_SignalRegion__mu.pdf': (0,   (.62, .82, .67, .85), (.2, .8), (.2,.62, 2),   0.0),
+'Sideband_vs_SignalRegion__el.pdf': ((None, 0.19), (.62, .82, .67, .85), (.2,.62)),
+'Sideband_vs_SignalRegion__mu.pdf': ((None,  0.0), (.62, .82, .67, .85), (.2,.62)),
 
-'SignalRegion_data__el_lin.pdf':    (2.2, (.20, .40, .36, .85), (.9, .8), (.9, .7, 1),  13.5),
-'SignalRegion_data__mu_lin.pdf':    (2.3, (.60, .80, .36, .85), (.2, .8), (.2, .7, 2),  50.0),
+'SignalRegion_data__el_lin.pdf':    ((None, 13.5), (.20, .40, .36, .85), (.9, .7)),
+'SignalRegion_data__mu_lin.pdf':    ((None, 50.0), (.60, .80, .36, .85), (.2, .7)),
 
-'SignalRegion__el_lin.pdf':         (2.2, (.20, .40, .46, .85), (.9, .8), (.2,.38, 1),  13.5),
-'SignalRegion__mu_lin.pdf':         (2.3, (.60, .80, .46, .85), (.2, .8), (.2,.62, 2),  50.0),
+'SignalRegion__el_lin.pdf':         ((None, 13.5), (.20, .40, .46, .85), (.2,.38)),
+'SignalRegion__mu_lin.pdf':         ((None, 50.0), (.60, .80, .46, .85), (.2,.62)),
 
-'SignalRegion_bkg__el_lin.pdf':     (2.2, (.65, .85, .55, .85), (.2, .8), (.2, .7, 1),  11.0),
-'SignalRegion_bkg__mu_lin.pdf':     (2.3, (.65, .85, .55, .85), (.2, .8), (.2, .7, 2),  35.0),
-'SignalRegion_bkg__comb_lin.pdf':   (2.3, (.65, .85, .55, .85), (.2, .8), (.2, .7, 3),  45.0),
+'SignalRegion_bkg__el_lin.pdf':     ((None, 11.0), (.65, .85, .55, .85), (.2, .7)),
+'SignalRegion_bkg__mu_lin.pdf':     ((None, 35.0), (.65, .85, .55, .85), (.2, .7)),
 
-'tlep_mass_lin.pdf':                (2.3, (.62, .82, .24, .73), (.9, .8), (.61,.8, 2),  2000),
-'tlep_pt_lin.pdf':                  (2.3, (.62, .82, .24, .73), (.9, .8), (.61,.8, 2),  2700),
+'tlep_mass_lin.pdf':                ((None, 2000), (.62, .82, .24, .73), (.61,.8)),
+'tlep_pt_lin.pdf':                  ((None, 2700), (.62, .82, .24, .73), (.61,.8)),
 
-'TpBLH_limits.pdf':                 (2.3, (.35, .55, .58, .85), (.2, .8), (.9, .6, 0),   99.),
-# 'TpBRH_limits.pdf':                 (2.3, (.38, .58, .58, .85), (.2, .8), (.9, .6, 0),   99.),
-# 'TpTLH_limits.pdf':                 (2.3, (.38, .58, .58, .85), (.2, .8), (.9, .6, 0),   99.),
-'TpTRH_limits.pdf':                 (2.3, (.35, .55, .58, .85), (.2, .8), (.9, .6, 0),   99.),
-
-# 'TpBLH_coupling_limits.pdf':        (2.3, (.38, .58, .63, .85), (.2, .8), (.2, .6, 0),   0.0),
-# 'TpBRH_coupling_limits.pdf':        (2.3, (.38, .58, .63, .85), (.2, .8), (.2, .6, 0),   0.0),
-# 'TpTLH_coupling_limits.pdf':        (2.3, (.38, .58, .63, .85), (.2, .8), (.2, .6, 0),   9.9),
-# 'TpTRH_coupling_limits.pdf':        (2.3, (.38, .58, .63, .85), (.2, .8), (.2, .6, 0),   9.9),
+'TpBLH_limits.pdf':                 ((None,  99.), (.35, .55, .58, .85), (.9, .6)),
+'TpTRH_limits.pdf':                 ((None,  99.), (.35, .55, .58, .85), (.9, .6)),
 }
-
-
-def build_sel_eff_canvas():
-    c_mu = get_canvas('sel_eff_mu.pdf')
-    c_el = get_canvas('sel_eff_el.pdf')
-
-    # start with legends (they contain the labels)
-    el_leg = list(c_el.GetListOfPrimitives())[-1]
-    mu_leg = list(c_mu.GetListOfPrimitives())[-1]
-
-    # get the graphs
-    el_objs = dict(
-        (e.GetLabel(), e)
-        for e in el_leg.GetListOfPrimitives()
-    )
-    mu_objs = dict(
-        (e.GetLabel(), e)
-        for e in mu_leg.GetListOfPrimitives()
-    )
-
-    def migrate_points(from_g, to_g):
-        x, y = ctypes.c_double(), ctypes.c_double()
-        for i in xrange(to_g.GetN()):
-            to_g.RemovePoint(0)
-        for i in xrange(from_g.GetN()):
-            from_g.GetPoint(i, x, y)
-            to_g.SetPoint(i, x.value, y.value)
-
-    # set points in electron graphs to the ones from the mu graphs
-    # T_{lh} b in ele chan can stay
-    migrate_points(el_objs['T_{rh} t'].GetObject(), el_objs['T_{rh} b'].GetObject())
-    migrate_points(mu_objs['T_{lh} b'].GetObject(), el_objs['T_{lh} t'].GetObject())
-    migrate_points(mu_objs['T_{rh} t'].GetObject(), el_objs['T_{rh} t'].GetObject())
-
-    # update the legend
-    el_objs['T_{lh} b'].SetLabel('pp#rightarrowT_{lh}b+X (ele. ch.)')
-    el_objs['T_{rh} b'].SetLabel('pp#rightarrowT_{rh}t+X (ele. ch.)')
-    el_objs['T_{lh} t'].SetLabel('pp#rightarrowT_{lh}b+X (mu. ch.)')
-    el_objs['T_{rh} t'].SetLabel('pp#rightarrowT_{rh}t+X (mu. ch.)')
-
-    return c_el
 
 
 def get_canvas(name):
-    if name == 'sel_eff_new.pdf':
-        return build_sel_eff_canvas()
-
-    path = pas_single[name]
+    path = path_single[name]
     path, basename = os.path.dirname(path), os.path.splitext(os.path.basename(path))[0]
-    canvname = basename.replace('_log', '').replace('_lin', '')
+    is_log_plot = basename.endswith('_log')
+    if is_log_plot or basename.endswith('_lin'):
+        basename = basename[:-4]
     f = ROOT.TFile(path + '/_varial_rootobjects.root.rt')
-    c = f.Get('{n}/{n}'.format(n=canvname))
+    c = f.Get('{n}/{n}'.format(n=basename))
     f.Close()
-    return c
+    return c, is_log_plot
 
 
 def handle_plot(name):
     # get parameters
-    lumi, (x1, x2, y1, y2), (cms_x, cms_y), (chan_x, chan_y, chan), y_scale_max = plot_config[name]
+    lumi, (x1, x2, y1, y2), (chan_x, chan_y), y_scale_max = plot_config[name]
     save_name = name.replace('.pdf', '')
 
     # get some info and fetch canvas
-    c = get_canvas(name)
+    c, is_log_plot = get_canvas(name)
 
     # pull items out of canvas
     canv_prims = list(c.GetListOfPrimitives())

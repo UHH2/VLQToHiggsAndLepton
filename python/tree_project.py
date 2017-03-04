@@ -20,43 +20,59 @@ tree_aliases = {
 
 
 core_histos = {
-    'vlq_mass':          (';T quark mass / GeV;events / 80 GeV',           25, 0, 2000   ),
-    'h_n_subjet_btags':  ('N_{H-jet subjet b-tags}',                       5, -.5, 4.5   ),
-    'n_fwd_jets':        ('N_{ak4 fwd jet}',                               5, -.5, 4.5   ),
-    'abs_largest_jet_eta': ('most forward jet #eta',                       50, 0., 5.    ),
-    'h_mass':            ('h_mass_10', ';H candidate mass / GeV;events / 10 GeV',  20, 50, 250   ),
-    'ST':                (';S_{T} / GeV;events / 100 GeV',                          25, 0, 2500   ),
-    'tlep_mass':         (';lept. top mass / GeV;events / 10 GeV',               25, 100, 350  ),
-    'tlep_pt':           (';lept. top p_{T} / GeV;events / 40 GeV',              25, 0, 1000   ),
-    'primary_lepton_pt': (';lepton p_{T} / GeV;events / 40 GeV',                 25, 0., 1000  ),
-    'leading_jet_pt':    (';leading ak4 jet p_{T} / GeV;events / 40 GeV',        25, 0., 1000  ),
-    'subleading_jet_pt': (';sub-leading ak4 jet p_{T} / GeV;events / 40 GeV',    25, 0., 1000  ),
-    'fwd_jets.m_eta':    (';fwd jet #eta;events',                          40, -5., 5.   ),
-    'fwd_jets.m_pt':     (';fwd jet p_{T};events / 20 GeV',                25, 0., 500   ),
+    'h_n_vtx':           ('Number of primary vertices',                                     40, .5, 40.5  ),
+    'h_n_true_vtx':      ('Number of true interactions',                                    40, .5, 40.5  ),
+
+    'primary_lepton_pt': (';Lepton p_{T} / GeV;Events / 40 GeV',                            25,  0, 1000  ),
+    'primary_lepton_eta':('Lepton #eta',                                                    16, -4, 4     ),
+
+    'leading_jet_pt':    (';Leading AK4 jet p_{T} (GeV);Events / 50 GeV',                   40, 0., 2000),
+    'subleading_jet_pt': (';Sub-leading AK4 jet p_{T} (GeV);Events / 50 GeV',               40, 0., 2000),
+    'ak4_jet_eta':       ('slimmedJets.m_eta', 'AK4 jet #eta',                              20, -5., 5.   ),
+    'n_jets':            ('Number of AK4 jets',                                             15, .5, 15.5  ),
+
+    'fwd_jet_pt':        ('fwd_jets.m_pt',';Forward jet p_{T} (GeV);Events / 20 GeV',       25, 0., 500   ),
+    'fwd_jet_eta':       ('fwd_jets.m_eta', 'Forward jet #eta',                             20, -5., 5.   ),
+    'n_fwd_jets':        ('Number of forward jets',                                         9, -.5, 8.5   ),
+
+    'ST':                (';S_{T} (GeV);Events / 100 GeV',                                  21, 400, 2500 ),
+    'MET':               ('slimmedMETs.m_pt', ';Missing E_{T} (GeV);Events / 25 GeV',       32, 0, 800    ),
+
+    'ak8_jet_pt':        ('slimmedJetsAK8_SoftDrop.m_pt',';AK8 jet p_{T} (GeV);Events / 20 GeV', 40, 0., 2000  ),
+    'ak8_jet_eta':       ('slimmedJetsAK8_SoftDrop.m_eta', 'AK8 jet #eta',                       20, -5., 5.   ),
+    'n_ak8_jets':        ('@slimmedJetsAK8_SoftDrop.size()', 'Number of AK8 jets',               8, .5, 8.5    ),
+
+    'h_pt':              (';H candidate p_{T} (GeV);Events / 25 GeV',                       32, 200, 1000 ),
+    'h_eta':             ('H candidate #eta',                                               20, -5., 5.   ),
+    'h_mass':            ('h_mass_10', ';H candidate mass (GeV);Events / 10 GeV',           20, 50, 250   ),
+
+    'h_mass_pruned':     ('h_jet.m_prunedmass', ';pruned jet mass (GeV);Events / 10 GeV',   20, 50, 250   ),
+    'h_mass_softdrop':   ('h_mass', ';soft-drop jet mass (GeV);Events / 10 GeV',            20, 50, 250   ),
+
+    'tlep_pt':           (';t quark candidate p_{T} (GeV);Events / 40 GeV',                 25, 0, 1000   ),
+    'tlep_eta':          ('t quark candidate #eta',                                         20, -5., 5.   ),
+    'tlep_mass':         (';t quark candidate mass (GeV);Events / 10 GeV',                  25, 100, 350  ),
+
+    'vlq_pt':            (';T quark candidate p_{T} (GeV);Events / 40 GeV',                 25, 0, 1000   ),
+    'vlq_eta':           ('T quark candidate #eta',                                         20, -5., 5.   ),
+    'vlq_mass':          (';T quark candidate mass (GeV);Events / 80 GeV',                  25, 0, 2000   ),
+
+    'h_n_subjet_btags':  ('Number of subjet b tags',                                        5, -.5, 4.5   ),
+    'event_chi2':        ('#chi^2',                                                         20, 0, 200    ),
 }
 
 more_histos = {
-    'event_chi2':        ('event chi2',                                    100, 0, 200   ),
+    'abs_largest_jet_eta': ('most forward jet #eta',                       50, 0., 5.    ),
     'dr_higg_top':       ('#DeltaR(H, t)',                                 50, 0, 5      ),
-    'h_pt':              (';Higgs candidate p_{T} / GeV;events / 40 GeV',  25, 0, 1000   ),
     'n_leading_btags':   ('N_{b-tag leading}',                             11, -.5, 10.5 ),
     'n_btags':           ('N_{b-tag}',                                     11, -.5, 10.5 ),
     'n_btags_tight':     ('N_{b-tag tight}',                               11, -.5, 10.5 ),
     'largest_jet_eta':   ('most forward ak4 jet #eta',                     50, -5., 5.   ),
-    'primary_lepton_eta':(';lepton #eta;events',                           25, -5., 5.   ),
-    'primary_lepton_charge': (';lepton charge;events',                     3, -1.5, 1.5  ),
     'h_tau21':           ('Higgs candidate #tau_{2}/#tau_{1}',             50, 0, 1      ),
     'h_tau32':           ('Higgs candidate #tau_{3}/#tau_{2}',             50, 0, 1      ),
-    'n_jets':            ('N_{ak4 jet}',                                   21, -.5, 20.5 ),
     'n_leptons':         ('N_{lepton}',                                    11, -.5, 10.5 ),
     'n_htags':           ('N_{H jet}',                                     5, -.5, 4.5   ),
-    'tlep_eta':          ('lept. top #eta',                                50, -5., 5.   ),
-    'h_eta':             ('Higgs candidate #eta',                          50, -5., 5.   ),
-    'vlq_pt':            (';T p_{T} / GeV;events / 40 GeV',                25, 0, 1000   ),
-    'vlq_eta':           ('T #eta',                                        50, -5., 5.   ),
-    'h_mass-.00001':     (';H candidate soft drop mass / GeV;events / 10 GeV', 40, 50, 250   ),
-    'h_jet.m_prunedmass': (';H candidate pruned mass / GeV;events / 10 GeV',   40, 50, 250   ),
-    'HT':                (';H_{T} / GeV;events / 100 GeV',                     30, 0, 3000   ),
+    'HT':                (';H_{T} (GeV);Events / 100 GeV',                 30, 0, 3000   ),
 }
 more_histos.update(core_histos)
 
@@ -72,19 +88,22 @@ samples = [
     'TpB_TH_1700',
 ] + varial.settings.all_signals
 
-bl_selection = [
-#    'ST                     > 400',
-#    'leading_jet_pt         > 100',
-#    'h_pt                   > 100',
-#    'tlep_pt                > 100',
+
+bl_selection_no_h_mass_cut = [
+    '(TwoDCut_ptrel > 40. || TwoDCut_dr > 0.4)',
+    '((trigger_accept_mu > 0.5 && leading_jet_pt > 100) || leading_jet_pt > 250)',
+    '((trigger_accept_mu > 0.5 && subleading_jet_pt > 50) || subleading_jet_pt > 70)',
+    'ST > 400',
+    'dr_higg_top > 2.',
+    'tlep_pt > 100',
+    ]
+
+bl_selection = bl_selection_no_h_mass_cut + [
     'h_mass_10 > 90',
     'h_mass_10 < 160',
-#    'dr_higg_top            > 2.',
-#    '(TwoDCut_ptrel > 40. || TwoDCut_dr > 0.4)',
 ]
 
 sr_selection = [
-    # 'primary_lepton_charge  > 0',
     'h_n_subjet_btags       == 2',
     'n_fwd_jets             >= 1',
 ]
@@ -106,17 +125,17 @@ fw0_b0_selection = b0_selection + [
     'n_fwd_jets             == 0',
 ]
 
-jet_selection = [
-    'leading_jet_pt         > 250',
-    'subleading_jet_pt      > 70',
-]
+# jet_selection = [
+#     'leading_jet_pt         > 250',
+#     'subleading_jet_pt      > 70',
+# ]
 
-ttbar_selection = [
-    'n_btags_tight          >= 2',
+ttbar_selection = bl_selection_no_h_mass_cut + [
+    'n_btags_tight >= 2',
 ]
 
 tau21_selection = [
-    'h_tau21                < .4',
+    'h_tau21 < .4',
 ]
 
 base_weight = 'weight'
@@ -126,33 +145,34 @@ def get_sec_sel_weight(additional_sel=None):
     bl_sel = bl_selection + (additional_sel or [])
     sr_sel = bl_sel + sr_selection
     sb_sel = bl_sel + sb_selection
-    fw1_b0_sel = bl_sel + fw1_b0_selection
+    b0_sel = bl_sel + b0_selection
     fw0_b0_sel = bl_sel + fw0_b0_selection
-    sb_jet_sel = bl_sel + sb_selection + jet_selection
-    ttbar_sel = ttbar_selection + (additional_sel or [])
+    fw1_b0_sel = bl_sel + fw1_b0_selection
+    # sb_jet_sel = bl_sel + sb_selection + jet_selection
+    # ttbar_sel = ttbar_selection + (additional_sel or [])
     ttbar2_sel = ttbar_selection + tau21_selection + (additional_sel or [])
-    b0_sel = b0_selection + (additional_sel or [])
 
-    lepchargeplus_selection = [
-        'primary_lepton_charge  > 0.1',
-    ]
 
-    lepchargeminus_selection = [
-        'primary_lepton_charge  < 0.1',
-    ]
+    # lepchargeplus_selection = [
+    #     'primary_lepton_charge  > 0.1',
+    # ]
+
+    # lepchargeminus_selection = [
+    #     'primary_lepton_charge  < 0.1',
+    # ]
 
     sec_sel_weight = [
         ('BaseLineSelection', bl_sel, base_weight),
-        ('BaseLineSelectionHTWeight', bl_sel, ht_weight),
-        ('BaseLineSelectionJetPT', sb_jet_sel, base_weight),
-        ('TTbarSelection', ttbar_sel, base_weight),
+        # ('BaseLineSelectionHTWeight', bl_sel, ht_weight),
+        # ('BaseLineSelectionJetPT', sb_jet_sel, base_weight),
+        # ('TTbarSelection', ttbar_sel, base_weight),
         ('TTbar2Selection', ttbar2_sel, base_weight),
         ('SignalRegion', sr_sel, base_weight),
         ('SidebandRegion', sb_sel, base_weight),
         ('Fw1B0Selection', fw1_b0_sel, base_weight),
         ('Fw0B0Selection', fw0_b0_sel, base_weight),
         ('B0Selection', b0_sel, base_weight),
-        ('B0SelectionHTWeight', b0_sel, ht_weight),
+        # ('B0SelectionHTWeight', b0_sel, ht_weight),
         # ('BaselineLepPlus', bl_sel + lepchargeplus_selection, base_weight),
         # ('BaselineLepMnus', bl_sel + lepchargeminus_selection, base_weight),
         # ('SRLepPlus', sr_selection + lepchargeplus_selection, base_weight),
@@ -196,7 +216,8 @@ def mk_sys_tps(add_sel=None):
     bl_sel = bl_selection + (add_sel or [])
     sr_sel = sr_selection + bl_sel
     sb_sel = sb_selection + bl_sel
-    fw1_b0_sel = fw1_b0_selection + bl_sel
+    b0_sel = b0_selection + bl_sel
+    fw0_b0_sel = fw0_b0_selection + bl_sel
 
     ################### first put together jerc uncert with nominal weights ###
     jercs = list(
@@ -212,7 +233,8 @@ def mk_sys_tps(add_sel=None):
         ('SignalRegion', sr_sel, base_weight),
         ('SidebandRegion', sb_sel, base_weight),
         ('BaseLineSelection', bl_sel, base_weight),
-        ('Fw1B0Selection', fw1_b0_sel, base_weight),
+        ('B0Selection', b0_sel, base_weight),
+        ('Fw0B0Selection', fw0_b0_sel, base_weight),
     ]
     sys_tps = list(
         TreeProjector(
@@ -230,7 +252,7 @@ def mk_sys_tps(add_sel=None):
     )
 
     ############ next put together nominal samples with with weight uncerts ###
-    nominal_files = base_path + 'samples_74X/uhh2.AnalysisModuleRunner.MC.*.root'
+    nominal_files = base_path + 'samples/uhh2.AnalysisModuleRunner.MC.*.root'
     filenames = dict(
         (sample, list(f for f in glob.glob(nominal_files) if sample in f))
         for sample in samples
@@ -263,23 +285,24 @@ def mk_sys_tps(add_sel=None):
             ('SignalRegion',        sr_sel, w if isinstance(w, dict) else base_weight+'*'+w),
             ('SidebandRegion',      sb_sel, w if isinstance(w, dict) else base_weight+'*'+w),
             ('BaseLineSelection',   bl_sel, w if isinstance(w, dict) else base_weight+'*'+w),
-            ('Fw1B0Selection',      fw1_b0_sel, w if isinstance(w, dict) else base_weight+'*'+w),
+            ('Fw0B0Selection',  fw0_b0_sel, w if isinstance(w, dict) else base_weight+'*'+w),
+            # ('B0Selection',         b0_sel, w if isinstance(w, dict) else base_weight+'*'+w),
         ])
         for name, w in (
             ('b_tag_bc__minus',     'weight_btag_bc_down/weight_btag'),
             ('b_tag_bc__plus',      'weight_btag_bc_up/weight_btag'),
             ('b_tag_udsg__minus',   'weight_btag_udsg_down/weight_btag'),
             ('b_tag_udsg__plus',    'weight_btag_udsg_up/weight_btag'),
-            ('muon_ID__minus',      'weight_sfmu_id_down/weight_sfmu_id'),
-            ('muon_ID__plus',       'weight_sfmu_id_up/weight_sfmu_id'),
-            ('muon_trigger__minus', 'weight_sfmu_trg_down/weight_sfmu_trg'),
-            ('muon_trigger__plus',  'weight_sfmu_trg_up/weight_sfmu_trg'),
+            # ('muon_ID__minus',      'weight_sfmu_id_down/weight_sfmu_id'),
+            # ('muon_ID__plus',       'weight_sfmu_id_up/weight_sfmu_id'),
+            # ('muon_trigger__minus', 'weight_sfmu_trg_down/weight_sfmu_trg'),
+            # ('muon_trigger__plus',  'weight_sfmu_trg_up/weight_sfmu_trg'),
             ('pileup__minus',       'weight_pu_down/weight_pu'),
             ('pileup__plus',        'weight_pu_up/weight_pu'),
-            ('jet_pt__minus',       '1'),
-            ('jet_pt__plus',        'weight_ak4jet'),
-            ('HT__minus',           '1'),
-            ('HT__plus',            'ht_weight'),
+            # ('jet_pt__minus',       '1'),
+            # ('jet_pt__plus',        'weight_ak4jet'),
+            # ('HT__minus',           '1'),
+            # ('HT__plus',            'ht_weight'),
             ('rate_xsec__minus',    rate_xsec_minus_dict),
             ('rate_xsec__plus',     rate_xsec_plus_dict),
             ('rate_fwdjet__minus',  '0.85'),
@@ -345,12 +368,8 @@ def mk_sys_tps(add_sel=None):
         PDFUpDown(name='PDF__minus'),
     ]
 
-    for tp in sys_tps:
-        iteration[0] += 1
-        tp.iteration = 10 * iteration[0]  # batch tp's should not interfere
-
     ####################################################### h_mass smearing ###
-    ttbar2_sel = ttbar_selection + tau21_selection + (add_sel or [])
+    # ttbar2_sel = ttbar_selection + tau21_selection + (add_sel or [])
     bl_skimmed = bl_selection[:]
     bl_skimmed.remove('h_mass_10 > 90')
     bl_skimmed.remove('h_mass_10 < 160')
@@ -362,13 +381,13 @@ def mk_sys_tps(add_sel=None):
     ]
     sr_sel = sr_selection + bl_sel
     sb_sel = sb_selection + bl_sel
-    fw1_b0_sel = fw1_b0_selection + bl_sel
+    # b0_sel = b0_selection + bl_sel
     nominal_sec_sel_weight = [
         ('SignalRegion', sr_sel, base_weight),
         ('SidebandRegion', sb_sel, base_weight),
         ('BaseLineSelection', bl_sel, base_weight),
-        ('Fw1B0Selection', fw1_b0_sel, base_weight),
-        ('TTbar2Selection', ttbar2_sel, base_weight),
+        # ('B0Selection', b0_sel, base_weight),
+        # ('TTbar2Selection', ttbar2_sel, base_weight),
     ]
     sys_params_smear_down = sys_params.copy()
     sys_params_smear_down['histos'] = sys_params_smear_down['histos'].copy()
@@ -391,13 +410,13 @@ def mk_sys_tps(add_sel=None):
     ]
     sr_sel = sr_selection + bl_sel
     sb_sel = sb_selection + bl_sel
-    fw1_b0_sel = fw1_b0_selection + bl_sel
+    # b0_sel = b0_selection + bl_sel
     nominal_sec_sel_weight = [
         ('SignalRegion', sr_sel, base_weight),
         ('SidebandRegion', sb_sel, base_weight),
         ('BaseLineSelection', bl_sel, base_weight),
-        ('Fw1B0Selection', fw1_b0_sel, base_weight),
-        ('TTbar2Selection', ttbar2_sel, base_weight),
+        # ('B0Selection', b0_sel, base_weight),
+        # ('TTbar2Selection', ttbar2_sel, base_weight),
     ]
     sys_params_smear_up = sys_params.copy()
     sys_params_smear_up['histos'] = sys_params_smear_up['histos'].copy()
@@ -413,6 +432,10 @@ def mk_sys_tps(add_sel=None):
         )
     ]
     ##### NO OTHER SYS AFTER THIS POINT (SEL LISTS ARE CHANGED)
+
+    for tp in sys_tps:
+        iteration[0] += 1
+        tp.iteration = 10 * iteration[0]  # batch tp's should not interfere
 
     # make it complete with a tooloolchain!
     return varial.tools.ToolChainParallel(

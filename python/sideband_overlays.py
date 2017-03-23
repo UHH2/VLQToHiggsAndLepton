@@ -108,23 +108,17 @@ def plot_setup(grps):
         dat, bkg, sig = list(dat), list(bkg), list(sig)
 
         # signal region: line histo
-        sr_bkg = list(w for w in bkg if w.legend == 'SignalRegion')
-        sr_bkg[0].is_pseudo_data = True
-        sr_bkg[0].draw_option = sr_bkg[0].draw_option + 'E1'
-        sr_bkg[0].histo.SetMarkerSize(0)
+        sr_bkg = list(w for w in bkg if w.legend != 'SidebandRegion')
+        for h in sr_bkg:
+            h.is_pseudo_data = True
+            h.draw_option = h.draw_option + 'E1'
+            h.histo.SetMarkerSize(0)
 
         # sideband region: stack
-        sb_bkg = list(w for w in bkg if w.legend != 'SignalRegion')
+        sb_bkg = list(w for w in bkg if w.legend == 'SidebandRegion')
         colorize_signal_region(sb_bkg[0])
         sb_bkg = [varial.op.stack(sb_bkg)]
 
-        # if dat:
-        #     dat = (w for w in dat if 'SignalRegion' not in w.in_file_path)
-        #     dat = varial.gen.gen_norm_to_integral(dat)
-        #     dat = list(dat)
-        #     assert len(dat) == 1, dat
-        # else:
-        #     sb_bkg[0].is_pseudo_data = True
         yield sr_bkg + sb_bkg
 
 
@@ -164,28 +158,15 @@ def plot_setup_with_data_uncert(grps):
         yield sr_bkg + sb_bkg
 
 
-def multi_region_hook_sample(wrps):
-    for w in wrps:
-        w.legend = w.sample
-        w.draw_option = 'histE0'
-        w.histo.SetMarkerSize(0.)
-        yield w
-
-
-def multi_region_hook_region(wrps):
-    for w in wrps:
-        w.legend = w.in_file_path.split('/')[0]
-        w.draw_option = 'histE0'
-        w.histo.SetMarkerSize(0.)
-        yield w
-
-
 class Chi2Test(varial.tools.Tool):
     def run(self):
         wrps = self.lookup_result('../HistoLoader')
         assert wrps, str(wrps)
         wrps = list(w for w in wrps if w.name == 'vlq_mass')
-        assert len(wrps) == 2, str(wrps)
+        if len(wrps) != 2:
+            self.message('ERROR more than two histograms. Returning without result.')
+            return
+
         a, b = wrps
         chi2 = b.histo.Chi2Test(a.histo, 'WW')
         self.result = varial.wrp.Wrapper(chi2=chi2)
@@ -197,28 +178,30 @@ class Chi2Collector(varial.tools.Tool):
         sys_names.remove(self.name)
         assert sys_names, str(sys_names)
         chi2_vals = dict(
-            (sys, round(self.lookup_result('../%s/Chi2Test'%sys).chi2, 2))
+            (sys, round(
+                getattr(self.lookup_result('../%s/Chi2Test'%sys), 'chi2', 0),
+                2
+            ))
             for sys in sys_names
         )
         self.result = varial.wrp.Wrapper(**chi2_vals)
 
 
-def mk_overlay_chain(name, input_pat, hlh=hook_loaded_histos_squash_mc):
+def mk_overlay_chain(
+    name,
+    input_pat,
+    hlh=hook_loaded_histos_squash_mc,
+    regions=('SignalRegion', 'SidebandRegion'),
+):
 
     # keyfunc
     good_name = lambda w: any(w.name == p for p in plots)
     good_smpl = lambda w: '_TH_' not in w.file_path and 'Run2015' not in w.file_path
-    good_regn = lambda w: any(
-        t in w.in_file_path
-        for t in ['SignalRegion', 'SidebandRegion']
-    )
+    good_regn = lambda w: any(t in w.in_file_path for t in regions)
     good_hist = lambda w: good_name(w) and good_smpl(w) and good_regn(w)
 
     post_build_funcs = [
-        varial.rnd.mk_split_err_ratio_plot_func(
-            poisson_errs=False,
-            y_title='#frac{Sig-ctrl}{ctrl}'
-        ),
+        varial.rnd.mk_split_err_multi_ratio_plot_func(),
         varial.rnd.mk_legend_func(),
     ]
 
@@ -243,41 +226,47 @@ def mk_overlay_chain(name, input_pat, hlh=hook_loaded_histos_squash_mc):
 
 
 def mk_data_overlay_chain(name, input_pat):
-
-    # keyfunc
     good_name = lambda w: any(w.name == p for p in plots)
     good_smpl = lambda w: '_TH_' not in w.file_path and 'Run2015' in w.file_path
     good_regn = lambda w: any(
         w.in_file_path.startswith(t)
-        for t in ['B0Selection/', 'SidebandRegion']
+        for t in ['Fw0B0Selection/', 'Fw1B0Selection/', 'SidebandRegion/']
     )
     good_hist = lambda w: good_name(w) and good_smpl(w) and good_regn(w)
 
     post_build_funcs = [
-        varial.rnd.mk_split_err_ratio_plot_func(
-            poisson_errs=False,
-            y_title='#frac{Sig-ctrl}{ctrl}'
-        ),
+        varial.rnd.mk_split_err_multi_ratio_plot_func(draw_opt_multi_line='E0X0'),
         varial.rnd.mk_legend_func(),
     ]
 
     def hook_loaded_histos_data(wrps):
-
-        def marker_style(wrps):
-            for w in wrps:
-                w.histo.SetMarkerStyle(1)
-                yield w
-
         wrps = common.label_axes(wrps)
         wrps = varial.generators.gen_add_wrp_info(
             wrps,
-            legend=lambda w: 'Data:' + w.in_file_path.split('/')[0],
-            draw_option=lambda w: 'histE1',
+            legend=lambda w: w.in_file_path.split('/')[0],
             is_data=lambda _: False,
+            is_signal=lambda w: not w.in_file_path.startswith('SidebandRegion')
         )
         wrps = varial.gen.gen_norm_to_integral(wrps)
-        wrps = marker_style(wrps)
         return wrps
+
+    def plot_setup_data(grp):
+        grp = list(grp)
+        bkg = list(w for w in grp if w.in_file_path.startswith('SidebandRegion'))
+        sig = list(w for w in reversed(grp) if w not in bkg)
+
+        for i, s in enumerate(sig):
+            cols = (596, 814)
+            s.histo.SetMarkerColor(cols[i])
+            s.histo.SetLineColor(cols[i])
+            s.histo.SetMarkerStyle(21+i)
+            s.draw_option='E0X0'
+
+        # sideband region: stack
+        colorize_signal_region(bkg[0])
+        bkg = [varial.op.stack(bkg)]
+
+        return sig + bkg
 
     return varial.tools.ToolChain(
         name,
@@ -291,13 +280,11 @@ def mk_data_overlay_chain(name, input_pat):
                 'Plotter',
                 input_result_path='../HistoLoader',
                 plot_grouper=varial.plotter.plot_grouper_by_name,
-                # plot_setup=plot_setup,
+                plot_setup=lambda ws: (plot_setup_data(w) for w in ws),
                 canvas_post_build_funcs=post_build_funcs,
             ),
-            Chi2Test(),
         ]
     )
-
 
 
 def get_xsec_sys(input_pat):
@@ -359,6 +346,13 @@ def get_tc(base_path):
             get_sys('JER__plus', base_path),
         ] + get_xsec_sys(base_path+'/TreeProjector/*.root') + [
             mk_data_overlay_chain('DataB0vsSB', base_path+'/TreeProjector/*.root'),
+            mk_overlay_chain(
+                'MultiRegion',
+                base_path+'/TreeProjector/*.root',
+                regions=('Fw0B0Selection/', 'Fw1B0Selection/', 'SignalRegion', 'SidebandRegion')
+            ),
             Chi2Collector()
         ]
     )
+
+

@@ -30,9 +30,22 @@ def vlq2ht_plot_preproc(w):
     return w
 
 
+def add_jet_eta_hists(wrps):
+    return varial.gen.gen_make_eff_graphs(
+        wrps,
+        'fwd_jet_eta',
+        'ak4_jet_eta',
+        'full_jet_eta',
+        True,
+        lambda w, l: w.in_file_path[:-l]+'__'+w.sample+'__'+w.sys_info,
+        varial.op.merge
+    )
+
+
 def loader_hook_sig_scale(wrps, rebin_max_bins):
     wrps = loader_hook(wrps, rebin_max_bins)
     wrps = (vlq2ht_plot_preproc(w) for w in wrps)
+    wrps = add_jet_eta_hists(wrps)
 
     # filter signals that are not for plotting
     wrps = itertools.ifilter(lambda w: 'Signal_' not in w.sample, wrps)

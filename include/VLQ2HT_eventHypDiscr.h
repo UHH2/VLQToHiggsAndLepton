@@ -21,6 +21,7 @@ private:
     Event::Handle<vector<Jet>> h_subjets;
     Event::Handle<float> h_higgs_tau21;
     Event::Handle<float> h_higgs_tau32;
+    Event::Handle<vector<Jet>> t_jets;
 
 public:
     EventHypDiscr(Context & ctx,
@@ -34,11 +35,14 @@ public:
         h_jet(ctx.declare_event_output<vector<TopJet>>("h_jet")),
         h_subjets(ctx.get_handle<vector<Jet>>("h_subjets")),
         h_higgs_tau21(ctx.get_handle<float>("h_tau21")),
-        h_higgs_tau32(ctx.get_handle<float>("h_tau32")) {}
+	h_higgs_tau32(ctx.get_handle<float>("h_tau32")),
+	t_jets(ctx.declare_event_output<vector<Jet>>("t_jets")) {}
+
 
     virtual bool process(Event & event) override {
         event.set(h_subjets, vector<Jet>());
         event.set(h_jet, vector<TopJet>());
+	event.set(t_jets, vector<Jet>());
 
         if (!event.is_valid(h_h_hyps)) {
             return false;
@@ -119,6 +123,7 @@ public:
             }
             if (best_t_hyp) {
                 event.set(h_top_lep, best_t_hyp->toplep_v4);
+		event.set(t_jets, best_t_hyp->toplep_jets);
             }
         }
         event.set(h_event_chi2, chi2);

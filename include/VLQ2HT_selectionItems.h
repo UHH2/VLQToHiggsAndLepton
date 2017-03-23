@@ -33,8 +33,12 @@ static vector<shared_ptr<SelectionItem>> SEL_ITEMS_VLQ2HT {
 
     // shared_ptr<SelectionItem>(new SelDatF("abs_vlq_eta",       "T #eta",                            50, 0., 5.                  )),
     shared_ptr<SelectionItem>(new SelDatI("n_btags",           "N_{b-tag}",                                     11, -.5, 10.5               )),
-    shared_ptr<SelectionItem>(new SelDatI("n_btags_tight",           "N_{b-tag}",                                     11, -.5, 10.5               )),
-    
+    shared_ptr<SelectionItem>(new SelDatI("n_btags_tight",           "N_{b-tag}",                               11, -.5, 10.5               )),
+    shared_ptr<SelectionItem>(new SelDatI("n_add_btags",  "N_{b-tag} without Higgs and Top",                    11, -.5, 10.5               )),
+    shared_ptr<SelectionItem>(new SelDatI("n_add_btags_incl_top",  "N_{b-tag} without Higgs",                   11, -.5, 10.5               )),
+    shared_ptr<SelectionItem>(new SelDatI("n_top_btags",  "N_{b-tag} (top)",                                    11, -.5, 10.5               )),
+
+
     shared_ptr<SelectionItem>(new SelDatF("largest_jet_eta",   "most forward ak4 jet #eta",                     50, -5., 5.                 )),
     
     shared_ptr<SelectionItem>(new SelDatF("primary_lepton_eta", ";primary lepton #eta;events",                  25, -5., 5.                 )),
@@ -74,8 +78,11 @@ static vector<shared_ptr<SelectionItem>> SEL_ITEMS_VLQ2HT {
 };
 
 
+
+
 static const vector<std::string> TRIGGER_PATHS_MU {
     "HLT_Mu50_v*",
+      //"HLT_TkMu50_v*",
 };
 static const vector<std::string> TRIGGER_PATHS_ELE {
     "HLT_Ele45_CaloIdVT_GsfTrkIdT_PFJet200_PFJet50_v*",

@@ -471,7 +471,6 @@ def handle_plot(name):
         entries[2].SetLabel('Stat. uncert. CR')
         latex.DrawLatex(0.2, 0.75, '(Data)')
 
-
     if name == 'El_ak8_jet_pt_log.pdf':
         x_axis.SetRangeUser(200., 2000.)
         x_axis_1st.SetRangeUser(200., 2000.)

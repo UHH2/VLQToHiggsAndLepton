@@ -17,8 +17,8 @@ def get_p_lim(sig):
 pas_single = {
     'selblock_primary_el_pt_lin.pdf': p_base + 'SelectionsElNoFwdSys/Stacks/BaseLineSelection/primary_lepton_pt_lin.pdf',
     'selblock_primary_mu_pt_lin.pdf': p_base + 'SelectionsMuNoFwdSys/Stacks/BaseLineSelection/primary_lepton_pt_lin.pdf',
-    'selblock_ST_lin.pdf':                p_base + 'SelectionsElNoFwdSys/Stacks/BaseLineSelection/ST_lin.pdf',
-    'selblock_h_mass_lin.pdf':            p_base + 'SelectionsMuNoFwdSys/Stacks/BaseLineSelection/h_mass_lin.pdf',
+    'selblock_ST_lin.pdf':            p_base + 'SelectionsElNoFwdSys/Stacks/BaseLineSelection/ST_lin.pdf',
+    'selblock_h_mass_lin.pdf':        p_base + 'SelectionsMuNoFwdSys/Stacks/BaseLineSelection/h_mass_lin.pdf',
     'tlep_mass_lin.pdf': p_base + 'SelectionsMuNoFwdSys/Stacks/BaseLineSelection/tlep_mass_lin.pdf',
     'tlep_pt_lin.pdf': p_base + 'SelectionsMuNoFwdSys/Stacks/BaseLineSelection/tlep_pt_lin.pdf',
     'SignalRegion_data__el_lin.pdf': p_base + 'SelectionsEl/Stacks/SignalRegion/vlq_mass_lin.pdf',
@@ -42,13 +42,17 @@ pas_single = {
     'TpTRH_coupling_limits.pdf': get_p_lim('TpTRH')+'/CouplingLimitPlot/Graph_lin'+ext,
     'sel_eff_el.pdf': 'VLQ2HT/SigEffGraphPlot/el_lin'+ext,
     'sel_eff_mu.pdf': 'VLQ2HT/SigEffGraphPlot/mu_lin'+ext,
+    'El_ct_MultiRegion.pdf': p_base+'SidebandsEl/MultiRegion/Plotter/vlq_mass_lin.pdf',
+    'Mu_ct_MultiRegion.pdf': p_base+'SidebandsMu/MultiRegion/Plotter/vlq_mass_lin.pdf',
+    'El_ct_DataB0vsSB.pdf':  p_base+'SidebandsEl/DataB0vsSB/Plotter/vlq_mass_lin.pdf',
+    'Mu_ct_DataB0vsSB.pdf':  p_base+'SidebandsMu/DataB0vsSB/Plotter/vlq_mass_lin.pdf',
 }
 
 
 plot_config = {  #                   lumi legend x1 x2 y1 y2    CMS pos   chan pos    y_max
-'sel_eff_el.pdf':                   (0,   (.70, .90, .65, .85), (.2, .8), (.2, .6, 1),   1.9),
-'sel_eff_mu.pdf':                   (0,   (.70, .90, .20, .40), (.2, .8), (.65,.255,2),  1.9),
-'sel_eff_new.pdf':                  (0,   (.50, .70, .65, .85), (.2, .8), (.2, .6, 0),   2.8),
+# 'sel_eff_el.pdf':                   (0,   (.70, .90, .65, .85), (.2, .8), (.2, .6, 1),   1.9),
+# 'sel_eff_mu.pdf':                   (0,   (.70, .90, .20, .40), (.2, .8), (.65,.255,2),  1.9),
+# 'sel_eff_new.pdf':                  (0,   (.50, .70, .65, .85), (.2, .8), (.2, .6, 0),   2.8),
 
 'selblock_h_mass_lin.pdf':          (2.3, (.62, .82, .24, .73), (.9, .8), (.61,.8, 2),  5500),
 'selblock_primary_el_pt_lin.pdf':   (2.2, (.62, .82, .24, .73), (.9, .8), (.61,.8, 1),  1100),
@@ -61,11 +65,16 @@ plot_config = {  #                   lumi legend x1 x2 y1 y2    CMS pos   chan p
 'Sideband_vs_SignalRegion__el.pdf': (0,   (.62, .82, .67, .85), (.2, .8), (.2,.62, 1),  0.19),
 'Sideband_vs_SignalRegion__mu.pdf': (0,   (.62, .82, .67, .85), (.2, .8), (.2,.62, 2),   0.0),
 
+'El_ct_MultiRegion.pdf':            (0,   (.62, .82, .55, .85), (.2, .8), (.2,.62, 1),  0.19),
+'Mu_ct_MultiRegion.pdf':            (0,   (.62, .82, .55, .85), (.2, .8), (.2,.62, 2),   0.0),
+'El_ct_DataB0vsSB.pdf':             (2.2, (.62, .82, .61, .85), (.2, .8), (.2,.62, 1),  0.19),
+'Mu_ct_DataB0vsSB.pdf':             (2.3, (.62, .82, .61, .85), (.2, .8), (.2,.62, 2),   0.0),
+
 'SignalRegion_data__el_lin.pdf':    (2.2, (.20, .40, .36, .85), (.9, .8), (.9, .7, 1),  13.5),
 'SignalRegion_data__mu_lin.pdf':    (2.3, (.60, .80, .36, .85), (.2, .8), (.2, .7, 2),  50.0),
 
-'SignalRegion__el_lin.pdf':         (2.2, (.20, .40, .46, .85), (.9, .8), (.2,.38, 1),  13.5),
-'SignalRegion__mu_lin.pdf':         (2.3, (.60, .80, .46, .85), (.2, .8), (.2,.62, 2),  50.0),
+# 'SignalRegion__el_lin.pdf':         (2.2, (.20, .40, .46, .85), (.9, .8), (.2,.38, 1),  13.5),
+# 'SignalRegion__mu_lin.pdf':         (2.3, (.60, .80, .46, .85), (.2, .8), (.2,.62, 2),  50.0),
 
 'SignalRegion_bkg__el_lin.pdf':     (2.2, (.65, .85, .55, .85), (.2, .8), (.2, .7, 1),  11.0),
 'SignalRegion_bkg__mu_lin.pdf':     (2.3, (.65, .85, .55, .85), (.2, .8), (.2, .7, 2),  35.0),
@@ -271,7 +280,10 @@ def handle_plot(name):
     #     y_axis.SetLabelSize(0.8 * y_axis.GetLabelSize())
 
     # fix signal lines
-    if any(isinstance(h, ROOT.THStack) for h in main_hists) and 4 < len(main_hists):
+    if (any(isinstance(h, ROOT.THStack) for h in main_hists) and
+        4 < len(main_hists) and
+        '_ct_' not in save_name
+    ):
         offset = 1 if len(main_hists) == 5 else 2
         for i in xrange(3):
             main_hists[-offset-i].SetLineWidth(2)
@@ -298,6 +310,53 @@ def handle_plot(name):
         legend.SetTextSize(1.2 * legend.GetTextSize())
         x_axis = first_obj.GetXaxis()
         x_axis.SetRangeUser(700, 1800)
+
+    if '_ct_' in save_name:
+        entries_tlist = legend.GetListOfPrimitives()
+        entries = list(entries_tlist)
+        y_axis_2nd.SetRangeUser(-0.9, 0.9)
+
+        for e in entries:
+            if e.GetLabel() == 'Fw0B0Selection':
+                e.SetLabel('Region A')
+            if e.GetLabel() == 'Fw1B0Selection':
+                e.SetLabel('Region B')
+            if e.GetLabel() == 'SignalRegion':
+                e.SetLabel('Signal region')
+            if e.GetLabel() == 'SidebandRegion':
+                e.SetLabel('Control region')
+                h = e.GetObject()
+                h.SetOption('hist')
+                h.SetLineColor(1)
+                h.SetLineWidth(2)
+            if e.GetLabel() == 'Stat. uncert. MC':
+                e.SetLabel('Stat. uncert. bkg.')
+                entries_tlist.RecursiveRemove(e)
+                entries_tlist.Add(e)
+
+        if any(s in name for s in ('minus', 'plus')):
+            text = '(%s)' % save_name.split('_ct_')[-1].replace('__', ' ')
+            for a, b in [
+                ('QCD', '#sigma_{Multijet}'),
+                ('TTbar', '#sigma_{t#bar{t}}'),
+                ('WJets', '#sigma_{W+jets}'),
+            ]:
+                text = text.replace(a, b)
+            latex.DrawLatex(0.2, 0.75, text)
+
+        if save_name.endswith('_ct_DataB0vsSB'):
+            entries[0].SetOption('P')
+            entries[1].SetOption('P')
+            entries[0].SetLabel('Region A (data)')
+            entries[1].SetLabel('Region B (data)')
+            entries[3].SetLabel('Control region (data)')
+            entries[2].SetLabel('Stat. uncert. CR')
+            y_axis.SetTitle('Arbitrary units')
+            # latex.DrawLatex(0.2, 0.75, '(Data)')
+        else:
+            entries_tlist.Clear()
+            for i in (0,2,1,3,4):  # swap A and B
+                entries_tlist.AddLast(entries[i])
 
     if name == 'tlep_pt_lin.pdf':
         x_axis.SetTitle('t quark candidate p_{T} (GeV)')
@@ -397,4 +456,5 @@ if __name__ == '__main__':
     # pb = PlotBeautifier()
     # varial.tools.Runner(pb)
     for p in plot_config:
+        # print p
         handle_plot(p)

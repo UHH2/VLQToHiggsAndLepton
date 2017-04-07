@@ -91,7 +91,7 @@ public:
 	
         vector<Jet> add_jets;
 	vector<Jet> add_jets_incl_top;
-	if (higgsjets.size() > 0 && leptonictopjets.size() >> 0){
+	if (higgsjets.size() > 0 && leptonictopjets.size() > 0){
 	  for (const auto & ak4_j : ak4jets){
 	    bool notTopHiggs = 1;
 	    bool notHiggs =1;
@@ -123,6 +123,33 @@ private:
     Event::Handle<vector<Jet>> h_jets_add;
     Event::Handle<vector<Jet>> h_jets_add_incl_top;
 };  // BTagJetBuilder
+
+class SubjetHiggsMassProducer: public AnalysisModule {
+public:
+    explicit SubjetHiggsMassProducer(Context & ctx):
+       h_higgsjets(ctx.get_handle<vector<TopJet>>("h_jet")),
+       h_mass_subjet(ctx.declare_event_output<float>("h_mass_subjet")){}
+
+    virtual bool process(Event & event) override {
+        const auto & higgsjets = event.get(h_higgsjets);
+	
+	for (const auto & higgs_j : higgsjets) {  
+	  LorentzVector subjet_sum;
+	  for (const auto & s : higgs_j.subjets()){
+	    subjet_sum += s.v4();
+	  }
+	  event.set(h_mass_subjet, subjet_sum.M());
+	}
+
+	return true;
+	
+    }
+private:
+    Event::Handle<vector<TopJet>> h_higgsjets ;
+    Event::Handle<float> h_mass_subjet;
+};  // SubjetHiggsMassProducer
+
+
 
 
 class HiggsJetBuilder: public AnalysisModule {
@@ -265,7 +292,7 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
         cout << " " << kv.first << " = " << kv.second << endl;
     }
 
-    ctx.set("lumi_file", "/nfs/dust/cms/user/schumas/ANALYSIS/80Xv2/CMSSW_8_0_20/src/UHH2/common/data/Cert_271036-280385_13TeV_PromptReco_Collisions16_JSON_NoL1T_v2.root");
+    ctx.set("lumi_file", "/nfs/dust/cms/user/schumas/ANALYSIS/80XMoriond17/CMSSW_8_0_24_patch1/src/UHH2/common/data/Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON.root");
     //if (version == "Run2015D_Ele") {
     //ctx.set("lumi_file", "/afs/desy.de/user/t/tholenhe/xxl-af-cms/CMSSW_7_4_15_patch1/src/UHH2/common/data/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON_NoBadBSRuns.root");
     //} else if (version == "Run2015D_Mu") {
@@ -275,10 +302,10 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     // remove everything from the output branch
     // ctx.undeclare_all_event_output();
 
-    auto ak8_corr = (type == "MC") ? JERFiles::Spring16_25ns_L23_AK8PFchs_MC
-                                   : JERFiles::Spring16_25ns_L23_AK8PFchs_DATA;
-    auto ak4_corr = (type == "MC") ? JERFiles::Spring16_25ns_L123_AK4PFchs_MC
-                                   : JERFiles::Spring16_25ns_L123_AK4PFchs_DATA; 
+        auto ak8_corr = (type == "MC") ? JERFiles::Summer16_23Sep2016_V4_L123_AK8PFchs_MC
+	  : ( (version == "DataSingleEleB1" || version == "DataSingleEleB2" || version == "DataSingleEleC" || version == "DataSingleEleD" || version == "DataSingleMuB1" || version == "DataSingleMuB2" || version == "DataSingleMuC" || version == "DataSingleMuD") ? JERFiles::Summer16_23Sep2016_V4_BCD_L123_AK8PFchs_DATA : (version == "DataSingleEleE" || version == "DataSingleEleF" || version == "DataSingleMuE" || version == "DataSingleMuF") ? JERFiles::Summer16_23Sep2016_V4_EF_L123_AK8PFchs_DATA : (version == "DataSingleEleG" || version == "DataSingleMuG") ? JERFiles::Summer16_23Sep2016_V4_G_L123_AK8PFchs_DATA : JERFiles::Summer16_23Sep2016_V4_H_L123_AK8PFchs_DATA);
+        auto ak4_corr = (type == "MC") ? JERFiles::Summer16_23Sep2016_V4_L123_AK4PFchs_MC
+	  : ((version == "DataSingleEleB1" || version == "DataSingleEleB2" || version == "DataSingleEleC" || version == "DataSingleEleD" || version == "DataSingleMuB1" || version == "DataSingleMuB2" || version == "DataSingleMuC" || version == "DataSingleMuD") ? JERFiles::Summer16_23Sep2016_V4_BCD_L123_AK4PFchs_DATA : (version == "DataSingleEleE" || version == "DataSingleEleF" || version == "DataSingleMuE" || version == "DataSingleMuF") ? JERFiles::Summer16_23Sep2016_V4_EF_L123_AK4PFchs_DATA : (version == "DataSingleEleG" || version == "DataSingleMuG") ? JERFiles::Summer16_23Sep2016_V4_G_L123_AK4PFchs_DATA : JERFiles::Summer16_23Sep2016_V4_H_L123_AK4PFchs_DATA);
 
 
     v_pre_modules.emplace_back(new JetLeptonCleaner(ctx, ak4_corr));
@@ -314,18 +341,18 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     v_pre_modules.emplace_back(new PrimaryLepton(
 	 ctx, "PrimaryLepton", 0.,  0.));  
 
-    if (type == "DATA") {   
-	  v_pre_modules.emplace_back(new TriggerAcceptProducer(
-	     ctx, TRIGGER_PATHS_ELE, TRIGGER_PATHS_MU, "trigger_accept_el"));  // Vetoing mu trigger!
-	  v_pre_modules.emplace_back(new TriggerAcceptProducer(
-	     ctx, TRIGGER_PATHS_MU, "trigger_accept_mu"));
-    }
-    else {    
-      v_pre_modules.emplace_back(new FakeTriggerAcceptProducer(
-	 ctx, "PrimaryLepton", "electrons", "trigger_accept_el"));  
-      v_pre_modules.emplace_back(new FakeTriggerAcceptProducer(
-         ctx, "PrimaryLepton", "muons", "trigger_accept_mu"));
-    }
+    // if (type == "DATA") {   
+    v_pre_modules.emplace_back(new TriggerAcceptProducer(
+	 ctx, TRIGGER_PATHS_ELE, TRIGGER_PATHS_MU, "trigger_accept_el"));  // Vetoing mu trigger!
+    v_pre_modules.emplace_back(new TriggerAcceptProducer(
+	 ctx, TRIGGER_PATHS_MU, "trigger_accept_mu"));
+    // }
+    // else {    
+    //   v_pre_modules.emplace_back(new FakeTriggerAcceptProducer(
+    // 	 ctx, "PrimaryLepton", "electrons", "trigger_accept_el"));  
+    //   v_pre_modules.emplace_back(new FakeTriggerAcceptProducer(
+    //      ctx, "PrimaryLepton", "muons", "trigger_accept_mu"));
+    // }
 
     v_pre_modules.emplace_back(new TriggerAwarePrimaryLepton(
         ctx, "PrimaryLepton", "trigger_accept_el", "trigger_accept_mu", 50., 55.));
@@ -442,6 +469,7 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     v_cat_modules.emplace_back(new TwoDCutProducer(ctx, "PrimaryLepton", "TwoDCut_dr", "TwoDCut_ptrel", true));
     v_cat_modules.emplace_back(new TriggerXOR(ctx, "trigger_accept_el", "trigger_accept_mu", "trigger_accept"));
     v_cat_modules.emplace_back(new HiggsMassSmear(ctx));
+    v_cat_modules.emplace_back(new SubjetHiggsMassProducer(ctx));
 
     // Selection Producer
     SelItemsHelper sel_helper(SEL_ITEMS_VLQ2HT, ctx);

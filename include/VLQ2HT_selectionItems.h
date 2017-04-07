@@ -23,6 +23,7 @@ static vector<shared_ptr<SelectionItem>> SEL_ITEMS_VLQ2HT {
     shared_ptr<SelectionItem>(new SelDatF("dr_higg_top",       "#DeltaR(H, t)",                                 50, 0, 5          ,2.       )),
     shared_ptr<SelectionItem>(new SelDatF("tlep_pt",           ";lept. top p_{T};events / 20 GeV",              25, 0, 1000       ,100      )),
     shared_ptr<SelectionItem>(new SelDatF("h_mass",            ";Higgs candidate mass;events / 10 GeV",         25, 50, 300                 )),
+    shared_ptr<SelectionItem>(new SelDatF("h_mass_subjet",     ";Higgs candidate mass (from subjets);events / 10 GeV", 25, 50, 300                 )),
     shared_ptr<SelectionItem>(new SelDatF("primary_lepton_pt", ";primary lepton p_{T};events / 20 GeV",         50, 0., 1000                )),
     shared_ptr<SelectionItem>(new SelDatI("trigger_accept_el", "electron trigger accept (mu veto)",             2, -.5, 1.5                 )),
     shared_ptr<SelectionItem>(new SelDatI("trigger_accept_mu", "muon trigger accept",                           2, -.5, 1.5                 )),
@@ -82,7 +83,7 @@ static vector<shared_ptr<SelectionItem>> SEL_ITEMS_VLQ2HT {
 
 static const vector<std::string> TRIGGER_PATHS_MU {
     "HLT_Mu50_v*",
-      //"HLT_TkMu50_v*",
+    "HLT_TkMu50_v*",
 };
 static const vector<std::string> TRIGGER_PATHS_ELE {
     "HLT_Ele45_CaloIdVT_GsfTrkIdT_PFJet200_PFJet50_v*",

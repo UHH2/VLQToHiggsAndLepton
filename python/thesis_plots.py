@@ -4,6 +4,7 @@
 
 import ctypes
 import ROOT
+import glob
 import os
 
 ROOT.gROOT.SetBatch()
@@ -184,8 +185,9 @@ y_max_values = {
 }
 
 
-def get_canvas(name):
-    path = path_single[name]
+def get_canvas(name, path=None):
+    if not path:
+        path = path_single[name]
     path, basename = os.path.dirname(path), os.path.splitext(os.path.basename(path))[0]
     if basename.endswith('_log') or basename.endswith('_lin'):
         basename = basename[:-4]
@@ -193,6 +195,31 @@ def get_canvas(name):
     c = f.Get('{n}/{n}'.format(n=basename))
     f.Close()
     return c
+
+
+
+def do_pull_plot(sig):
+    p = glob.glob(get_p_lim(sig) + 'PostFitPulls/ThetaLimits/cnv_post_fit_Signal_*_M1000.png')
+    assert len(p) == 1
+    c = get_canvas(None, p[0])
+    x_axis = list(c.GetListOfPrimitives())[1].GetXaxis()
+    y_axis = list(c.GetListOfPrimitives())[1].GetYaxis()
+
+    y_axis.SetBinLabel(2, 'Jet energy resolution')
+    y_axis.SetBinLabel(3, 'Jet energy scale')
+    y_axis.SetBinLabel(4, 'soft-drop mass')
+    y_axis.SetBinLabel(6, 'b tag, heavy flavour')
+    y_axis.SetBinLabel(7, 'b tag, light flavour')
+    y_axis.SetBinLabel(8, 'signal strength') #  '#beta_{sig}')
+    y_axis.SetBinLabel(9, 'Bkg. rate')
+    y_axis.SetBinLabel(10, 'Forward jet')
+    y_axis.SetBinLabel(11, 'Lepton trg. and iso.')
+    y_axis.SetBinLabel(12, 'Pileup')
+
+    x_axis.SetTitleSize(0.04)
+    x_axis.SetTitleOffset(1.2)
+
+    c.SaveAs('Beautifier/pull_%s.pdf'%sig)
 
 
 def handle_plot(name):
@@ -514,6 +541,12 @@ def handle_plot(name):
     c.SaveAs('Beautifier/'+name)
 
 
+
+
 if __name__ == '__main__':
     for p in sorted(path_single):
         handle_plot(p)
+
+    do_pull_plot('TpBLH')
+    do_pull_plot('TpTRH')
+

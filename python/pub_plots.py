@@ -354,6 +354,10 @@ def handle_plot(name):
             y_axis.SetTitle('Arbitrary units')
             # latex.DrawLatex(0.2, 0.75, '(Data)')
         else:
+            main_hists[3].SetLineStyle(2)
+            main_hists[2].SetLineStyle(2)
+            second_pad.GetListOfPrimitives()[3].SetLineStyle(2)
+            second_pad.GetListOfPrimitives()[2].SetLineStyle(2)
             entries_tlist.Clear()
             for i in (0,2,1,3,4):  # swap A and B
                 entries_tlist.AddLast(entries[i])
@@ -432,6 +436,17 @@ def handle_plot(name):
     if name == 'selblock_ST_lin.pdf':
         x_axis.SetRangeUser(400., 2500.)
         x_axis_1st.SetRangeUser(400., 2500.)
+
+    if name.startswith('SignalRegion_bkg__'):
+        hdat = ROOT.TH1F('foo', 'foo', 25, 0., 2000.)
+        for i in xrange(20):
+            x, y = ctypes.c_double(), ctypes.c_double()
+            main_hists[-1].GetPoint(i, x, y)
+            # print i, x.value, y.value
+            hdat.SetBinContent(i+6, y.value)
+        hdat.SetBinErrorOption(ROOT.TH1.kPoisson)
+        print hdat.KolmogorovTest(main_hists[1])
+        print hdat.Chi2Test(main_hists[1], 'UW')
 
 
     c.Modified()

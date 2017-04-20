@@ -69,7 +69,7 @@ a8"    `Y88 ""     `Y8   88    ""     `Y8
 
 
 
-<InputData Lumi="1" NEventsMax="-1" Type="DATA" Version="DataSingleEleB1" Cacheable="False">
+<!--InputData Lumi="1" NEventsMax="-1" Type="DATA" Version="DataSingleEleB1" Cacheable="False">
     <In FileName="/nfs/dust/cms/user/schumas/ANALYSIS/80XMoriond17/CMSSW_8_0_24_patch1/src/UHH2/Files/80XMoriond17/Presel/workdir/uhh2.AnalysisModuleRunner.DATA.DataSingleEleB1*.root" Lumi="0.0"/>
     <InputTree Name="AnalysisTree" />
     <OutputTree Name="AnalysisTree" />
@@ -163,7 +163,7 @@ a8"    `Y88 ""     `Y8   88    ""     `Y8
     <In FileName="/nfs/dust/cms/user/schumas/ANALYSIS/80XMoriond17/CMSSW_8_0_24_patch1/src/UHH2/Files/80XMoriond17/Presel/workdir/uhh2.AnalysisModuleRunner.DATA.DataSingleMuH*.root" Lumi="0.0"/>
     <InputTree Name="AnalysisTree" />
     <OutputTree Name="AnalysisTree" />
-</InputData>
+</InputData-->
 
 <!--
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -517,13 +517,13 @@ aa    ]8I 88 "8a,   ,d88 88       88 88,    ,88 88
 -->
 
 
-<!--InputData Lumi="48629.563" NEventsMax="-1" Type="MC" Version="WJets_LNu_HT100To200" Cacheable="False">
+<InputData Lumi="48629.563" NEventsMax="-1" Type="MC" Version="WJets_LNu_HT100To200" Cacheable="False">
     <In FileName="/nfs/dust/cms/user/schumas/ANALYSIS/80XMoriond17/CMSSW_8_0_24_patch1/src/UHH2/Files/80XMoriond17/Presel/workdir/uhh2.AnalysisModuleRunner.MC.WJets_LNu_HT100To200*.root" Lumi="0.0"/>
     <InputTree Name="AnalysisTree" />
     <OutputTree Name="AnalysisTree" />
 </InputData>
 
-<InputData Lumi="90848.565"   NEventsMax="-1" Type="MC" Version="WJets_LNu_HT200To400" Cacheable="False">
+<!--InputData Lumi="90848.565"   NEventsMax="-1" Type="MC" Version="WJets_LNu_HT200To400" Cacheable="False">
     <In FileName="/nfs/dust/cms/user/schumas/ANALYSIS/80XMoriond17/CMSSW_8_0_24_patch1/src/UHH2/Files/80XMoriond17/Presel/workdir/uhh2.AnalysisModuleRunner.MC.WJets_LNu_HT200To400*.root" Lumi="0.0"/>
     <InputTree Name="AnalysisTree" />
     <OutputTree Name="AnalysisTree" />

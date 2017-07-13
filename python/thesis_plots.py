@@ -235,13 +235,13 @@ def handle_plot(name):
     (x1, x2, y1, y2), (chan_x, chan_y) = plot_config.get(save_name, def_par)
 
 
+    is_sim = name.split('_')[1] == 'ct' and not 'Data' in name
     is_el_chan = name.startswith('El_')
     is_mu_chan = name.startswith('Mu_')
     is_limit = '_limits' in name
     is_log = save_name.endswith('_log')
-    lumi = 2.2 if is_el_chan else 2.3 if is_mu_chan or is_limit or name.startswith('gen_') else 0.
+    lumi = 0. if is_sim else 2.2 if is_el_chan else 2.3 if is_mu_chan or is_limit or name.startswith('gen_') else 0.
     chan_name = 'Electron' if is_el_chan else 'Muon' if is_mu_chan else ''
-    is_sim = (not lumi) or name.split('_')[1] == 'sim'
 
     # get some info and fetch canvas
     c = get_canvas(name)
@@ -490,7 +490,7 @@ def handle_plot(name):
                 ('WJets', '#sigma_{W+jets}'),
             ]:
                 text = text.replace(a, b)
-            latex.DrawLatex(0.2, 0.75, text)
+            latex.DrawLatex(0.2, 0.7, text)
 
     if save_name.endswith('_ct_DataB0vsSB'):
         entries[0].SetOption('P')
@@ -530,6 +530,9 @@ def handle_plot(name):
 
     if save_name == 'Mu_primary_lepton_eta_lin':
         x_axis.SetTitle('Muon #eta')
+
+    if save_name.endswith('_full_jet_eta_lin'):
+        x_axis.SetTitle('Jet #eta')
 
     c.Modified()
     c.Update()

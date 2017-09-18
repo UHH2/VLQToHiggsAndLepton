@@ -54,7 +54,7 @@ class MySFrameBatch(SFrame):
         self.xml_doctype = self.xml_doctype + """
 <!--
    <ConfigParse NEventsBreak="100000" FileSplit="0" AutoResubmit="0" />
-   <ConfigSGE RAM ="2" DISK ="2" Mail="heiner@cern.de" Notification="as" Workdir="workdir"/>
+   <ConfigSGE RAM ="2" DISK ="2" Mail="svenja.schumann@desy.de" Notification="as" Workdir="workdir"/>
 -->
 """
         if os.path.exists(self.cwd + 'workdir'):

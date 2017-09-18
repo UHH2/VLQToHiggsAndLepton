@@ -214,6 +214,7 @@ public:
         }
 
         const TopJet & hj = e.get(h_jet).at(0);  // hj is a jet, not vector
+
         auto closest_genjet = closestParticle(hj, e.get(h_genjets));
         if (closest_genjet == nullptr || deltaR(*closest_genjet, hj) > 0.3) {
             e.set(h_mass_10, hm);
@@ -222,8 +223,8 @@ public:
             e.set(h_mass_gen, 0.f);
             e.set(h_mass_gen_sd, 0.f);
             return true;
-        }
-
+	    }
+	   
         const auto & gen_sj = closest_genjet->subjets();
         float gen_mass = (gen_sj.size() > 1) ?
                             (gen_sj[0].v4() + gen_sj[1].v4()).mass() : hm;
@@ -265,6 +266,9 @@ private:
     // modules for setting up collections and cleaning
     vector<unique_ptr<AnalysisModule>> v_pre_modules;
     vector<unique_ptr<AnalysisModule>> v_cat_modules;
+    unique_ptr<AnalysisModule> Mu_SF_BtoF;
+    unique_ptr<AnalysisModule> Mu_SF_GtoH;
+ 
 
     unique_ptr<Selection> cat_check_module;
     unique_ptr<SelectionProducer> sel_module;
@@ -279,6 +283,10 @@ private:
 
     Event::Handle<int> h_ele_trg;
     Event::Handle<int> h_mu_trg;
+
+    double lumi_tot;
+    double lumi1;
+    double lumi2;
 };
 
 
@@ -302,15 +310,35 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     // remove everything from the output branch
     // ctx.undeclare_all_event_output();
 
-        auto ak8_corr = (type == "MC") ? JERFiles::Summer16_23Sep2016_V4_L123_AK8PFchs_MC
-	  : ( (version == "DataSingleEleB1" || version == "DataSingleEleB2" || version == "DataSingleEleC" || version == "DataSingleEleD" || version == "DataSingleMuB1" || version == "DataSingleMuB2" || version == "DataSingleMuC" || version == "DataSingleMuD") ? JERFiles::Summer16_23Sep2016_V4_BCD_L123_AK8PFchs_DATA : (version == "DataSingleEleE" || version == "DataSingleEleF" || version == "DataSingleMuE" || version == "DataSingleMuF") ? JERFiles::Summer16_23Sep2016_V4_EF_L123_AK8PFchs_DATA : (version == "DataSingleEleG" || version == "DataSingleMuG") ? JERFiles::Summer16_23Sep2016_V4_G_L123_AK8PFchs_DATA : JERFiles::Summer16_23Sep2016_V4_H_L123_AK8PFchs_DATA);
-        auto ak4_corr = (type == "MC") ? JERFiles::Summer16_23Sep2016_V4_L123_AK4PFchs_MC
-	  : ((version == "DataSingleEleB1" || version == "DataSingleEleB2" || version == "DataSingleEleC" || version == "DataSingleEleD" || version == "DataSingleMuB1" || version == "DataSingleMuB2" || version == "DataSingleMuC" || version == "DataSingleMuD") ? JERFiles::Summer16_23Sep2016_V4_BCD_L123_AK4PFchs_DATA : (version == "DataSingleEleE" || version == "DataSingleEleF" || version == "DataSingleMuE" || version == "DataSingleMuF") ? JERFiles::Summer16_23Sep2016_V4_EF_L123_AK4PFchs_DATA : (version == "DataSingleEleG" || version == "DataSingleMuG") ? JERFiles::Summer16_23Sep2016_V4_G_L123_AK4PFchs_DATA : JERFiles::Summer16_23Sep2016_V4_H_L123_AK4PFchs_DATA);
+    
+
+    auto ak8_corr = JERFiles::Summer16_23Sep2016_V4_L123_AK8PFchs_MC;
+    auto ak4_corr = JERFiles::Summer16_23Sep2016_V4_L123_AK4PFchs_MC;
+    if (type == "DATA"){
+      if (version == "DataSingleEleB1" || version == "DataSingleEleB2" || version == "DataSingleEleC" || version == "DataSingleEleD" || version == "DataSingleMuB1" || version == "DataSingleMuB2" || version == "DataSingleMuC" || version == "DataSingleMuD") {
+	ak8_corr = JERFiles::Summer16_23Sep2016_V4_BCD_L123_AK8PFchs_DATA;
+	ak4_corr = JERFiles::Summer16_23Sep2016_V4_BCD_L123_AK4PFchs_DATA;
+      }
+      if (version == "DataSingleEleE" || version == "DataSingleEleF" || version == "DataSingleMuE" || version == "DataSingleMuF") {
+	ak8_corr = JERFiles::Summer16_23Sep2016_V4_EF_L123_AK8PFchs_DATA;
+	ak4_corr = JERFiles::Summer16_23Sep2016_V4_EF_L123_AK4PFchs_DATA;
+               
+      }
+      if (version == "DataSingleEleG" || version == "DataSingleMuG") {
+	ak8_corr = JERFiles::Summer16_23Sep2016_V4_G_L123_AK8PFchs_DATA;
+	ak4_corr = JERFiles::Summer16_23Sep2016_V4_G_L123_AK4PFchs_DATA;
+      }
+      if (version == "DataSingleEleH" || version == "DataSingleMuH") {
+        ak8_corr = JERFiles::Summer16_23Sep2016_V4_H_L123_AK8PFchs_DATA;
+        ak4_corr = JERFiles::Summer16_23Sep2016_V4_H_L123_AK4PFchs_DATA;
+      }
+    }
 
 
     v_pre_modules.emplace_back(new JetLeptonCleaner(ctx, ak4_corr));
 
     // jet correction (if nominal, the corrections were already applied in the preselection)
+ 
     if (ctx.get("jecsmear_direction", "nominal") != "nominal") {
         v_pre_modules.emplace_back(new GenericTopJetCorrector(ctx,
             ak8_corr, "patJetsAk8CHSJetsSoftDropPacked_daughters"));
@@ -341,7 +369,7 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     v_pre_modules.emplace_back(new PrimaryLepton(
 	 ctx, "PrimaryLepton", 0.,  0.));  
 
-    // if (type == "DATA") {   
+    //if (type == "DATA") {   
     v_pre_modules.emplace_back(new TriggerAcceptProducer(
 	 ctx, TRIGGER_PATHS_ELE, TRIGGER_PATHS_MU, "trigger_accept_el"));  // Vetoing mu trigger!
     v_pre_modules.emplace_back(new TriggerAcceptProducer(
@@ -355,7 +383,7 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     // }
 
     v_pre_modules.emplace_back(new TriggerAwarePrimaryLepton(
-        ctx, "PrimaryLepton", "trigger_accept_el", "trigger_accept_mu", 50., 55.));
+        ctx, "PrimaryLepton", "trigger_accept_el", "trigger_accept_mu", 55., 55.));
     v_pre_modules.emplace_back(new CollectionProducer<TopJet>(
         ctx, "combined_ak8_jets", "h_jets", n_htags_all));
     v_pre_modules.emplace_back(new CollectionSizeProducer<TopJet>(
@@ -369,17 +397,27 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
       //v_cat_modules.emplace_back(new TriggerAwareEventWeight(ctx, "trigger_accept_el", (target_lumi - 93.)/target_lumi));
         v_cat_modules.emplace_back(new MCLumiWeight(ctx));
         v_cat_modules.emplace_back(new MCPileupReweight(ctx));
-        //v_cat_modules.emplace_back(new MCBTagScaleFactor(ctx, CSVBTag::WP_LOOSE, "h_jets"));
-        //v_cat_modules.emplace_back(new MCMuonScaleFactor(ctx,
-	//data_dir_path + "MuonID_Z_RunD_Reco74X_Nov20.root",
-	//"NUM_MediumID_DEN_genTracks_PAR_pt_spliteta_bin1", 1., "id", "nominal", "prim_mu_coll"));
-        //v_cat_modules.emplace_back(new MCMuonScaleFactor(ctx,
-	//data_dir_path + "SingleMuonTrigger_Z_RunD_Reco74X_Nov20.root",
-	//"Mu45_eta2p1_PtEtaBins", 1., "trg", "nominal", "prim_mu_coll"));
+        v_cat_modules.emplace_back(new MCBTagScaleFactor(ctx, CSVBTag::WP_LOOSE, "h_jets"));
+        v_cat_modules.emplace_back(new MCMuonScaleFactor(ctx,
+	data_dir_path + "MuonID_EfficienciesAndSF_average_RunBtoH.root",
+	"MC_NUM_MediumID2016_DEN_genTracks_PAR_pt_eta", 1., "id", "nominal", "prim_mu_coll"));
+        v_cat_modules.emplace_back(new MCElecScaleFactor(ctx,
+	data_dir_path + "egammaEffi.txt_EGM2D_CutBased_Tight_ID.root",1., "eleid", "nominal", "prim_ele_coll"));
         if (version.size() > 7 && version.substr(0, 7) == "Signal_") {
             v_cat_modules.emplace_back(new PDFWeightBranchCreator(ctx, 110));
         }
     }
+
+    Mu_SF_BtoF.reset(new MCMuonScaleFactor(ctx,
+	data_dir_path + "MuonTrigger_EfficienciesAndSF_RunBtoF.root",
+	"Mu50_OR_TkMu50_PtEtaBins", 1., "trg", "nominal", "prim_mu_coll"));
+    Mu_SF_GtoH.reset(new MCMuonScaleFactor(ctx,
+	data_dir_path + "MuonTrigger_EfficienciesAndSF_RunGtoH.root",
+	"Mu50_OR_TkMu50_PtEtaBins", 1., "trg", "nominal", "prim_mu_coll"));
+
+    lumi_tot = string2double(ctx.get("target_lumi"));
+    lumi1 = 19870.;//0.622/fb in 2016 data
+    lumi2 = lumi_tot - lumi1;
 
     //if (version == "TTbar") {
     //v_cat_modules.emplace_back(new TTbarGenProducer(ctx, "ttbargen", false));
@@ -494,17 +532,16 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
 
     // insert trigger dependent jet cuts
     sel_module->replace_selection(1, new TriggerAwareHandleSelection<float>(
-        ctx, "leading_jet_pt", "trigger_accept_el", 250., 100.));
+        ctx, "leading_jet_pt", "trigger_accept_el", 185., 185.));
     sel_module->replace_selection(2, new TriggerAwareHandleSelection<float>(
-        ctx, "subleading_jet_pt", "trigger_accept_el", 70., 50.));
+        ctx, "subleading_jet_pt", "trigger_accept_el", 50., 50.));
 
  
 
     // insert 2D cut
     unsigned pos_2d_cut = 3;
 
-    sel_module->insert_selection(pos_2d_cut, new TwoDCutSel(ctx, DR_2D_CUT, DPT_2D_CUT));                                  //ACHTUNG 2D cut rausgenommen !!!!!!!!!!!!!!!
-    //TwoDcut_module->insert_selection(0 , new TwoDCutSel(ctx, DR_2D_CUT, DPT_2D_CUT ));
+    sel_module->insert_selection(pos_2d_cut, new TwoDCutSel(ctx, DR_2D_CUT, DPT_2D_CUT));   
 
     nm1_hists_el->insert_hists(pos_2d_cut, new TwoDCutHist(ctx, "ElChan/Nm1Selection"));
     cf_hists_el->insert_step(pos_2d_cut, "2D cut");
@@ -596,6 +633,17 @@ bool VLQToHiggsAndLeptonModule::process(Event & event) {
     for (auto & mod : v_cat_modules) {
         mod->process(event);
     }
+
+    double w_wo_HLT = event.weight;
+    // muon-HLT eff
+    Mu_SF_BtoF->process(event);
+    double w1 = event.weight;
+    event.weight = w_wo_HLT;
+    Mu_SF_GtoH->process(event);
+    double w2 = event.weight;
+    double w = (lumi1*w1+lumi2*w2)/(lumi_tot);
+    event.weight = w; 
+
 
     // run selection
     bool all_accepted = sel_module->process(event);

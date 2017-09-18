@@ -61,7 +61,7 @@ static vector<shared_ptr<SelectionItem>> SEL_ITEMS_VLQ2HT {
     shared_ptr<SelectionItem>(new SelDatF("h_eta",             "Higgs candidate #eta",                          25, -5., 5.                 )),
     shared_ptr<SelectionItem>(new SelDatF("vlq_pt",            ";T p_{T};events / 20 GeV",                      25, 0, 1000                 )),
     shared_ptr<SelectionItem>(new SelDatF("vlq_eta",           "T #eta",                                        25, -5., 5.                 )),
-    shared_ptr<SelectionItem>(new SelDatF("vlq_mass",          ";T mass;events / 80 GeV",                       25, 0, 2000                 )),
+    shared_ptr<SelectionItem>(new SelDatF("vlq_mass",          ";T mass;events / 80 GeV",                       35, 0, 2800                 )),
 
     // shared_ptr<SelectionItem>(new SelDatF("es_isotropy",          "isotropy",              60, -0.1, 1.1               )),
     // shared_ptr<SelectionItem>(new SelDatF("es_circularity",       "circularity",           60, -0.1, 1.1               )),
@@ -86,6 +86,7 @@ static const vector<std::string> TRIGGER_PATHS_MU {
     "HLT_TkMu50_v*",
 };
 static const vector<std::string> TRIGGER_PATHS_ELE {
-    "HLT_Ele45_CaloIdVT_GsfTrkIdT_PFJet200_PFJet50_v*",
-    // "HLT_Ele105_CaloIdVT_GsfTrkIdT_v*",
+  //"HLT_Ele45_CaloIdVT_GsfTrkIdT_PFJet200_PFJet50_v*",
+  //"HLT_Ele115_CaloIdVT_GsfTrkIdT_v*"
+  "HLT_Ele50_CaloIdVT_GsfTrkIdT_PFJet165_v*"
 };

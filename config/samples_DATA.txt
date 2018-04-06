@@ -1,14 +1,14 @@
-                DataSingleEleB:      0      7 000 ESC[94m Working ESC[0m
-                 DataSingleMuB:      0     15 000 ESC[94m Working ESC[0m
-                DataSingleEleC:      0      3 000 ESC[94m Working ESC[0m
-                DataSingleEleD:      0      5 000 ESC[94m Working ESC[0m
-                DataSingleEleE:      0      5 000 ESC[94m Working ESC[0m
-                DataSingleEleF:      0      4 000 ESC[94m Working ESC[0m
-                DataSingleEleG:      0      8 000 ESC[94m Working ESC[0m
-                DataSingleEleH:      0      9 000 ESC[94m Working ESC[0m
-                 DataSingleMuC:      0      7 000 ESC[94m Working ESC[0m
-                 DataSingleMuD:      0     12 000 ESC[94m Working ESC[0m
-                 DataSingleMuE:      0     12 000 ESC[94m Working ESC[0m
-                 DataSingleMuF:      0      9 000 ESC[94m Working ESC[0m
-                 DataSingleMuG:      0     23 000 ESC[94m Working ESC[0m
-                 DataSingleMuH:      0     27 000 ESC[94m Working ESC[0m
+    DataSingleEleC:      6      6 100  Transferred 
+                DataSingleEleD:      9      9 100  Transferred 
+                DataSingleEleE:      9      9 100  Transferred 
+                DataSingleEleF:      6      6 100  Transferred 
+                DataSingleEleG:     15     15 100  Transferred 
+                DataSingleEleH:     17     17 100  Transferred 
+                 DataSingleMuC:     10     10 100  Transferred 
+                 DataSingleMuD:     16     16 100  Transferred 
+                 DataSingleMuE:     16     16 100  Transferred 
+                 DataSingleMuF:     13     13 100  Transferred 
+                 DataSingleMuG:     33     33 100  Transferred 
+                 DataSingleMuH:     39     39 100  Transferred 
+                DataSingleEleB:      0     12 000  Working 
+                 DataSingleMuB:      0     21 000  Working 

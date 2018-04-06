@@ -1,42 +1,42 @@
-        Signal_TpB_TH_LH_M0700:      0      1 000 ESC[94m Working ESC[0m
-        Signal_TpB_TH_LH_M0800:      0      1 000 ESC[94m Working ESC[0m
-        Signal_TpB_TH_LH_M0900:      0      1 000 ESC[94m Working ESC[0m
-        Signal_TpB_TH_LH_M1000:      0      1 000 ESC[94m Working ESC[0m
-        Signal_TpB_TH_LH_M1100:      0      1 000 ESC[94m Working ESC[0m
-        Signal_TpB_TH_LH_M1200:      0      1 000 ESC[94m Working ESC[0m
-        Signal_TpB_TH_LH_M1400:      0      1 000 ESC[94m Working ESC[0m
-        Signal_TpB_TH_LH_M1500:      0      1 000 ESC[94m Working ESC[0m
-        Signal_TpB_TH_LH_M1700:      0      1 000 ESC[94m Working ESC[0m
-        Signal_TpB_TH_LH_M1800:      0      1 000 ESC[94m Working ESC[0m
-        WJetsToLNu_Pt-100To250:      0     44 000 ESC[94m Working ESC[0m
-        WJetsToLNu_Pt-250To400:      0     20 000 ESC[94m Working ESC[0m
-        WJetsToLNu_Pt-400To600:      0      5 000 ESC[94m Working ESC[0m
-        WJetsToLNu_Pt-600ToInf:      0      6 000 ESC[94m Working ESC[0m
-           QCD_Pt80to120_MuEnr:      0      1 000 ESC[94m Working ESC[0m
-          QCD_Pt120to170_MuEnr:      0      1 000 ESC[94m Working ESC[0m
-          QCD_Pt170to300_MuEnr:      0      2 000 ESC[94m Working ESC[0m
-          QCD_Pt300to470_MuEnr:      0      4 000 ESC[94m Working ESC[0m
-          QCD_Pt470to600_MuEnr:      0      3 000 ESC[94m Working ESC[0m
-          QCD_Pt600to800_MuEnr:      0      3 000 ESC[94m Working ESC[0m
-         QCD_Pt800to1000_MuEnr:      0      4 000 ESC[94m Working ESC[0m
-         QCD_Pt1000toInf_MuEnr:      0      4 000 ESC[94m Working ESC[0m
-     QCD_Pt-80to120_EMEnriched:      0      1 000 ESC[94m Working ESC[0m
-    QCD_Pt-120to170_EMEnriched:      0      1 000 ESC[94m Working ESC[0m
-    QCD_Pt-170to300_EMEnriched:      0      1 000 ESC[94m Working ESC[0m
-    QCD_Pt-300toInf_EMEnriched:      0      1 000 ESC[94m Working ESC[0m
-          QCD_Pt_80to170_bcToE:      0      1 000 ESC[94m Working ESC[0m
-         QCD_Pt_170to250_bcToE:      0      1 000 ESC[94m Working ESC[0m
-         QCD_Pt_250toInf_bcToE:      0      2 000 ESC[94m Working ESC[0m
-         DYJetsToLL_HT100to200:      0      2 000 ESC[94m Working ESC[0m
-         DYJetsToLL_HT200to400:      0     11 000 ESC[94m Working ESC[0m
-         DYJetsToLL_HT400to600:      0     30 000 ESC[94m Working ESC[0m
-         DYJetsToLL_HT600to800:      0     32 000 ESC[94m Working ESC[0m
-        DYJetsToLL_HT800to1200:      0     12 000 ESC[94m Working ESC[0m
-       DYJetsToLL_HT1200to2500:      0      3 000 ESC[94m Working ESC[0m
-        DYJetsToLL_HT2500toInf:      0      3 000 ESC[94m Working ESC[0m
-              SingleT_sChannel:      0      1 000 ESC[94m Working ESC[0m
-      SingleT_tChannel_antitop:      0      1 000 ESC[94m Working ESC[0m
-          SingleT_tChannel_top:      0      1 000 ESC[94m Working ESC[0m
-              SingleT_WAntitop:      0      3 000 ESC[94m Working ESC[0m
-                  SingleT_WTop:      0      3 000 ESC[94m Working ESC[0m
-                         TTbar:      0     33 000 ESC[94m Working ESC[0m
+       Signal_TpB_TH_LH_M0700:      1      1 100  Transferred 
+        Signal_TpB_TH_LH_M0800:      1      1 100  Transferred 
+        Signal_TpB_TH_LH_M0900:      1      1 100  Transferred 
+        Signal_TpB_TH_LH_M1000:      1      1 100  Transferred 
+        Signal_TpB_TH_LH_M1100:      1      1 100  Transferred 
+        Signal_TpB_TH_LH_M1200:      1      1 100  Transferred 
+        Signal_TpB_TH_LH_M1400:      1      1 100  Transferred 
+        Signal_TpB_TH_LH_M1500:      1      1 100  Transferred 
+        Signal_TpB_TH_LH_M1700:      1      1 100  Transferred 
+        Signal_TpB_TH_LH_M1800:      1      1 100  Transferred 
+        WJetsToLNu_Pt-100To250:     87     87 100  Transferred 
+        WJetsToLNu_Pt-250To400:     40     40 100  Transferred 
+        WJetsToLNu_Pt-400To600:      9      9 100  Transferred 
+        WJetsToLNu_Pt-600ToInf:     11     11 100  Transferred 
+           QCD_Pt80to120_MuEnr:      1      1 100  Transferred 
+          QCD_Pt120to170_MuEnr:      1      1 100  Transferred 
+          QCD_Pt170to300_MuEnr:      3      3 100  Transferred 
+          QCD_Pt300to470_MuEnr:      6      6 100  Transferred 
+          QCD_Pt470to600_MuEnr:      4      4 100  Transferred 
+          QCD_Pt600to800_MuEnr:      5      5 100  Transferred 
+         QCD_Pt800to1000_MuEnr:      6      6 100  Transferred 
+         QCD_Pt1000toInf_MuEnr:      6      6 100  Transferred 
+     QCD_Pt-80to120_EMEnriched:      1      1 100  Transferred 
+    QCD_Pt-120to170_EMEnriched:      1      1 100  Transferred 
+    QCD_Pt-170to300_EMEnriched:      1      1 100  Transferred 
+    QCD_Pt-300toInf_EMEnriched:      1      1 100  Transferred 
+          QCD_Pt_80to170_bcToE:      1      1 100  Transferred 
+         QCD_Pt_170to250_bcToE:      1      1 100  Transferred 
+         QCD_Pt_250toInf_bcToE:      2      3 066  Failed 
+         DYJetsToLL_HT100to200:      3      3 100  Transferred 
+         DYJetsToLL_HT200to400:     21     21 100  Transferred 
+         DYJetsToLL_HT400to600:     58     58 100  Transferred 
+         DYJetsToLL_HT600to800:     41     62 066  Working 
+        DYJetsToLL_HT800to1200:      2     23 008  Working 
+       DYJetsToLL_HT1200to2500:      1      6 016  Working 
+        DYJetsToLL_HT2500toInf:      0      4 000  Working 
+              SingleT_sChannel:      1      1 100  Transferred 
+      SingleT_tChannel_antitop:      1      1 100  Transferred 
+          SingleT_tChannel_top:      1      1 100  Transferred 
+              SingleT_WAntitop:      1      5 020  Working 
+                  SingleT_WTop:      1      5 020  Working 
+                    TTbar_both:      0    117 000  Failed 

@@ -440,6 +440,7 @@ public:
                 break;
             }
         }
+
         if (tprime.mother(gps, 1)) {
             auto mom = tprime.mother(gps, 1);
             auto d1 = mom->daughter(gps,1);
@@ -457,9 +458,12 @@ public:
                 }
             }
         }
+
         auto d1 = tprime.daughter(gps,1);
         auto d2 = tprime.daughter(gps,2);
+
         if (abs(d1->pdgId()) == 6) {
+	  std::cout<< "TEST" << std::endl;
             top = *d1;
             higg = *d2;
         } else {

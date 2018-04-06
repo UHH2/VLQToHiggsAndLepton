@@ -4,10 +4,16 @@
 
 sys_uncerts = {
     # 'name' : {'item name': 'item value', ...},
-    'jec_up'        : {'jecsmear_direction':'up'},
-    'jec_down'      : {'jecsmear_direction':'down'},
-    'jer_up'        : {'jersmear_direction':'up'},
-    'jer_down'      : {'jersmear_direction':'down'},
+    'jec_up'         : {'jecsmear_direction':'up'},
+    'jec_down'       : {'jecsmear_direction':'down'},
+    'jer_up'         : {'jersmear_direction':'up'},
+    'jer_down'       : {'jersmear_direction':'down'},
+    'SCALE_upup'     : {'ScaleVariationMuR':'up','ScaleVariationMuF':'up'},
+    'SCALE_upnone'   : {'ScaleVariationMuR':'up','ScaleVariationMuF':'none'},
+    'SCALE_noneup'   : {'ScaleVariationMuR':'none','ScaleVariationMuF':'up'},
+    'SCALE_nonedown' : {'ScaleVariationMuR':'none','ScaleVariationMuF':'down'},
+    'SCALE_downnone' : {'ScaleVariationMuR':'down','ScaleVariationMuF':'none'},
+    'SCALE_downdown' : {'ScaleVariationMuR':'down','ScaleVariationMuF':'down'},
     # 'jer_jec_up'    : {'jersmear_direction':'up','jecsmear_direction':'up'},
     # 'jer_jec_down'  : {'jersmear_direction':'down','jecsmear_direction':'down'},
 }

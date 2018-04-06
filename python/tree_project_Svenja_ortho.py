@@ -39,43 +39,7 @@ varial.settings.all_signals = [
      'Signal_1500',
      'Signal_1700',
      'Signal_1800',
-     'Signal_M1000_Width-30p',
-     'Signal_M1000_Width-10p',
-     'Signal_M1000_Width-20p',
-     'Signal_M1100_Width-10p',
-     'Signal_M1200_Width-10p',
-     'Signal_M1200_Width-20p',
-     'Signal_M1200_Width-30p',
-     'Signal_M1300_Width-10p',
-     'Signal_M1400_Width-10p',
-     'Signal_M1400_Width-20p',
-     'Signal_M1400_Width-30p',
-     'Signal_M1500_Width-10p',
-     'Signal_M1600_Width-10p',
-     'Signal_M1600_Width-20p',
-     'Signal_M1600_Width-30p',
-     'Signal_M1700_Width-10p',
-     'Signal_M1800_Width-10p',
-     'Signal_M1800_Width-20p',
-     'Signal_M1800_Width-30p',
-     'Signal_M1900_Width-10p',
-     'Signal_M2000_Width-10p',
-     'Signal_M2000_Width-20p',
-     'Signal_M2000_Width-30p',
-     'Signal_M2200_Width-10p',
-     'Signal_M2200_Width-20p',
-     'Signal_M2200_Width-30p',
-     'Signal_M2400_Width-10p',
-     'Signal_M2400_Width-20p',
-     'Signal_M2400_Width-30p',
-     'Signal_M2600_Width-10p',
-     'Signal_M2600_Width-20p',
-     'Signal_M2600_Width-30p',
-     'Signal_M700_Width-10p',
-     'Signal_M800_Width-10p',
-     'Signal_M800_Width-20p',
-     'Signal_M800_Width-30p',
-     'Signal_M900_Width-10p',
+   
 ]
 
 core_histos = {
@@ -125,7 +89,7 @@ samples = [
     'QCD',
     'DY',
     'WJets',
-    #'Data',
+    'Data',
     'Signal_700',
     'Signal_800',
     'Signal_900',
@@ -136,43 +100,7 @@ samples = [
     'Signal_1500',
     'Signal_1700',
     'Signal_1800',
-    #'Signal_M1000_Width-30p',
-    #'Signal_M1000_Width-10p',
-    #'Signal_M1000_Width-20p',
-    #'Signal_M1100_Width-10p',
-    #'Signal_M1200_Width-10p',
-    #'Signal_M1200_Width-20p',
-    #'Signal_M1200_Width-30p',
-    #'Signal_M1300_Width-10p',
-    #'Signal_M1400_Width-10p',
-    #'Signal_M1400_Width-20p',
-    #'Signal_M1400_Width-30p',
-    #'Signal_M1500_Width-10p',
-    #'Signal_M1600_Width-10p',
-    #'Signal_M1600_Width-20p',
-    #'Signal_M1600_Width-30p',
-    #'Signal_M1700_Width-10p',
-    #'Signal_M1800_Width-10p',
-    #'Signal_M1800_Width-20p',
-    #'Signal_M1800_Width-30p',
-    #'Signal_M1900_Width-10p',
-    #'Signal_M2000_Width-10p',
-    #'Signal_M2000_Width-20p',
-    #'Signal_M2000_Width-30p',
-    #'Signal_M2200_Width-10p',
-    #'Signal_M2200_Width-20p',
-    #'Signal_M2200_Width-30p',
-    #'Signal_M2400_Width-10p',
-    #'Signal_M2400_Width-20p',
-    #'Signal_M2400_Width-30p',
-    #'Signal_M2600_Width-10p',
-    #'Signal_M2600_Width-20p',
-    #'Signal_M2600_Width-30p',
-    #'Signal_M700_Width-10p',
-    #'Signal_M800_Width-10p',
-    #'Signal_M800_Width-20p',
-    #'Signal_M800_Width-30p',
-    #'Signal_M900_Width-10p',
+  
 
 ] #+ varial.settings.all_signals
 
@@ -181,8 +109,8 @@ bl_selection = [
 #    'leading_jet_pt         > 100',
 #    'h_pt                   > 100',
 #    'tlep_pt                > 100',
-    'h_mass_10 > 90',
-    'h_mass_10 < 160',
+#    'h_mass_10 < 90',
+    'h_mass_10 > 160',
 #    'dr_higg_top            > 2.',
 #    '(TwoDCut_ptrel > 40. || TwoDCut_dr > 0.4)',
 ]
@@ -348,7 +276,7 @@ def mk_tp(input_pat, add_sel=None, channel = 'Default'):
 
 def mk_sys_tps(add_sel=None, channel='Default'):
     # some defs
-    base_path = '/nfs/dust/cms/user/schumas/ANALYSIS/80X_v4/CMSSW_8_0_24_patch1/src/UHH2/FILES/BASELINE/MERGED_toptagveto/'
+    base_path = '/nfs/dust/cms/user/schumas/ANALYSIS/80X_v4/CMSSW_8_0_24_patch1/src/UHH2/FILES/BASELINE/MERGED/'
     sys_params = {
         'histos': core_histos,
         'treename': 'AnalysisTree',
@@ -793,7 +721,7 @@ class PDFUpDown(varial.tools.Tool):
 
 if __name__ == '__main__':
     inp_pat = './*.root'
-    varial.tools.Runner(mk_tp(inp_pat, el_selection, 'Electron'))
-    varial.tools.Runner(mk_tp(inp_pat, mu_selection, 'Muon'))
+    varial.tools.Runner(mk_tp(inp_pat, el_selection, 'ElectronOrtho'))
+    varial.tools.Runner(mk_tp(inp_pat, mu_selection, 'MuonOrtho'))
     #varial.tools.Runner(mk_sys_tps(mu_selection, 'Muon'))
     #varial.tools.Runner(mk_sys_tps(el_selection, 'Electron'))

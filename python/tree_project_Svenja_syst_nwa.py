@@ -125,7 +125,7 @@ samples = [
     'QCD',
     'DY',
     'WJets',
-    #'Data',
+    'Data',
     'Signal_700',
     'Signal_800',
     'Signal_900',
@@ -136,43 +136,7 @@ samples = [
     'Signal_1500',
     'Signal_1700',
     'Signal_1800',
-    #'Signal_M1000_Width-30p',
-    #'Signal_M1000_Width-10p',
-    #'Signal_M1000_Width-20p',
-    #'Signal_M1100_Width-10p',
-    #'Signal_M1200_Width-10p',
-    #'Signal_M1200_Width-20p',
-    #'Signal_M1200_Width-30p',
-    #'Signal_M1300_Width-10p',
-    #'Signal_M1400_Width-10p',
-    #'Signal_M1400_Width-20p',
-    #'Signal_M1400_Width-30p',
-    #'Signal_M1500_Width-10p',
-    #'Signal_M1600_Width-10p',
-    #'Signal_M1600_Width-20p',
-    #'Signal_M1600_Width-30p',
-    #'Signal_M1700_Width-10p',
-    #'Signal_M1800_Width-10p',
-    #'Signal_M1800_Width-20p',
-    #'Signal_M1800_Width-30p',
-    #'Signal_M1900_Width-10p',
-    #'Signal_M2000_Width-10p',
-    #'Signal_M2000_Width-20p',
-    #'Signal_M2000_Width-30p',
-    #'Signal_M2200_Width-10p',
-    #'Signal_M2200_Width-20p',
-    #'Signal_M2200_Width-30p',
-    #'Signal_M2400_Width-10p',
-    #'Signal_M2400_Width-20p',
-    #'Signal_M2400_Width-30p',
-    #'Signal_M2600_Width-10p',
-    #'Signal_M2600_Width-20p',
-    #'Signal_M2600_Width-30p',
-    #'Signal_M700_Width-10p',
-    #'Signal_M800_Width-10p',
-    #'Signal_M800_Width-20p',
-    #'Signal_M800_Width-30p',
-    #'Signal_M900_Width-10p',
+
 
 ] #+ varial.settings.all_signals
 
@@ -348,7 +312,7 @@ def mk_tp(input_pat, add_sel=None, channel = 'Default'):
 
 def mk_sys_tps(add_sel=None, channel='Default'):
     # some defs
-    base_path = '/nfs/dust/cms/user/schumas/ANALYSIS/80X_v4/CMSSW_8_0_24_patch1/src/UHH2/FILES/BASELINE/MERGED_toptagveto/'
+    base_path = '/nfs/dust/cms/user/schumas/ANALYSIS/80X_v4/CMSSW_8_0_24_patch1/src/UHH2/FILES/BASELINE/MERGED/'
     sys_params = {
         'histos': core_histos,
         'treename': 'AnalysisTree',
@@ -382,10 +346,10 @@ def mk_sys_tps(add_sel=None, channel='Default'):
     jercs = list(
         (name, base_path + uncrt_pth + '/*.root')
         for name, uncrt_pth in (
-            #('JES__minus', 'jec_down'),
-            #('JES__plus', 'jec_up'),
-            #('JER__minus', 'jer_down'),
-            #('JER__plus', 'jer_up'),
+            ('JES__minus', 'jec_down'),
+            ('JES__plus', 'jec_up'),
+            ('JER__minus', 'jer_down'),
+            ('JER__plus', 'jer_up'),
             )
         )
     nominal_sec_sel_weight = [
@@ -484,10 +448,14 @@ def mk_sys_tps(add_sel=None, channel='Default'):
         ])
 
         for name, w in (
-            ('b_tag_bc__minus',     'weight_btag_bc_down/weight_btag'),
-            ('b_tag_bc__plus',      'weight_btag_bc_up/weight_btag'),
-            ('b_tag_udsg__minus',   'weight_btag_udsg_down/weight_btag'),
-            ('b_tag_udsg__plus',    'weight_btag_udsg_up/weight_btag'),
+            ('b_tag_bc_AK4__minus',     'weight_btag_bc_down_AK4/weight_btag_AK4'),
+            ('b_tag_bc_AK4__plus',      'weight_btag_bc_up_AK4/weight_btag_AK4'),
+            ('b_tag_udsg_AK4__minus',   'weight_btag_udsg_down_AK4/weight_btag_AK4'),
+            ('b_tag_udsg_AK4__plus',    'weight_btag_udsg_up_AK4/weight_btag_AK4'),
+            ('b_tag_bc_subjet__minus',     'weight_btag_bc_down_HJet/weight_btag_HJet'),
+            ('b_tag_bc_subjet__plus',      'weight_btag_bc_up_HJet/weight_btag_HJet'),
+            ('b_tag_udsg_subjet__minus',   'weight_btag_udsg_down_HJet/weight_btag_HJet'),
+            ('b_tag_udsg_subjet__plus',    'weight_btag_udsg_up_HJet/weight_btag_HJet'),
             ('muon_ID__minus',      'weight_sfmu_id_down/weight_sfmu_id'),
             ('muon_ID__plus',       'weight_sfmu_id_up/weight_sfmu_id'),
             ('muon_trigger__minus', 'weight_sfmu_trg_down/weight_sfmu_trg'),
@@ -522,7 +490,7 @@ def mk_sys_tps(add_sel=None, channel='Default'):
     )
 
   ####################################################### PDF uncertainty ###
-    with open('weight_dict_TpB_large_width') as f:
+    with open('weight_dict_TpB') as f:
         weight_dict = ast.literal_eval(f.read())
     #with open('weight_dict_TpT') as f:
         #weight_dict.update(ast.literal_eval(f.read()))
@@ -597,27 +565,27 @@ def mk_sys_tps(add_sel=None, channel='Default'):
     fw0_b0_sel_ab12 = fw0_b0_sel + sr_selection_addB12
 
     nominal_sec_sel_weight = [
-        #('BaseLineSelection', bl_sel, base_weight),
-        #('SignalRegion',              sr_sel,          base_weight),
-        #('SignalRegionAddB0',         sr_sel_ab0,      base_weight),
-        #('SignalRegionAddB1',         sr_sel_ab1,      base_weight),
-        #('SignalRegionAddB2',         sr_sel_ab2,      base_weight),
-        #('SignalRegionAddB12',        sr_sel_ab12,     base_weight),
-        #('SidebandRegion',            sb_sel,          base_weight),
-        #('SidebandRegionAddB0',       sb_sel_ab0,      base_weight),
-        #('SidebandRegionAddB1',       sb_sel_ab1,      base_weight),
-        #('SidebandRegionAddB2',       sb_sel_ab2,      base_weight),
-        #('SidebandRegionAddB12',      sb_sel_ab12,     base_weight),
-        #('Fw0B0Selection',            fw0_b0_sel,      base_weight),
-        #('Fw1B0Selection',            fw1_b0_sel,      base_weight),
-        #('Fw0B0SelectionAddB0',       fw0_b0_sel_ab0,  base_weight),
-        #('Fw0B0SelectionAddB1',       fw0_b0_sel_ab1,  base_weight),
-        #('Fw0B0SelectionAddB2',       fw0_b0_sel_ab2,  base_weight),
-        #('Fw0B0SelectionAddB12',      fw0_b0_sel_ab12, base_weight),
-        #('Fw1B0SelectionAddB0',       fw1_b0_sel_ab0,  base_weight),
-        #('Fw1B0SelectionAddB1',       fw1_b0_sel_ab1,  base_weight),
-        #('Fw1B0SelectionAddB2',       fw1_b0_sel_ab2,  base_weight),
-        #('Fw1B0SelectionAddB12',      fw1_b0_sel_ab12, base_weight),
+        ('BaseLineSelection', bl_sel, base_weight),
+        ('SignalRegion',              sr_sel,          base_weight),
+        ('SignalRegionAddB0',         sr_sel_ab0,      base_weight),
+        ('SignalRegionAddB1',         sr_sel_ab1,      base_weight),
+        ('SignalRegionAddB2',         sr_sel_ab2,      base_weight),
+        ('SignalRegionAddB12',        sr_sel_ab12,     base_weight),
+        ('SidebandRegion',            sb_sel,          base_weight),
+        ('SidebandRegionAddB0',       sb_sel_ab0,      base_weight),
+        ('SidebandRegionAddB1',       sb_sel_ab1,      base_weight),
+        ('SidebandRegionAddB2',       sb_sel_ab2,      base_weight),
+        ('SidebandRegionAddB12',      sb_sel_ab12,     base_weight),
+        ('Fw0B0Selection',            fw0_b0_sel,      base_weight),
+        ('Fw1B0Selection',            fw1_b0_sel,      base_weight),
+        ('Fw0B0SelectionAddB0',       fw0_b0_sel_ab0,  base_weight),
+        ('Fw0B0SelectionAddB1',       fw0_b0_sel_ab1,  base_weight),
+        ('Fw0B0SelectionAddB2',       fw0_b0_sel_ab2,  base_weight),
+        ('Fw0B0SelectionAddB12',      fw0_b0_sel_ab12, base_weight),
+        ('Fw1B0SelectionAddB0',       fw1_b0_sel_ab0,  base_weight),
+        ('Fw1B0SelectionAddB1',       fw1_b0_sel_ab1,  base_weight),
+        ('Fw1B0SelectionAddB2',       fw1_b0_sel_ab2,  base_weight),
+        ('Fw1B0SelectionAddB12',      fw1_b0_sel_ab12, base_weight),
     ]
     sys_params_smear_down = sys_params.copy()
     sys_params_smear_down['histos'] = sys_params_smear_down['histos'].copy()
@@ -662,27 +630,27 @@ def mk_sys_tps(add_sel=None, channel='Default'):
     fw0_b0_sel_ab12 = fw0_b0_sel + sr_selection_addB12
 
     nominal_sec_sel_weight = [
-        #('BaseLineSelection', bl_sel, base_weight),
-        #('SignalRegion',              sr_sel,          base_weight),
-        #('SignalRegionAddB0',         sr_sel_ab0,      base_weight),
-        #('SignalRegionAddB1',         sr_sel_ab1,      base_weight),
-        #('SignalRegionAddB2',         sr_sel_ab2,      base_weight),
-        #('SignalRegionAddB12',        sr_sel_ab12,     base_weight),
-        #('SidebandRegion',            sb_sel,          base_weight),
-        #('SidebandRegionAddB0',       sb_sel_ab0,      base_weight),
-        #('SidebandRegionAddB1',       sb_sel_ab1,      base_weight),
-        #('SidebandRegionAddB2',       sb_sel_ab2,      base_weight),
-        #('SidebandRegionAddB12',      sb_sel_ab12,     base_weight),
-        #('Fw0B0Selection',            fw0_b0_sel,      base_weight),
-        #('Fw1B0Selection',            fw1_b0_sel,      base_weight),
-        #('Fw0B0SelectionAddB0',       fw0_b0_sel_ab0,  base_weight),
-        #('Fw0B0SelectionAddB1',       fw0_b0_sel_ab1,  base_weight),
-        #('Fw0B0SelectionAddB2',       fw0_b0_sel_ab2,  base_weight),
-        #('Fw0B0SelectionAddB12',      fw0_b0_sel_ab12, base_weight),
-        #('Fw1B0SelectionAddB0',       fw1_b0_sel_ab0,  base_weight),
-        #('Fw1B0SelectionAddB1',       fw1_b0_sel_ab1,  base_weight),
-        #('Fw1B0SelectionAddB2',       fw1_b0_sel_ab2,  base_weight),
-        #('Fw1B0SelectionAddB12',      fw1_b0_sel_ab12, base_weight),
+        ('BaseLineSelection', bl_sel, base_weight),
+        ('SignalRegion',              sr_sel,          base_weight),
+        ('SignalRegionAddB0',         sr_sel_ab0,      base_weight),
+        ('SignalRegionAddB1',         sr_sel_ab1,      base_weight),
+        ('SignalRegionAddB2',         sr_sel_ab2,      base_weight),
+        ('SignalRegionAddB12',        sr_sel_ab12,     base_weight),
+        ('SidebandRegion',            sb_sel,          base_weight),
+        ('SidebandRegionAddB0',       sb_sel_ab0,      base_weight),
+        ('SidebandRegionAddB1',       sb_sel_ab1,      base_weight),
+        ('SidebandRegionAddB2',       sb_sel_ab2,      base_weight),
+        ('SidebandRegionAddB12',      sb_sel_ab12,     base_weight),
+        ('Fw0B0Selection',            fw0_b0_sel,      base_weight),
+        ('Fw1B0Selection',            fw1_b0_sel,      base_weight),
+        ('Fw0B0SelectionAddB0',       fw0_b0_sel_ab0,  base_weight),
+        ('Fw0B0SelectionAddB1',       fw0_b0_sel_ab1,  base_weight),
+        ('Fw0B0SelectionAddB2',       fw0_b0_sel_ab2,  base_weight),
+        ('Fw0B0SelectionAddB12',      fw0_b0_sel_ab12, base_weight),
+        ('Fw1B0SelectionAddB0',       fw1_b0_sel_ab0,  base_weight),
+        ('Fw1B0SelectionAddB1',       fw1_b0_sel_ab1,  base_weight),
+        ('Fw1B0SelectionAddB2',       fw1_b0_sel_ab2,  base_weight),
+        ('Fw1B0SelectionAddB12',      fw1_b0_sel_ab12, base_weight),
     ]
     sys_params_smear_up = sys_params.copy()
     sys_params_smear_up['histos'] = sys_params_smear_up['histos'].copy()
@@ -793,7 +761,7 @@ class PDFUpDown(varial.tools.Tool):
 
 if __name__ == '__main__':
     inp_pat = './*.root'
-    varial.tools.Runner(mk_tp(inp_pat, el_selection, 'Electron'))
-    varial.tools.Runner(mk_tp(inp_pat, mu_selection, 'Muon'))
-    #varial.tools.Runner(mk_sys_tps(mu_selection, 'Muon'))
-    #varial.tools.Runner(mk_sys_tps(el_selection, 'Electron'))
+    #varial.tools.Runner(mk_tp(inp_pat, el_selection, 'Electron'))
+    #varial.tools.Runner(mk_tp(inp_pat, mu_selection, 'Muon'))
+    varial.tools.Runner(mk_sys_tps(mu_selection, 'Muon'))
+    varial.tools.Runner(mk_sys_tps(el_selection, 'Electron'))

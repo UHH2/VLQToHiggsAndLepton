@@ -214,8 +214,9 @@ public:
         }
 
         const TopJet & hj = e.get(h_jet).at(0);  // hj is a jet, not vector
-
+	
         auto closest_genjet = closestParticle(hj, e.get(h_genjets));
+
         if (closest_genjet == nullptr || deltaR(*closest_genjet, hj) > 0.3) {
             e.set(h_mass_10, hm);
             e.set(h_mass_20, hm);
@@ -280,7 +281,7 @@ private:
     vector<unique_ptr<Hists>> v_hists_mu;
     vector<unique_ptr<Hists>> v_hists_after_sel_el;
     vector<unique_ptr<Hists>> v_hists_after_sel_mu;
-
+  std::unique_ptr<TopJetCorrector> topjet23_corrector;  //top tag veto
     Event::Handle<int> h_ele_trg;
     Event::Handle<int> h_mu_trg;
 
@@ -300,12 +301,8 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
         cout << " " << kv.first << " = " << kv.second << endl;
     }
 
-    ctx.set("lumi_file", "/nfs/dust/cms/user/schumas/ANALYSIS/80XMoriond17/CMSSW_8_0_24_patch1/src/UHH2/common/data/Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON.root");
-    //if (version == "Run2015D_Ele") {
-    //ctx.set("lumi_file", "/afs/desy.de/user/t/tholenhe/xxl-af-cms/CMSSW_7_4_15_patch1/src/UHH2/common/data/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON_NoBadBSRuns.root");
-    //} else if (version == "Run2015D_Mu") {
-    //ctx.set("lumi_file", "/afs/desy.de/user/t/tholenhe/xxl-af-cms/CMSSW_7_4_15_patch1/src/UHH2/common/data/Latest_2015_Golden_JSON.root");
-    //}
+    ctx.set("lumi_file", "/nfs/dust/cms/user/schumas/ANALYSIS/80X_v4/CMSSW_8_0_24_patch1/src/UHH2/common/data/Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON.root");
+
 
     // remove everything from the output branch
     // ctx.undeclare_all_event_output();
@@ -315,7 +312,7 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     auto ak8_corr = JERFiles::Summer16_23Sep2016_V4_L123_AK8PFchs_MC;
     auto ak4_corr = JERFiles::Summer16_23Sep2016_V4_L123_AK4PFchs_MC;
     if (type == "DATA"){
-      if (version == "DataSingleEleB1" || version == "DataSingleEleB2" || version == "DataSingleEleC" || version == "DataSingleEleD" || version == "DataSingleMuB1" || version == "DataSingleMuB2" || version == "DataSingleMuC" || version == "DataSingleMuD") {
+      if (version == "DataSingleEleB" || version == "DataSingleEleC" || version == "DataSingleEleD" || version == "DataSingleMuB" || version == "DataSingleMuC" || version == "DataSingleMuD") {
 	ak8_corr = JERFiles::Summer16_23Sep2016_V4_BCD_L123_AK8PFchs_DATA;
 	ak4_corr = JERFiles::Summer16_23Sep2016_V4_BCD_L123_AK4PFchs_DATA;
       }
@@ -352,14 +349,35 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
 
     }
     
+if (type == "MC"){
+      topjet23_corrector.reset(new TopJetCorrector(ctx, JERFiles::Summer16_23Sep2016_V4_L23_AK8PFchs_MC));
+    }
+    else {
+      if (version == "DataSingleEleB" || version == "DataSingleEleC" || version == "DataSingleEleD" || version == "DataSingleMuB" || version == "DataSingleMuC" || version == "DataSingleMuD") {
+	topjet23_corrector.reset(new TopJetCorrector(ctx, JERFiles::Summer16_23Sep2016_V4_BCD_L23_AK8PFchs_DATA));}
+      if (version == "DataSingleEleE" || version == "DataSingleEleF" || version == "DataSingleMuE" || version == "DataSingleMuF") {
+	topjet23_corrector.reset(new TopJetCorrector(ctx, JERFiles::Summer16_23Sep2016_V4_EF_L23_AK8PFchs_DATA));}
+      if (version == "DataSingleEleG" || version == "DataSingleMuG") {
+	topjet23_corrector.reset(new TopJetCorrector(ctx, JERFiles::Summer16_23Sep2016_V4_G_L23_AK8PFchs_DATA));}
+      if (version == "DataSingleEleH" || version == "DataSingleMuH") {
+	topjet23_corrector.reset(new TopJetCorrector(ctx, JERFiles::Summer16_23Sep2016_V4_H_L23_AK8PFchs_DATA));}
+
+    }
+
+
     if (type == "MC") {
         v_pre_modules.emplace_back(new JetResolutionSmearer(ctx));
         //v_pre_modules.emplace_back(new GenericJetResolutionSmearer(ctx, "topjets", "slimmedGenJetsAK8", false));        //!!!!!!    invalid handle to GEN-jets --> ist die GEN Collection in NTuples und sind die handle richtig? 
     }
+    //v_pre_modules.emplace_back(new TopJetCleaner(ctx,
+    //    PtEtaCut(200., 2.4),
+    //       "topjets"));
+
     v_pre_modules.emplace_back(new HiggsJetBuilder(ctx));
     v_pre_modules.emplace_back(new TopJetCleaner(ctx,
         PtEtaCut(200., 2.4),
             "combined_ak8_jets"));
+
 
     // first event content modules
     auto n_htags_all = TopJetId(AndId<TopJet>(
@@ -369,18 +387,20 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     v_pre_modules.emplace_back(new PrimaryLepton(
 	 ctx, "PrimaryLepton", 0.,  0.));  
 
-    //if (type == "DATA") {   
-    v_pre_modules.emplace_back(new TriggerAcceptProducer(
-	 ctx, TRIGGER_PATHS_ELE, TRIGGER_PATHS_MU, "trigger_accept_el"));  // Vetoing mu trigger!
-    v_pre_modules.emplace_back(new TriggerAcceptProducer(
-	 ctx, TRIGGER_PATHS_MU, "trigger_accept_mu"));
-    // }
-    // else {    
-    //   v_pre_modules.emplace_back(new FakeTriggerAcceptProducer(
-    // 	 ctx, "PrimaryLepton", "electrons", "trigger_accept_el"));  
-    //   v_pre_modules.emplace_back(new FakeTriggerAcceptProducer(
-    //      ctx, "PrimaryLepton", "muons", "trigger_accept_mu"));
-    // }
+     if (version == "DataSingleEleB" || version == "DataSingleMuB"  ) {
+       v_pre_modules.emplace_back(new TriggerAcceptProducer(
+	     ctx, TRIGGER_PATHS_ELE, TRIGGER_PATHS_MU_B, "trigger_accept_el"));  // Vetoing mu trigger!
+       v_pre_modules.emplace_back(new TriggerAcceptProducer(
+	     ctx, TRIGGER_PATHS_MU_B, "trigger_accept_mu"));
+     }
+     else{
+       v_pre_modules.emplace_back(new TriggerAcceptProducer(
+	     ctx, TRIGGER_PATHS_ELE, TRIGGER_PATHS_MU, "trigger_accept_el"));  // Vetoing mu trigger!
+       v_pre_modules.emplace_back(new TriggerAcceptProducer(
+	     ctx, TRIGGER_PATHS_MU, "trigger_accept_mu"));
+     }
+
+
 
     v_pre_modules.emplace_back(new TriggerAwarePrimaryLepton(
         ctx, "PrimaryLepton", "trigger_accept_el", "trigger_accept_mu", 55., 55.));
@@ -397,16 +417,19 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
       //v_cat_modules.emplace_back(new TriggerAwareEventWeight(ctx, "trigger_accept_el", (target_lumi - 93.)/target_lumi));
         v_cat_modules.emplace_back(new MCLumiWeight(ctx));
         v_cat_modules.emplace_back(new MCPileupReweight(ctx));
-        v_cat_modules.emplace_back(new MCBTagScaleFactor(ctx, CSVBTag::WP_LOOSE, "h_jets"));
+        v_cat_modules.emplace_back(new MCBTagScaleFactor(ctx, CSVBTag::WP_LOOSE, "h_jets", ctx.get("subjetbtag_sys"),"lt","incl","MCBtagEfficienciesHJet","_HJet","BTagCalibrationHJet"));
+        v_cat_modules.emplace_back(new MCBTagScaleFactor(ctx, CSVBTag::WP_LOOSE, "jets", ctx.get("btagging_sys"), "mujets","incl","MCBtagEfficienciesAK4","_AK4","BTagCalibrationAK4"));
         v_cat_modules.emplace_back(new MCMuonScaleFactor(ctx,
 	data_dir_path + "MuonID_EfficienciesAndSF_average_RunBtoH.root",
 	"MC_NUM_MediumID2016_DEN_genTracks_PAR_pt_eta", 1., "id", "nominal", "prim_mu_coll"));
         v_cat_modules.emplace_back(new MCElecScaleFactor(ctx,
 	data_dir_path + "egammaEffi.txt_EGM2D_CutBased_Tight_ID.root",1., "eleid", "nominal", "prim_ele_coll"));
-        if (version.size() > 7 && version.substr(0, 7) == "Signal_") {
-            v_cat_modules.emplace_back(new PDFWeightBranchCreator(ctx, 110));
-        }
     }
+    if (version.size() > 7 && version.substr(0, 6) == "Signal") {
+      v_cat_modules.emplace_back(new PDFWeightBranchCreator(ctx, 110));}
+
+    //v_cat_modules.emplace_back(new MCScaleVariation(ctx));
+
 
     Mu_SF_BtoF.reset(new MCMuonScaleFactor(ctx,
 	data_dir_path + "MuonTrigger_EfficienciesAndSF_RunBtoF.root",
@@ -565,7 +588,8 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     v_hists_after_sel_el.emplace_back(new JetHists(ctx, "ElChan/SanityCheckFwdJets", 4, "fwd_jets"));
     v_hists_after_sel_el.emplace_back(new TopJetHists(ctx, "ElChan/SanityCheckAK8Jets", 2, "patJetsAk8CHSJetsSoftDropPacked_daughters"));
     v_hists_after_sel_el.emplace_back(new TopJetHists(ctx, "ElChan/HiggsJetsAfterSel", 2, "h_jets"));
-    v_hists_after_sel_el.emplace_back(new BTagMCEfficiencyHists(ctx, "ElChan/BTagMCEfficiencyHists", CSVBTag::WP_LOOSE, "h_jets"));
+    v_hists_after_sel_el.emplace_back(new BTagMCEfficiencyHists(ctx, "ElChan/BTagMCEfficiencyHistsHJet", CSVBTag::WP_LOOSE, "h_jets"));
+    v_hists_after_sel_el.emplace_back(new BTagMCEfficiencyHists(ctx, "ElChan/BTagMCEfficiencyHistsAK4", CSVBTag::WP_LOOSE, "jets"));
     v_hists_after_sel_el.emplace_back(new VLQ2HTEventReco(ctx, "ElChan/EventRecoAfterSel"));
     v_hists_after_sel_el.emplace_back(new HistCollector(ctx, "ElChan/EventHistsPost", type == "MC"));
     v_hists_after_sel_mu.emplace_back(new ElectronHists(ctx, "MuChan/SanityCheckEle", true));
@@ -575,7 +599,8 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     v_hists_after_sel_mu.emplace_back(new JetHists(ctx, "MuChan/SanityCheckFwdJets", 4, "fwd_jets"));
     v_hists_after_sel_mu.emplace_back(new TopJetHists(ctx, "MuChan/SanityCheckAK8Jets", 2, "patJetsAk8CHSJetsSoftDropPacked_daughters"));
     v_hists_after_sel_mu.emplace_back(new TopJetHists(ctx, "MuChan/HiggsJetsAfterSel", 2, "h_jets"));
-    v_hists_after_sel_mu.emplace_back(new BTagMCEfficiencyHists(ctx, "MuChan/BTagMCEfficiencyHists", CSVBTag::WP_LOOSE, "h_jets"));
+    v_hists_after_sel_mu.emplace_back(new BTagMCEfficiencyHists(ctx, "MuChan/BTagMCEfficiencyHistsHJet", CSVBTag::WP_LOOSE, "h_jets"));
+    v_hists_after_sel_mu.emplace_back(new BTagMCEfficiencyHists(ctx, "MuChan/BTagMCEfficiencyHistsAK4", CSVBTag::WP_LOOSE, "jets"));
     v_hists_after_sel_mu.emplace_back(new VLQ2HTEventReco(ctx, "MuChan/EventRecoAfterSel"));
     v_hists_after_sel_mu.emplace_back(new HistCollector(ctx, "MuChan/EventHistsPost", type == "MC"));
 
@@ -588,7 +613,7 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
     }
 
     // signal sample gen hists
-    if (version.size() > 5 && version.substr(version.size() - 5, 100) == "_Tlep") {
+    if (type == "MC" && version.substr(0, 6) == "Signal" ) {
         v_hists_el.emplace_back(new VLQ2HTRecoGenComparison(ctx, "ElChan/GenRecoHists"));
         v_hists_el.emplace_back(new VLQ2HTRecoGenMatchHists(ctx, "ElChan/Chi2SignalMatch"));
         v_hists_after_sel_el.emplace_back(new VLQ2HTRecoGenComparison(ctx, "ElChan/GenRecoHistsAfterSel"));
@@ -599,18 +624,20 @@ VLQToHiggsAndLeptonModule::VLQToHiggsAndLeptonModule(Context & ctx){
         v_hists_after_sel_mu.emplace_back(new VLQ2HTRecoGenMatchHists(ctx, "MuChan/Chi2SignalMatchAfterSel"));
     }
 
-    if (version.size() > 7 && version.substr(0, 7) == "TpB_TH_") {
+    if (version.size() > 7 && version.substr(0, 6) == "noSignal") {
         gen_hists.reset(new VLQ2HTGenHists(ctx, "VLQ2HTGenHists"));
     }
 }
 
 
 bool VLQToHiggsAndLeptonModule::process(Event & event) {
-
+  bool keep = false;
+  
     if (gen_hists) {
         gen_hists->fill(event);
-    }
 
+    }
+ 
     if (type == "MC") {
         bool tlepEvt = isTlepEvent(event.genparticles);
         if (version.size() > 5 && version.substr(version.size() - 5, 100) == "_Tlep" && !tlepEvt) {
@@ -649,6 +676,48 @@ bool VLQToHiggsAndLeptonModule::process(Event & event) {
     bool all_accepted = sel_module->process(event);
     //bool TwoDcut_accepted = TwoDcut_module->process(event);
 
+
+    // top tag veto
+    
+    bool toptagveto = true;
+    std::vector<TopJet>* topjets = event.topjets;
+    for(unsigned int i=0;i<topjets->size();i++){
+      
+      TopJet topjet=topjets->at(i);
+      
+      const std::vector<Jet> subjets=topjets->at(i).subjets();
+      for(unsigned int m = 0; m < subjets.size(); m++)
+	{ 
+	  double topjetpt = 0.;    
+	  topjetpt=topjets->at(i).pt();
+	  if (topjetpt > 400.){
+	    topjet23_corrector->process(event);
+		    
+	    LorentzVector subjet_sum;
+	    for (const auto s : topjet.subjets()) {
+	      subjet_sum += s.v4();
+	    }
+		   
+
+	    double masstop = subjet_sum.M()*1/topjets->at(i).JEC_factor_raw();
+	
+	    if (masstop<220 && masstop>105 && topjets->at(i).tau3()/topjets->at(i).tau2()< 0.57) {
+	      const std::vector<Jet> subjets=topjets->at(i).subjets();
+	      for(unsigned int ii=0;ii<subjets.size();ii++){
+		if(subjets[ii].btag_combinedSecondaryVertex()> 0.8484) toptagveto = false;}
+	    }
+	  }
+	}
+    }
+    
+    //end top tag veto
+
+    if (all_accepted && toptagveto) {
+      keep = true;
+    }
+    if (!toptagveto){
+      std::cout << all_accepted << toptagveto << keep << std::endl;
+    }
     // pick histograms for channel
     bool ele_acc = event.get(h_ele_trg);
     bool mu_acc = event.get(h_mu_trg);
@@ -658,7 +727,8 @@ bool VLQToHiggsAndLeptonModule::process(Event & event) {
     const auto & v_hists_after_sel = (ele_acc) ? v_hists_after_sel_el : v_hists_after_sel_mu;
 
     // fill histograms
-    if (all_accepted) {
+    if (all_accepted && toptagveto) {
+      //if (all_accepted) {
         for (auto & hist : v_hists_after_sel) {
             hist->fill(event);
         }
@@ -669,7 +739,8 @@ bool VLQToHiggsAndLeptonModule::process(Event & event) {
       }
       //}
     // decide whether or not to keep the current event in the output:
-    return all_accepted;
+    //return all_accepted;
+    return keep;
 }
 
 UHH2_REGISTER_ANALYSIS_MODULE(VLQToHiggsAndLeptonModule)

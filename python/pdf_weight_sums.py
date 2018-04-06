@@ -6,22 +6,22 @@ import glob
 import os
 
 
-smpls = glob.glob('/pnfs/desy.de/cms/tier2//store/user/sschuman/Signal80XMor2017//TprimeBToTH_M-*_LH_TuneCUETP8M1_13TeV-madgraph-pythia8/crab_TprimeBToTH_M-*_LHanded/*/*/Ntuple_*.root')
-out_name = 'weight_dict_TpB'
+smpls = glob.glob('/pnfs/desy.de/cms/tier2/store/user/sschuman/80XSignalLargeWidth/TprimeBToTH_M-*/crab_TprimeBToTH_M-*/*/*/Ntuple_*.root')
+out_name = 'weight_dict_TpB_large_width'
 
 # smpls = glob.glob('/nfs/dust/cms/user/tholenhe/grid_control_new/gc-output/RunII-ntuple-25ns-v1.2/signals/MC_TpT_TH_*_Ntuple.root')
 # out_name = 'weight_dict_TpT'
 
 def get_name_pnfs(name):
-    name = name.replace('crab_', '').replace('_25ns', '')  # TprimeBToTH_M-700_LH
-    name = name.replace('ToTH', '_TH')  # TprimeB_TH_M-700_LH
-    name = name.replace('rime', '')  # TpB_TH_M-700_LH
-    name = name.replace('M-', '')  # TpB_TH_M700_LH
+    name = name.replace('crab_', '').replace('_25ns', '')  # TprimeBToTH_M-700_LH / TprimeBToTH_M-800_Width-20p_LHanded
+    name = name.replace('ToTH', '_TH')  # TprimeB_TH_M-700_LH / TprimeB_TH_M-800_Width-20p_LHanded
+    name = name.replace('rime', '')  # TpB_TH_M-700_LH / TpB_TH_M-800_Width-20p_LHanded
+    name = name.replace('M-', 'M')  # TpB_TH_M700_LH / TpB_TH_M800_Width-20p_LHanded
     #name = name.replace('M7', 'M07')  # TpB_TH_M0700_LH
     #name = name.replace('M8', 'M08')  # TpB_TH_M0700_LH
     #name = name.replace('M9', 'M09')  # TpB_TH_M0700_LH
     name_lst = name.split('_')
-    name_lst = ['Signal', name_lst[2]]
+    name_lst = ['Signal', name_lst[2], name_lst[3]]
     name =  '_'.join(name_lst)  # TpB_TH_LH_M0700
     #name = 'Signal_' + name  # Signal_TpB_TH_LH_M0700
     return name

@@ -120,59 +120,59 @@ more_histos = {
 more_histos.update(core_histos)
 
 samples = [
-    'TTbar',
-    'SingleT',
-    'QCD',
-    'DY',
-    'WJets',
+    #'TTbar',
+    #'SingleT',
+    #'QCD',
+    #'DY',
+    #'WJets',
     #'Data',
-    'Signal_700',
-    'Signal_800',
-    'Signal_900',
-    'Signal_1000',
-    'Signal_1100',
-    'Signal_1200',
-    'Signal_1400',
-    'Signal_1500',
-    'Signal_1700',
-    'Signal_1800',
-    #'Signal_M1000_Width-30p',
-    #'Signal_M1000_Width-10p',
-    #'Signal_M1000_Width-20p',
-    #'Signal_M1100_Width-10p',
-    #'Signal_M1200_Width-10p',
-    #'Signal_M1200_Width-20p',
-    #'Signal_M1200_Width-30p',
-    #'Signal_M1300_Width-10p',
-    #'Signal_M1400_Width-10p',
-    #'Signal_M1400_Width-20p',
-    #'Signal_M1400_Width-30p',
-    #'Signal_M1500_Width-10p',
-    #'Signal_M1600_Width-10p',
-    #'Signal_M1600_Width-20p',
-    #'Signal_M1600_Width-30p',
-    #'Signal_M1700_Width-10p',
-    #'Signal_M1800_Width-10p',
-    #'Signal_M1800_Width-20p',
-    #'Signal_M1800_Width-30p',
-    #'Signal_M1900_Width-10p',
-    #'Signal_M2000_Width-10p',
-    #'Signal_M2000_Width-20p',
-    #'Signal_M2000_Width-30p',
-    #'Signal_M2200_Width-10p',
-    #'Signal_M2200_Width-20p',
-    #'Signal_M2200_Width-30p',
-    #'Signal_M2400_Width-10p',
-    #'Signal_M2400_Width-20p',
-    #'Signal_M2400_Width-30p',
-    #'Signal_M2600_Width-10p',
-    #'Signal_M2600_Width-20p',
-    #'Signal_M2600_Width-30p',
-    #'Signal_M700_Width-10p',
-    #'Signal_M800_Width-10p',
-    #'Signal_M800_Width-20p',
-    #'Signal_M800_Width-30p',
-    #'Signal_M900_Width-10p',
+    #'Signal_700',
+    #'Signal_800',
+    #'Signal_900',
+    #'Signal_1000',
+    #'Signal_1100',
+    #'Signal_1200',
+    #'Signal_1400',
+    #'Signal_1500',
+    #'Signal_1700',
+    #'Signal_1800',
+    'Signal_M1000_Width-30p',
+    'Signal_M1000_Width-10p',
+    'Signal_M1000_Width-20p',
+    'Signal_M1100_Width-10p',
+    'Signal_M1200_Width-10p',
+    'Signal_M1200_Width-20p',
+    'Signal_M1200_Width-30p',
+    'Signal_M1300_Width-10p',
+    'Signal_M1400_Width-10p',
+    'Signal_M1400_Width-20p',
+    'Signal_M1400_Width-30p',
+    'Signal_M1500_Width-10p',
+    'Signal_M1600_Width-10p',
+    'Signal_M1600_Width-20p',
+    'Signal_M1600_Width-30p',
+    'Signal_M1700_Width-10p',
+    'Signal_M1800_Width-10p',
+    'Signal_M1800_Width-20p',
+    'Signal_M1800_Width-30p',
+    'Signal_M1900_Width-10p',
+    'Signal_M2000_Width-10p',
+    'Signal_M2000_Width-20p',
+    'Signal_M2000_Width-30p',
+    'Signal_M2200_Width-10p',
+    'Signal_M2200_Width-20p',
+    'Signal_M2200_Width-30p',
+    'Signal_M2400_Width-10p',
+    'Signal_M2400_Width-20p',
+    'Signal_M2400_Width-30p',
+    'Signal_M2600_Width-10p',
+    'Signal_M2600_Width-20p',
+    'Signal_M2600_Width-30p',
+    'Signal_M700_Width-10p',
+    'Signal_M800_Width-10p',
+    'Signal_M800_Width-20p',
+    'Signal_M800_Width-30p',
+    'Signal_M900_Width-10p',
 
 ] #+ varial.settings.all_signals
 
@@ -348,7 +348,7 @@ def mk_tp(input_pat, add_sel=None, channel = 'Default'):
 
 def mk_sys_tps(add_sel=None, channel='Default'):
     # some defs
-    base_path = '/nfs/dust/cms/user/schumas/ANALYSIS/80X_v4/CMSSW_8_0_24_patch1/src/UHH2/FILES/BASELINE/MERGED_toptagveto/'
+    base_path = '/nfs/dust/cms/user/schumas/ANALYSIS/80X_v4/CMSSW_8_0_24_patch1/src/UHH2/FILES/BASELINE/MERGED/'
     sys_params = {
         'histos': core_histos,
         'treename': 'AnalysisTree',
@@ -484,18 +484,22 @@ def mk_sys_tps(add_sel=None, channel='Default'):
         ])
 
         for name, w in (
-            ('b_tag_bc__minus',     'weight_btag_bc_down/weight_btag'),
-            ('b_tag_bc__plus',      'weight_btag_bc_up/weight_btag'),
-            ('b_tag_udsg__minus',   'weight_btag_udsg_down/weight_btag'),
-            ('b_tag_udsg__plus',    'weight_btag_udsg_up/weight_btag'),
-            ('muon_ID__minus',      'weight_sfmu_id_down/weight_sfmu_id'),
-            ('muon_ID__plus',       'weight_sfmu_id_up/weight_sfmu_id'),
-            ('muon_trigger__minus', 'weight_sfmu_trg_down/weight_sfmu_trg'),
-            ('muon_trigger__plus',  'weight_sfmu_trg_up/weight_sfmu_trg'),
-            ('elec_ID__minus',      'weight_sfelec_eleid_down/weight_sfelec_eleid'),
-            ('elec_ID__plus',       'weight_sfelec_eleid_up/weight_sfelec_eleid'),
-            ('pileup__minus',       'weight_pu_down/weight_pu'),
-            ('pileup__plus',        'weight_pu_up/weight_pu'),
+            #('b_tag_bc_AK4__minus',     'weight_btag_bc_down_AK4/weight_btag_AK4'),
+            #('b_tag_bc_AK4__plus',      'weight_btag_bc_up_AK4/weight_btag_AK4'),
+            #('b_tag_udsg_AK4__minus',   'weight_btag_udsg_down_AK4/weight_btag_AK4'),
+            #('b_tag_udsg_AK4__plus',    'weight_btag_udsg_up_AK4/weight_btag_AK4'),
+            #('b_tag_bc_subjet__minus',     'weight_btag_bc_down_HJet/weight_btag_HJet'),
+            #('b_tag_bc_subjet__plus',      'weight_btag_bc_up_HJet/weight_btag_HJet'),
+            #('b_tag_udsg_subjet__minus',   'weight_btag_udsg_down_HJet/weight_btag_HJet'),
+            #('b_tag_udsg_subjet__plus',    'weight_btag_udsg_up_HJet/weight_btag_HJet'),
+            #('muon_ID__minus',      'weight_sfmu_id_down/weight_sfmu_id'),
+            #('muon_ID__plus',       'weight_sfmu_id_up/weight_sfmu_id'),
+            #('muon_trigger__minus', 'weight_sfmu_trg_down/weight_sfmu_trg'),
+            #('muon_trigger__plus',  'weight_sfmu_trg_up/weight_sfmu_trg'),
+            #('elec_ID__minus',      'weight_sfelec_eleid_down/weight_sfelec_eleid'),
+            #('elec_ID__plus',       'weight_sfelec_eleid_up/weight_sfelec_eleid'),
+            #('pileup__minus',       'weight_pu_down/weight_pu'),
+            #('pileup__plus',        'weight_pu_up/weight_pu'),
             
             #('jet_pt__minus',       '1'),
             #('jet_pt__plus',        'weight_ak4jet'),
@@ -533,8 +537,8 @@ def mk_sys_tps(add_sel=None, channel='Default'):
         }
     sys_sec_sel_weight_pdf = list(
         ('pdf_weight_%i'%i, [
-                ('SignalRegionAddB0',         sr_sel_ab0,      dict((smpl, base_weight+'*weight_pdf_%i/%s'%(i, weight_list[i]))for smpl, weight_list in weight_dict.iteritems())),
-                #('SignalRegionAddB1',         sr_sel_ab1,      dict((smpl, base_weight+'*weight_pdf_%i/%s'%(i, weight_list[i]))for smpl, weight_list in weight_dict.iteritems())),
+                #('SignalRegionAddB0',         sr_sel_ab0,      dict((smpl, base_weight+'*weight_pdf_%i/%s'%(i, weight_list[i]))for smpl, weight_list in weight_dict.iteritems())),
+                ('SignalRegionAddB1',         sr_sel_ab1,      dict((smpl, base_weight+'*weight_pdf_%i/%s'%(i, weight_list[i]))for smpl, weight_list in weight_dict.iteritems())),
                 #('SignalRegionAddB2',         sr_sel_ab2,      dict((smpl, base_weight+'*weight_pdf_%i/%s'%(i, weight_list[i]))for smpl, weight_list in weight_dict.iteritems())),
                 #('SignalRegionAddB12',        sr_sel_ab12,     dict((smpl, base_weight+'*weight_pdf_%i/%s'%(i, weight_list[i]))for smpl, weight_list in weight_dict.iteritems())),
          ])
@@ -793,7 +797,7 @@ class PDFUpDown(varial.tools.Tool):
 
 if __name__ == '__main__':
     inp_pat = './*.root'
-    varial.tools.Runner(mk_tp(inp_pat, el_selection, 'Electron'))
-    varial.tools.Runner(mk_tp(inp_pat, mu_selection, 'Muon'))
-    #varial.tools.Runner(mk_sys_tps(mu_selection, 'Muon'))
-    #varial.tools.Runner(mk_sys_tps(el_selection, 'Electron'))
+    #varial.tools.Runner(mk_tp(inp_pat, el_selection, 'Electron'))
+    #varial.tools.Runner(mk_tp(inp_pat, mu_selection, 'Muon'))
+    varial.tools.Runner(mk_sys_tps(mu_selection, 'MuonLARGE1'))
+    varial.tools.Runner(mk_sys_tps(el_selection, 'ElectronLARGE1'))
